@@ -1,0 +1,9 @@
+{
+  "approval_record_hash": "sha256:929a6c9dfd309b1feb50f6d4bbccdc08537781fd408668985bafba055bbc6960",
+  "authorization_record_hash": "sha256:fe5aada9b18cf596aa492f865849f4466c5e933059496bf1b7d99baa08be8dd8",
+  "candidate_hash": "sha256:556083dd71ed01078f5bd1a6164abd88660824ed2170030d0bfa13f0cdd00b6d",
+  "generated_at": "2026-01-01T00:00:00Z",
+  "manifest_hash": "sha256:eacbfa79bcd864536528615eaf889595c482eee5d73bd43407d35658c118c51a",
+  "manifest_id": "audit_6f968316625e3ad15ac3d962",
+  "verification_result_hash": "sha256:28e15d9fd0fe0ddf9bd648de1cf0eab8e027d5a191082118ed59623b8f2b346a"
+}

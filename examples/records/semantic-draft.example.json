@@ -1,0 +1,10 @@
+{
+  "assurance_statement": "A synthetic access-review control test was completed.",
+  "claim_text": "The synthetic access-review control was tested.",
+  "content_categories": [],
+  "limitations": [
+    "Synthetic evidence only; no production control is assessed."
+  ],
+  "redacted": false,
+  "selected_evidence_id": "evidence_control_001"
+}

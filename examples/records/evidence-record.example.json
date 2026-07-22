@@ -1,0 +1,9 @@
+{
+  "case_id": "case_demo",
+  "classification": "internal",
+  "content_hash": "sha256:0e6a5b29cca4d09b676aa048f22ae21a5c5274e4adac5a79719421e2efe8988d",
+  "evidence_id": "evidence_control_001",
+  "source_uri": "synthetic://control-test/001",
+  "summary": "Synthetic access-review control-test evidence.",
+  "tenant_id": "tenant_demo"
+}
