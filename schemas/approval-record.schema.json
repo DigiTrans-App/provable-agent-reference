@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/approval-record.schema.json",
+  "title": "Approval Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "approval_id",
+    "candidate_id",
+    "candidate_hash",
+    "verification_result_hash",
+    "decision",
+    "approver_id",
+    "rationale",
+    "decided_at",
+    "record_hash"
+  ],
+  "properties": {
+    "approval_id": {"type": "string"},
+    "candidate_id": {"type": "string"},
+    "candidate_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "verification_result_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "decision": {"enum": ["approved", "rejected", "changes_requested"]},
+    "approver_id": {"type": "string"},
+    "rationale": {"type": "string"},
+    "decided_at": {"type": "string"},
+    "record_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/verification-result.schema.json",
+  "title": "Verification Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "result_id",
+    "candidate_id",
+    "candidate_hash",
+    "status",
+    "findings",
+    "evaluated_at",
+    "result_hash"
+  ],
+  "properties": {
+    "result_id": {"type": "string"},
+    "candidate_id": {"type": "string"},
+    "candidate_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "status": {"enum": ["pass", "fail"]},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "severity", "passed", "message"],
+        "properties": {
+          "code": {"type": "string"},
+          "severity": {"enum": ["info", "warning", "error"]},
+          "passed": {"type": "boolean"},
+          "message": {"type": "string"}
+        }
+      }
+    },
+    "evaluated_at": {"type": "string"},
+    "result_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

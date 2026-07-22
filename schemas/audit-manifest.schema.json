@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/audit-manifest.schema.json",
+  "title": "Audit Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_id",
+    "candidate_hash",
+    "verification_result_hash",
+    "approval_record_hash",
+    "authorization_record_hash",
+    "generated_at",
+    "manifest_hash"
+  ],
+  "properties": {
+    "manifest_id": {"type": "string"},
+    "candidate_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "verification_result_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "approval_record_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "authorization_record_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "generated_at": {"type": "string"},
+    "manifest_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}
