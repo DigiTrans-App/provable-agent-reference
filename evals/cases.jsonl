@@ -1,0 +1,6 @@
+{"id":"happy_path","expected":"completed"}
+{"id":"unknown_evidence","expected":"compilation_error"}
+{"id":"forbidden_disclosure","expected":"verification_failed"}
+{"id":"output_substitution","expected":"authorization_denied"}
+{"id":"purpose_drift","expected":"authorization_denied"}
+{"id":"audit_manifest_tamper","expected":"audit_failure"}

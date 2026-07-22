@@ -1,0 +1,36 @@
+{
+  "assurance_statement": "A synthetic access-review control test was completed.",
+  "candidate_hash": "sha256:556083dd71ed01078f5bd1a6164abd88660824ed2170030d0bfa13f0cdd00b6d",
+  "candidate_id": "candidate_fb4a3fd06ced1113d27bacd8",
+  "claim_id": "claim_6801b6da41342f3962c1ead2",
+  "claim_text": "The synthetic access-review control was tested.",
+  "compiler_id": "provable_agent_reference.compiler",
+  "compiler_version": "0.1.0",
+  "content_categories": [],
+  "created_at": "2026-01-01T00:00:00Z",
+  "evidence": {
+    "case_id": "case_demo",
+    "classification": "internal",
+    "content_hash": "sha256:0e6a5b29cca4d09b676aa048f22ae21a5c5274e4adac5a79719421e2efe8988d",
+    "evidence_id": "evidence_control_001",
+    "source_uri": "synthetic://control-test/001",
+    "summary": "Synthetic access-review control-test evidence.",
+    "tenant_id": "tenant_demo"
+  },
+  "evidence_bundle_hash": "sha256:f30d8f234229b9d49af7b0ef91677f7f28de1ff8b39f5755c36fae926d30c1cc",
+  "limitations": [
+    "Synthetic evidence only; no production control is assessed."
+  ],
+  "redacted": false,
+  "run_context": {
+    "agent_id": "agent_demo",
+    "audience": "security reviewer",
+    "case_id": "case_demo",
+    "classification": "internal",
+    "created_at": "2026-01-01T00:00:00Z",
+    "purpose": "Prepare a synthetic assurance statement.",
+    "run_id": "run_demo",
+    "tenant_id": "tenant_demo"
+  },
+  "schema_version": "0.1"
+}

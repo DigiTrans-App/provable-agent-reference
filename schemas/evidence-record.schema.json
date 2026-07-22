@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/evidence-record.schema.json",
+  "title": "Evidence Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_id",
+    "tenant_id",
+    "case_id",
+    "content_hash",
+    "source_uri",
+    "classification",
+    "summary"
+  ],
+  "properties": {
+    "evidence_id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$"},
+    "tenant_id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$"},
+    "case_id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$"},
+    "content_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "source_uri": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "classification": {
+      "enum": ["public", "internal", "confidential", "restricted", "regulated"]
+    },
+    "summary": {"type": "string", "minLength": 1, "maxLength": 2000}
+  }
+}

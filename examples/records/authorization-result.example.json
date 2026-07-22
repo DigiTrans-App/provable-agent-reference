@@ -1,0 +1,13 @@
+{
+  "approval_id": "approval_819cf12184c091972d9c20ed",
+  "audience": "security reviewer",
+  "authorization_id": "authorization_5abf154070999109a51bb455",
+  "authorized": true,
+  "authorized_at": "2026-01-01T00:00:00Z",
+  "candidate_hash": "sha256:556083dd71ed01078f5bd1a6164abd88660824ed2170030d0bfa13f0cdd00b6d",
+  "candidate_id": "candidate_fb4a3fd06ced1113d27bacd8",
+  "output_hash": "sha256:b7916b633a079a4d4e2ccc2359ec441405af3cb1bd0ee0ca5d8a8f43c64872b3",
+  "purpose": "Prepare a synthetic assurance statement.",
+  "reason": "EXACT_USE_AUTHORIZED",
+  "record_hash": "sha256:fe5aada9b18cf596aa492f865849f4466c5e933059496bf1b7d99baa08be8dd8"
+}

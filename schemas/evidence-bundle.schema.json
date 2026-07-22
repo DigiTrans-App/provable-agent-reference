@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/evidence-bundle.schema.json",
+  "title": "Evidence Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["bundle_id", "tenant_id", "case_id", "records", "bundle_hash"],
+  "properties": {
+    "bundle_id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$"},
+    "tenant_id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$"},
+    "case_id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,127}$"},
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "evidence-record.schema.json"}
+    },
+    "bundle_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

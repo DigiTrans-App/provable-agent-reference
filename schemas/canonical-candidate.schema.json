@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/canonical-candidate.schema.json",
+  "title": "Canonical Candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "candidate_id",
+    "compiler_id",
+    "compiler_version",
+    "run_context",
+    "claim_id",
+    "claim_text",
+    "evidence",
+    "evidence_bundle_hash",
+    "limitations",
+    "assurance_statement",
+    "content_categories",
+    "redacted",
+    "created_at",
+    "candidate_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "candidate_id": {"type": "string"},
+    "compiler_id": {"type": "string"},
+    "compiler_version": {"type": "string"},
+    "run_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "case_id",
+        "run_id",
+        "agent_id",
+        "purpose",
+        "audience",
+        "classification",
+        "created_at"
+      ],
+      "properties": {
+        "tenant_id": {"type": "string"},
+        "case_id": {"type": "string"},
+        "run_id": {"type": "string"},
+        "agent_id": {"type": "string"},
+        "purpose": {"type": "string"},
+        "audience": {"type": "string"},
+        "classification": {"type": "string"},
+        "created_at": {"type": "string"}
+      }
+    },
+    "claim_id": {"type": "string"},
+    "claim_text": {"type": "string"},
+    "evidence": {"$ref": "evidence-record.schema.json"},
+    "evidence_bundle_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "limitations": {"type": "array", "items": {"type": "string"}},
+    "assurance_statement": {"type": "string"},
+    "content_categories": {"type": "array", "items": {"type": "string"}},
+    "redacted": {"type": "boolean"},
+    "created_at": {"type": "string"},
+    "candidate_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

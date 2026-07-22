@@ -1,0 +1,17 @@
+{
+  "bundle_hash": "sha256:f30d8f234229b9d49af7b0ef91677f7f28de1ff8b39f5755c36fae926d30c1cc",
+  "bundle_id": "bundle_demo",
+  "case_id": "case_demo",
+  "records": [
+    {
+      "case_id": "case_demo",
+      "classification": "internal",
+      "content_hash": "sha256:0e6a5b29cca4d09b676aa048f22ae21a5c5274e4adac5a79719421e2efe8988d",
+      "evidence_id": "evidence_control_001",
+      "source_uri": "synthetic://control-test/001",
+      "summary": "Synthetic access-review control-test evidence.",
+      "tenant_id": "tenant_demo"
+    }
+  ],
+  "tenant_id": "tenant_demo"
+}

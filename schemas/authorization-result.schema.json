@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/authorization-result.schema.json",
+  "title": "Authorization Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "authorization_id",
+    "candidate_id",
+    "candidate_hash",
+    "approval_id",
+    "purpose",
+    "audience",
+    "output_hash",
+    "authorized",
+    "reason",
+    "authorized_at",
+    "record_hash"
+  ],
+  "properties": {
+    "authorization_id": {"type": "string"},
+    "candidate_id": {"type": "string"},
+    "candidate_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "approval_id": {"type": "string"},
+    "purpose": {"type": "string"},
+    "audience": {"type": "string"},
+    "output_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "authorized": {"type": "boolean"},
+    "reason": {"type": "string"},
+    "authorized_at": {"type": "string"},
+    "record_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "approval_id": "approval_819cf12184c091972d9c20ed",
+  "approver_id": "human_reviewer",
+  "candidate_hash": "sha256:556083dd71ed01078f5bd1a6164abd88660824ed2170030d0bfa13f0cdd00b6d",
+  "candidate_id": "candidate_fb4a3fd06ced1113d27bacd8",
+  "decided_at": "2026-01-01T00:00:00Z",
+  "decision": "approved",
+  "rationale": "Verified candidate approved for the requested exact use.",
+  "record_hash": "sha256:929a6c9dfd309b1feb50f6d4bbccdc08537781fd408668985bafba055bbc6960",
+  "verification_result_hash": "sha256:28e15d9fd0fe0ddf9bd648de1cf0eab8e027d5a191082118ed59623b8f2b346a"
+}

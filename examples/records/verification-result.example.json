@@ -1,0 +1,46 @@
+{
+  "candidate_hash": "sha256:556083dd71ed01078f5bd1a6164abd88660824ed2170030d0bfa13f0cdd00b6d",
+  "candidate_id": "candidate_fb4a3fd06ced1113d27bacd8",
+  "evaluated_at": "2026-01-01T00:00:00Z",
+  "findings": [
+    {
+      "code": "CANDIDATE_HASH_VALID",
+      "message": "Canonical candidate hash must match its deterministic payload.",
+      "passed": true,
+      "severity": "error"
+    },
+    {
+      "code": "EVIDENCE_BUNDLE_BOUND",
+      "message": "Candidate must bind the exact authorized evidence bundle.",
+      "passed": true,
+      "severity": "error"
+    },
+    {
+      "code": "EVIDENCE_REFERENCE_VALID",
+      "message": "Candidate evidence must resolve exactly in the authorized bundle.",
+      "passed": true,
+      "severity": "error"
+    },
+    {
+      "code": "SCOPE_MATCH",
+      "message": "Run, evidence, and bundle scopes must match.",
+      "passed": true,
+      "severity": "error"
+    },
+    {
+      "code": "DISCLOSURE_SAFE",
+      "message": "Sensitive categories require explicit redaction intent.",
+      "passed": true,
+      "severity": "error"
+    },
+    {
+      "code": "LIMITATION_PRESENT",
+      "message": "Consequential outputs must state at least one limitation.",
+      "passed": true,
+      "severity": "warning"
+    }
+  ],
+  "result_hash": "sha256:28e15d9fd0fe0ddf9bd648de1cf0eab8e027d5a191082118ed59623b8f2b346a",
+  "result_id": "verification_efcfc5a40d670e73f508b6fc",
+  "status": "pass"
+}
