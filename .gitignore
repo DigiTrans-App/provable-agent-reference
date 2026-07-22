@@ -1,3 +1,32 @@
+# Python
 __pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
 .venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local environments and credentials
 .env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local evaluation output
+evals/results/*
+!evals/results/.gitignore
+
+# Temporary and generated runtime files
+*.log
+*.db
+*.db-shm
+*.db-wal
