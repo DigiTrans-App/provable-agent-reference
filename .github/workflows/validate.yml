@@ -29,13 +29,6 @@ jobs:
       - name: Local evaluation suite
         run: python evals/run_local.py
       - name: Lint
-        run: ruff check . --output-format=concise | tee /tmp/ruff.txt
-      - name: Upload lint report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ruff-report-${{ matrix.python-version }}
-          path: /tmp/ruff.txt
-          if-no-files-found: ignore
+        run: ruff check .
       - name: Demo
         run: python -m provable_agent_reference > /tmp/provable-agent-reference-demo.json
