@@ -83,6 +83,7 @@ context = TrustedRunContext(
     purpose="Prepare a synthetic assurance statement.",
     audience="security reviewer",
     classification="internal",
+    created_at="2026-01-01T00:00:00Z",
 )
 
 evidence = EvidenceRecord.from_text(
