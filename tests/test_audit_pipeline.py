@@ -3,9 +3,9 @@ from __future__ import annotations
 import unittest
 from dataclasses import replace
 
-from provable_agent_reference import ProvableAgentPipeline, verify_audit_manifest
-
 from helpers import bundle, context, draft
+
+from provable_agent_reference import ProvableAgentPipeline, verify_audit_manifest
 
 
 class AuditPipelineTests(unittest.TestCase):

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
-from typing import Any, Iterable, Literal
+from typing import Any, Literal
 
 from .canonical import sha256_uri
 from .errors import ContractError
@@ -147,7 +148,7 @@ class EvidenceRecord:
         source_uri: str,
         classification: Classification,
         summary: str,
-    ) -> "EvidenceRecord":
+    ) -> EvidenceRecord:
         return cls(
             evidence_id=evidence_id,
             tenant_id=tenant_id,
@@ -194,7 +195,7 @@ class EvidenceBundle:
         tenant_id: str,
         case_id: str,
         records: Iterable[EvidenceRecord],
-    ) -> "EvidenceBundle":
+    ) -> EvidenceBundle:
         record_tuple = tuple(records)
         provisional = {
             "bundle_id": bundle_id,

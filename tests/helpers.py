@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from provable_agent_reference import EvidenceBundle, EvidenceRecord, SemanticDraft, TrustedRunContext
+from provable_agent_reference import (
+    EvidenceBundle,
+    EvidenceRecord,
+    SemanticDraft,
+    TrustedRunContext,
+)
 
 
 def context(**changes: object) -> TrustedRunContext:

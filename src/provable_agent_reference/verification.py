@@ -4,9 +4,9 @@ from dataclasses import dataclass
 
 from .canonical import sha256_uri
 from .contracts import (
+    SENSITIVE_CATEGORIES,
     CanonicalCandidate,
     EvidenceBundle,
-    SENSITIVE_CATEGORIES,
     VerificationFinding,
     VerificationResult,
 )
@@ -88,9 +88,11 @@ class DeterministicVerifier:
             )
         )
 
-        status = "pass" if all(
-            item.passed for item in findings if item.severity == "error"
-        ) else "fail"
+        status = (
+            "pass"
+            if all(item.passed for item in findings if item.severity == "error")
+            else "fail"
+        )
         result_id = "verification_" + sha256_uri(
             {
                 "candidate_hash": candidate.candidate_hash,

@@ -3,9 +3,9 @@ from __future__ import annotations
 import unittest
 from dataclasses import replace
 
-from provable_agent_reference import DeterministicVerifier, TrustedCompiler
-
 from helpers import bundle, context, draft
+
+from provable_agent_reference import DeterministicVerifier, TrustedCompiler
 
 
 class VerificationTests(unittest.TestCase):

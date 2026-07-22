@@ -28,12 +28,7 @@ jobs:
         run: python scripts/validate_repo.py
       - name: Local evaluation suite
         run: python evals/run_local.py
-      - name: Preview lint fixes
-        run: ruff check . --fix --diff > /tmp/ruff-fix.diff || true
-      - name: Upload lint fix preview
-        uses: actions/upload-artifact@v4
-        with:
-          name: ruff-fix-${{ matrix.python-version }}
-          path: /tmp/ruff-fix.diff
+      - name: Lint
+        run: ruff check .
       - name: Demo
         run: python -m provable_agent_reference > /tmp/provable-agent-reference-demo.json

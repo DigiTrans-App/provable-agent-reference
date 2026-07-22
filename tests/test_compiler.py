@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import unittest
 
+from helpers import bundle, context, draft, evidence
+
 from provable_agent_reference import TrustedCompiler
 from provable_agent_reference.errors import CompilationError, ContractError
-
-from helpers import bundle, context, draft, evidence
 
 
 class CompilerTests(unittest.TestCase):

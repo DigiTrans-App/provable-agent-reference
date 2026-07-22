@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import unittest
 
+from helpers import context, evidence
+
 from provable_agent_reference import EvidenceBundle, SemanticDraft
 from provable_agent_reference.errors import ContractError
-
-from helpers import context, evidence
 
 
 class ContractTests(unittest.TestCase):

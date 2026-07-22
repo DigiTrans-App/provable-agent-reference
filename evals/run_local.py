@@ -11,6 +11,8 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from graders import grade  # noqa: E402
+
 from provable_agent_reference import (  # noqa: E402
     DeterministicVerifier,
     EvidenceBundle,
@@ -24,8 +26,6 @@ from provable_agent_reference import (  # noqa: E402
     verify_audit_manifest,
 )
 from provable_agent_reference.errors import ContractError  # noqa: E402
-
-from graders import grade  # noqa: E402
 
 
 def fixture() -> tuple[TrustedRunContext, EvidenceBundle, SemanticDraft]:
