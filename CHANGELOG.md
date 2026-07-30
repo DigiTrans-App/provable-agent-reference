@@ -4,6 +4,12 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Versioned runtime evidence adapter interface.
+- Experimental Codex adapter for privacy-safe execution and multi-agent lifecycle evidence.
+- Synthetic Codex JSONL fixtures, deterministic compatibility vectors, documentation, and fail-closed tests.
+
 ## [0.1.0] - 2026-07-22
 
 ### Added
