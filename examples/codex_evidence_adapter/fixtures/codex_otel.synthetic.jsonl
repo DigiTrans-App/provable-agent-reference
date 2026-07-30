@@ -1,0 +1,2 @@
+{"event.name":"codex.agent_communication","communication_id":"communication_demo_001","kind":"spawn","state":"send","sender_thread_id":"thread_demo_001","receiver_thread_id":"thread_demo_002","content":"Inspect the synthetic repository and report test status."}
+{"event.name":"codex.agent_communication","communication_id":"communication_demo_001","state":"receive"}
