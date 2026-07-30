@@ -1,0 +1,8 @@
+{"type":"thread.started","thread_id":"thread_demo_001"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_command_001","type":"command_execution","command":"python -m unittest discover -s tests -v","aggregated_output":"Ran 24 tests in 0.12s\nOK","exit_code":0,"status":"completed"}}
+{"type":"item.completed","item":{"id":"item_change_001","type":"file_change","changes":[{"path":"src/synthetic_example.py","kind":"update"}],"status":"completed"}}
+{"type":"item.completed","item":{"id":"item_mcp_001","type":"mcp_tool_call","server":"synthetic-evidence-server","tool":"review_evidence","arguments":{"case_id":"case_demo"},"result":{"status":"ok"},"status":"completed"}}
+{"type":"item.completed","item":{"id":"item_message_001","type":"agent_message","text":"The synthetic validation completed.","status":"completed"}}
+{"type":"turn.completed","usage":{"input_tokens":1200,"cached_input_tokens":400,"output_tokens":180,"reasoning_output_tokens":75}}
+{"type":"diagnostic","message":"This unsupported synthetic event is counted but not retained."}
