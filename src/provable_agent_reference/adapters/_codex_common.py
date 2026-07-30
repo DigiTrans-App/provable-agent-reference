@@ -13,6 +13,13 @@ _MAX_EVENT_COUNT = 10_000
 _MAX_LINE_BYTES = 262_144
 _MAX_STRING_LENGTH = 32_768
 _SAFE_TOKEN = re.compile(r"^[A-Za-z0-9_.:/-]{1,128}$")
+_USAGE_FIELDS = {
+    "input_tokens",
+    "cached_input_tokens",
+    "output_tokens",
+    "reasoning_output_tokens",
+    "total_tokens",
+}
 _SECRET_PATTERNS = (
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\b"),
@@ -70,7 +77,7 @@ def safe_usage(payload: Mapping[str, Any]) -> dict[str, int]:
     return {
         key: value
         for key, value in sorted(payload.items())
-        if _SAFE_TOKEN.fullmatch(key)
+        if key in _USAGE_FIELDS
         and isinstance(value, int)
         and not isinstance(value, bool)
         and value >= 0
