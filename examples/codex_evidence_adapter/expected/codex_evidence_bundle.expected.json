@@ -1,0 +1,35 @@
+{
+  "bundle_hash": "sha256:05b58337db240f68be6dae213d4325dc8d846751a024f78a4037acf86c907c13",
+  "bundle_id": "bundle_codex_fb690fd833182840200e",
+  "case_id": "case_demo",
+  "records": [
+    {
+      "case_id": "case_demo",
+      "classification": "internal",
+      "content_hash": "sha256:996cd465cc629295aff9de7c258dacbb28901ea225d9e19db962234eb06bc84b",
+      "evidence_id": "evidence_codex_exec",
+      "source_uri": "urn:codex:exec:5d5f4291ca7d33176b208d03abfd2f7f3feb00d6e8cba44d46affcbcdfa97ece",
+      "summary": "Privacy-safe normalized Codex execution evidence with 7 accepted and 1 ignored events.",
+      "tenant_id": "tenant_demo"
+    },
+    {
+      "case_id": "case_demo",
+      "classification": "internal",
+      "content_hash": "sha256:730a8d8ce1643534e5a4238bc05b07e80451a7ee9dd38533e37850a68450d0ae",
+      "evidence_id": "evidence_codex_telemetry",
+      "source_uri": "urn:codex:telemetry:de254425e2a99eb0145155e86c01758e360796704ae30e208ecd85b66208fada",
+      "summary": "Privacy-safe normalized Codex telemetry evidence with 1 matched communication lifecycles and 0 unmatched sends.",
+      "tenant_id": "tenant_demo"
+    },
+    {
+      "case_id": "case_demo",
+      "classification": "internal",
+      "content_hash": "sha256:367907b2b89007f8bb227b72394003dd2036ef69ee7525c364f79328194f8fdb",
+      "evidence_id": "evidence_codex_coverage",
+      "source_uri": "urn:codex:coverage:367907b2b89007f8bb227b72394003dd2036ef69ee7525c364f79328194f8fdb",
+      "summary": "Explicit coverage and limitation report for the Codex evidence adapter.",
+      "tenant_id": "tenant_demo"
+    }
+  ],
+  "tenant_id": "tenant_demo"
+}
