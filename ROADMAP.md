@@ -15,12 +15,14 @@
 
 ## v0.2 - Interoperability
 
-- [ ] Versioned adapter interface for agent runtimes
+- [x] Versioned adapter interface for agent runtimes
+- [x] Experimental Codex execution and multi-agent evidence adapter
+- [x] Codex synthetic compatibility test vectors
 - [ ] Additional provider example
 - [ ] JSON-LD or equivalent provenance profile exploration
 - [ ] Pluggable policy rules
 - [ ] Signed record adapter interface
-- [ ] Compatibility test vectors
+- [ ] Additional cross-runtime compatibility test vectors
 
 ## v0.3 - Community hardening
 
