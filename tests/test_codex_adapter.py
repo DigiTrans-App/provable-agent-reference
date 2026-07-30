@@ -8,6 +8,7 @@ from provable_agent_reference.adapters import (
     AdapterContext,
     AdapterValidationError,
     CodexEvidenceAdapter,
+    CoverageFinding,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,7 +41,7 @@ class CodexEvidenceAdapterTests(unittest.TestCase):
         values.update(changes)
         return self.adapter.build_evidence(**values)  # type: ignore[arg-type]
 
-    def test_builds_deterministic_privacy_safe_evidence(self) -> None:
+    def test_builds_deterministic_privacy_minimized_evidence(self) -> None:
         first = self.build()
         second = self.build()
 
@@ -84,6 +85,38 @@ class CodexEvidenceAdapterTests(unittest.TestCase):
         )
         self.assertEqual(result.evidence_bundle.to_dict(), expected_bundle)
         self.assertEqual([item.to_dict() for item in result.coverage], expected_coverage)
+
+    def test_discards_unrecognized_numeric_usage_fields(self) -> None:
+        baseline = self.build(
+            execution_jsonl='{"type":"turn.completed","usage":{"input_tokens":1}}\n',
+            telemetry_jsonl="",
+        )
+        extra = self.build(
+            execution_jsonl=(
+                '{"type":"turn.completed","usage":'
+                '{"input_tokens":1,"employee_id":123456}}\n'
+            ),
+            telemetry_jsonl="",
+        )
+        baseline_record = next(
+            record
+            for record in baseline.evidence_bundle.records
+            if record.evidence_id == "evidence_codex_exec"
+        )
+        extra_record = next(
+            record
+            for record in extra.evidence_bundle.records
+            if record.evidence_id == "evidence_codex_exec"
+        )
+        self.assertEqual(baseline_record.content_hash, extra_record.content_hash)
+
+    def test_rejects_invalid_coverage_status_at_runtime(self) -> None:
+        with self.assertRaisesRegex(AdapterValidationError, "coverage status"):
+            CoverageFinding(
+                capability="runtime_test",
+                status="unknown",  # type: ignore[arg-type]
+                detail="Synthetic invalid status.",
+            )
 
     def test_rejects_malformed_json(self) -> None:
         with self.assertRaisesRegex(AdapterValidationError, "not valid JSON"):
