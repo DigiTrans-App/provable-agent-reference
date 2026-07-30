@@ -45,7 +45,7 @@ This repository contains generic, reusable building blocks:
 - audit reconstruction and tamper detection;
 - synthetic examples, adversarial tests, and local evaluations;
 - an optional OpenAI Agents SDK example;
-- an experimental privacy-safe Codex evidence adapter;
+- an experimental privacy-minimized Codex evidence adapter;
 - a documented Codex contributor workflow.
 
 ## What is not in this repository
@@ -133,6 +133,8 @@ The optional example is not required for the deterministic test suite and does n
 ## Codex Evidence Adapter
 
 The experimental [`CodexEvidenceAdapter`](docs/codex-evidence-adapter.md) converts synthetic `codex exec --json` events and `codex_otel.agent_communication` telemetry into scoped, deterministic evidence records. Raw prompts, commands, paths, tool payloads, identifiers, outputs, and multi-agent message content are not retained; relevant values are hash-bound instead.
+
+The hashes are integrity references, not anonymization. Review the adapter documentation before using the pattern with sensitive production data.
 
 Run the fully local compatibility example:
 
