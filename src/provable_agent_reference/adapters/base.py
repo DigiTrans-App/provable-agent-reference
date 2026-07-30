@@ -7,6 +7,8 @@ from typing import Literal, Protocol
 from ..contracts import Classification, EvidenceBundle
 
 _IDENTIFIER = re.compile(r"^[a-z][a-z0-9_.-]{2,127}$")
+_VERSION = re.compile(r"^[0-9][0-9A-Za-z_.-]{0,63}$")
+_HASH = re.compile(r"^sha256:[0-9a-f]{64}$")
 CoverageStatus = Literal["available", "partial", "unavailable"]
 
 
@@ -61,6 +63,8 @@ class CoverageFinding:
     def __post_init__(self) -> None:
         if not _IDENTIFIER.fullmatch(self.capability):
             raise AdapterValidationError("coverage capability is not a valid identifier")
+        if self.status not in {"available", "partial", "unavailable"}:
+            raise AdapterValidationError("coverage status is not supported")
         if not self.detail or len(self.detail) > 1000:
             raise AdapterValidationError(
                 "coverage detail must contain between 1 and 1000 characters"
@@ -76,7 +80,7 @@ class CoverageFinding:
 
 @dataclass(frozen=True)
 class AdapterResult:
-    """Privacy-safe evidence and coverage metadata produced by a runtime adapter."""
+    """Privacy-minimized evidence and coverage metadata from a runtime adapter."""
 
     runtime: str
     adapter_version: str
@@ -86,6 +90,26 @@ class AdapterResult:
     accepted_event_count: int
     ignored_event_count: int
     source_stream_hashes: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if not _IDENTIFIER.fullmatch(self.runtime):
+            raise AdapterValidationError("runtime is not a valid identifier")
+        if not _VERSION.fullmatch(self.adapter_version):
+            raise AdapterValidationError("adapter_version is not valid")
+        if (self.evidence_bundle.tenant_id, self.evidence_bundle.case_id) != (
+            self.context.tenant_id,
+            self.context.case_id,
+        ):
+            raise AdapterValidationError("evidence bundle does not match adapter context scope")
+        capabilities = [finding.capability for finding in self.coverage]
+        if len(capabilities) != len(set(capabilities)):
+            raise AdapterValidationError("coverage contains duplicate capabilities")
+        if self.accepted_event_count < 0 or self.ignored_event_count < 0:
+            raise AdapterValidationError("event counts must not be negative")
+        if not self.source_stream_hashes:
+            raise AdapterValidationError("at least one source stream hash is required")
+        if any(not _HASH.fullmatch(value) for value in self.source_stream_hashes):
+            raise AdapterValidationError("source stream hash is not a valid sha256 URI")
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -113,6 +137,6 @@ class RuntimeEvidenceAdapter(Protocol):
         execution_jsonl: str,
         telemetry_jsonl: str = "",
     ) -> AdapterResult:
-        """Normalize runtime streams into deterministic privacy-safe evidence."""
+        """Normalize runtime streams into deterministic privacy-minimized evidence."""
 
         ...
