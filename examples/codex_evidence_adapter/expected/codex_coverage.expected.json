@@ -1,0 +1,37 @@
+[
+  {
+    "capability": "exec_event_stream",
+    "detail": "Supported Codex execution events were normalized and hash-bound.",
+    "status": "available"
+  },
+  {
+    "capability": "command_and_file_activity",
+    "detail": "Command, file, MCP, or web activity was observed in item events.",
+    "status": "available"
+  },
+  {
+    "capability": "multi_agent_lifecycle",
+    "detail": "Every supplied communication send had a correlated receive event.",
+    "status": "available"
+  },
+  {
+    "capability": "multi_agent_readable_task_text",
+    "detail": "The source stream did not explicitly attest that task content was readable audit text; the adapter does not infer plaintext from a content field (see openai/codex#28058).",
+    "status": "unavailable"
+  },
+  {
+    "capability": "offered_tool_catalog",
+    "detail": "The event stream did not expose the offered tool catalog (see openai/codex#31088).",
+    "status": "unavailable"
+  },
+  {
+    "capability": "offered_skill_catalog",
+    "detail": "The event stream did not expose the offered skill catalog (see openai/codex#31088).",
+    "status": "unavailable"
+  },
+  {
+    "capability": "permissions_profile",
+    "detail": "The event stream did not expose an effective permissions profile.",
+    "status": "unavailable"
+  }
+]
