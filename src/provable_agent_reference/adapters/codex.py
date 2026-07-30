@@ -60,7 +60,7 @@ class CodexEvidenceAdapter:
                 source_uri=source_uri("exec", execution_stream_hash),
                 classification=context.classification,
                 summary=(
-                    "Privacy-safe normalized Codex execution evidence with "
+                    "Privacy-minimized normalized Codex execution evidence with "
                     f"{exec_facts['accepted']} accepted and {exec_facts['ignored']} ignored events."
                 ),
             ),
@@ -72,7 +72,7 @@ class CodexEvidenceAdapter:
                 source_uri=source_uri("telemetry", telemetry_stream_hash),
                 classification=context.classification,
                 summary=(
-                    "Privacy-safe normalized Codex telemetry evidence with "
+                    "Privacy-minimized normalized Codex telemetry evidence with "
                     f"{telemetry_facts['matched']} matched communication lifecycles and "
                     f"{telemetry_facts['unmatched_sends']} unmatched sends."
                 ),
