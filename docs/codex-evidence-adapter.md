@@ -1,6 +1,6 @@
 # Codex Evidence Adapter v0.1
 
-The Codex Evidence Adapter is an optional, downstream interoperability example for converting Codex execution and observability events into deterministic, privacy-safe evidence records.
+The Codex Evidence Adapter is an optional, downstream interoperability example for converting Codex execution and observability events into deterministic, privacy-minimized evidence records.
 
 It is a community integration maintained by DigiTrans LLC. It is not affiliated with, endorsed by, certified by, or sponsored by OpenAI.
 
@@ -84,6 +84,8 @@ The generated evidence does not retain raw:
 - multi-agent message content.
 
 Those values are hash-bound when they are relevant to supported evidence. Credential-like values are rejected before hashing so a raw secret is not silently accepted into the processing path.
+
+A deterministic SHA-256 content hash is an integrity reference, not anonymization. Predictable or low-entropy values may be discoverable through dictionary comparison. Do not publish production hashes solely because the raw value was removed; apply appropriate access control and, where needed, a deployment-specific keyed commitment layer outside this v0.1 format.
 
 The detector covers common OpenAI API-key, AWS access-key, bearer-token, password/secret assignment, and private-key markers. It is a defense-in-depth example, not a substitute for an enterprise secret scanner.
 
