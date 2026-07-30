@@ -1,6 +1,6 @@
 # Synthetic Codex Evidence Adapter example
 
-This example converts synthetic Codex execution JSONL and synthetic multi-agent lifecycle telemetry into a deterministic, privacy-safe evidence bundle.
+This example converts synthetic Codex execution JSONL and synthetic multi-agent lifecycle telemetry into a deterministic, privacy-minimized evidence bundle.
 
 It requires no network access and no API key.
 
