@@ -45,6 +45,7 @@ This repository contains generic, reusable building blocks:
 - audit reconstruction and tamper detection;
 - synthetic examples, adversarial tests, and local evaluations;
 - an optional OpenAI Agents SDK example;
+- an experimental privacy-safe Codex evidence adapter;
 - a documented Codex contributor workflow.
 
 ## What is not in this repository
@@ -129,16 +130,29 @@ The core framework is provider-neutral and has no runtime dependency on any mode
 
 The optional example is not required for the deterministic test suite and does not imply OpenAI endorsement or certification.
 
+## Codex Evidence Adapter
+
+The experimental [`CodexEvidenceAdapter`](docs/codex-evidence-adapter.md) converts synthetic `codex exec --json` events and `codex_otel.agent_communication` telemetry into scoped, deterministic evidence records. Raw prompts, commands, paths, tool payloads, identifiers, outputs, and multi-agent message content are not retained; relevant values are hash-bound instead.
+
+Run the fully local compatibility example:
+
+```bash
+python examples/codex_evidence_adapter/run.py
+```
+
+The adapter reports unavailable evidence rather than reconstructing it heuristically. It is a downstream community integration and does not imply OpenAI endorsement, certification, sponsorship, or review.
+
 ## Repository map
 
 ```text
-src/provable_agent_reference/   Core provider-neutral library
-schemas/                        Machine-readable contracts
-examples/                       Synthetic and OpenAI SDK examples
-evals/                          Local adversarial evaluation harness
-docs/                           Architecture, threat model, and governance
-scripts/                        Repository validation
-tests/                          Deterministic unit and integration tests
+src/provable_agent_reference/            Provider-neutral core library
+src/provable_agent_reference/adapters/   Optional runtime adapters
+schemas/                                 Machine-readable contracts
+examples/                                Synthetic and provider examples
+evals/                                   Local adversarial evaluation harness
+docs/                                    Architecture, threat model, and governance
+scripts/                                 Repository validation
+tests/                                   Deterministic unit and integration tests
 ```
 
 ## Security status
