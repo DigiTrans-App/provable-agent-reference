@@ -24,7 +24,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["jsonschema>=4.23,<5", "ruff>=0.9,<1"]
-openai = ["openai-agents>=0.18.3,<0.19", "pydantic>=2.10,<3"]
+openai = ["openai-agents>=0.18.3,<0.20", "pydantic>=2.10,<3"]
 
 [project.urls]
 Homepage = "https://github.com/DigiTrans-App/provable-agent-reference"
