@@ -24,13 +24,21 @@ python scripts/validate_repo.py
 ruff check .
 ```
 
+## Independent validation
+
+Independent technical reviews are welcome, including critical, negative, and incomplete results. Start with the [independent validation guide](docs/independent-validation.md) and use the [validation report template](docs/validation-report-template.md) for the human assessment.
+
+A useful external review should identify the exact tag or commit, reproduce the public checks, examine the trust boundary and limitations, and include the smallest synthetic reproduction for any failure. Generated reports under `validation-results/` are ignored by Git and should be reviewed manually before any public disclosure.
+
+Use only public or synthetic inputs. Do not place credentials, customer data, private evidence, production traces, proprietary architecture, or private prompts in a report, issue, or pull request. Report unpublished security vulnerabilities through the private process in `SECURITY.md` rather than the public independent-validation issue form.
+
 ## Pull requests
 
 - Open an issue for substantial architecture changes.
 - Keep pull requests focused and explain the trust-boundary impact.
 - Add tests for each behavior change and each failure mode.
 - Update schemas and documentation when contracts change.
-- Do not commit API keys, `.env` files, private evidence, raw prompts from customer workloads, or generated evaluation results.
+- Do not commit API keys, `.env` files, private evidence, raw prompts from customer workloads, generated evaluation results, or generated independent-validation reports.
 - Use Conventional Commit style when practical, for example `feat(compiler): add evidence-scope binding`.
 
 ## AI-assisted contributions
