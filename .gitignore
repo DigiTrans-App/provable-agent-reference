@@ -25,6 +25,9 @@ Thumbs.db
 evals/results/*
 !evals/results/.gitignore
 
+# Generated independent-validation reports
+validation-results/
+
 # Temporary and generated runtime files
 *.log
 *.db
