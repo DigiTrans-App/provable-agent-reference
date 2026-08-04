@@ -34,24 +34,24 @@ The runner replaces repository and home-directory paths and redacts several comm
 
 Report security-sensitive findings through the private process in [`SECURITY.md`](../SECURITY.md), not through the public validation issue form.
 
-## Recommended tagged-release validation
+## Validate a checkout that contains the kit
 
-The strongest public reproduction starts from an immutable annotated release tag.
+For `main` and future release tags that contain `scripts/run_external_validation.py`, the runner can operate in place:
 
 ```bash
 git clone https://github.com/DigiTrans-App/provable-agent-reference.git
 cd provable-agent-reference
-git fetch --tags
-git checkout --detach v0.2.0
 
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 python -m pip install -e '.[dev,openai]'
 
+EXPECTED_COMMIT="$(git rev-parse HEAD)"
 python scripts/run_external_validation.py \
-  --expected-tag v0.2.0 \
-  --expected-commit 106b91ea790bf96b059d5d60c07f79f16c02eeea
+  --expected-commit "${EXPECTED_COMMIT}"
 ```
+
+For a future immutable tag that includes the kit, add `--expected-tag <tag>` after checking out that annotated tag.
 
 The default report path is:
 
@@ -59,7 +59,7 @@ The default report path is:
 validation-results/independent-validation-report.json
 ```
 
-The generated directory is ignored by Git. The runner exits with:
+The generated directory is ignored by Git in checkouts that contain this kit. The runner exits with:
 
 - `0` when all required checks and requested artifact checks pass;
 - `1` when a validation or provenance check fails;
@@ -67,7 +67,48 @@ The generated directory is ignored by Git. The runner exits with:
 
 Do not use `--allow-dirty` for an independent release reproduction. That option exists for local investigation and records the dirty state, but it weakens the reproducibility claim.
 
-## Verify release artifacts
+## Validate the immutable v0.2.0 release
+
+The `v0.2.0` tag was published before the Independent Validation Kit was added, so the tagged checkout does not contain the runner. Validate it with two separate checkouts:
+
+- a current **validator checkout** containing the kit;
+- an immutable **target checkout** at `v0.2.0`.
+
+From a parent working directory:
+
+```bash
+git clone https://github.com/DigiTrans-App/provable-agent-reference.git \
+  provable-agent-reference-validator
+
+git clone https://github.com/DigiTrans-App/provable-agent-reference.git \
+  provable-agent-reference-v0.2.0
+
+git -C provable-agent-reference-v0.2.0 fetch --tags
+git -C provable-agent-reference-v0.2.0 checkout --detach v0.2.0
+
+python -m venv validation-venv
+source validation-venv/bin/activate  # Windows: validation-venv\Scripts\activate
+python -m pip install -e './provable-agent-reference-v0.2.0[dev,openai]'
+
+python provable-agent-reference-validator/scripts/run_external_validation.py \
+  --repository provable-agent-reference-v0.2.0 \
+  --output "$(pwd)/v0.2.0-independent-validation-report.json" \
+  --expected-tag v0.2.0 \
+  --expected-commit 106b91ea790bf96b059d5d60c07f79f16c02eeea
+```
+
+This arrangement intentionally runs the public validation logic from the validator checkout while executing the tests, repository checks, evaluations, linting, and demonstration against the separate target checkout. The virtual environment installs the target release, not the validator checkout.
+
+Before relying on the result:
+
+1. verify that the validator checkout came from this public repository;
+2. record the validator checkout commit separately in the human report;
+3. confirm that the machine-readable report identifies the target commit and annotated tag;
+4. review the generated report before sharing it publicly.
+
+The report digest binds the report content, but it does not authenticate the validator code. A future release that includes the kit will permit a single-checkout tagged reproduction.
+
+## Verify v0.2.0 release artifacts
 
 Download these four files from the [v0.2.0 GitHub Release](https://github.com/DigiTrans-App/provable-agent-reference/releases/tag/v0.2.0) into one directory:
 
@@ -78,10 +119,12 @@ ARTIFACTS.json
 SHA256SUMS
 ```
 
-Then run:
+Using the two-checkout setup above, run:
 
 ```bash
-python scripts/run_external_validation.py \
+python provable-agent-reference-validator/scripts/run_external_validation.py \
+  --repository provable-agent-reference-v0.2.0 \
+  --output "$(pwd)/v0.2.0-independent-validation-report.json" \
   --expected-tag v0.2.0 \
   --expected-commit 106b91ea790bf96b059d5d60c07f79f16c02eeea \
   --release-dir /path/to/downloaded-release-assets \
