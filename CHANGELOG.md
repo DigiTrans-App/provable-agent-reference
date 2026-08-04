@@ -4,6 +4,12 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Independent validation runner for reproducible offline tests, evaluations, linting, demonstrations, Git provenance, and privacy-bounded JSON reports.
+- Optional verification of release wheels, source distributions, `ARTIFACTS.json`, and `SHA256SUMS` without extracting archives.
+- Machine-readable independent-validation report schema, human reviewer guide and template, public issue form, and fail-closed test coverage.
+
 ## [0.2.0] - 2026-08-03
 
 ### Added
