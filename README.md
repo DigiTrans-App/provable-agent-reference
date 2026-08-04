@@ -63,19 +63,18 @@ Review the complete [v0.2.0 release notes](docs/releases/v0.2.0.md). GitHub Rele
 
 ## Independent validation
 
-External reviewers can reproduce the tagged release, verify the published artifacts, and generate a privacy-bounded machine-readable report:
+External reviewers can validate a checkout that contains the kit and generate a privacy-bounded machine-readable report:
 
 ```bash
-git checkout --detach v0.2.0
 python -m pip install -e '.[dev,openai]'
+EXPECTED_COMMIT="$(git rev-parse HEAD)"
 python scripts/run_external_validation.py \
-  --expected-tag v0.2.0 \
-  --expected-commit 106b91ea790bf96b059d5d60c07f79f16c02eeea
+  --expected-commit "${EXPECTED_COMMIT}"
 ```
 
 The runner records Git provenance, environment metadata, bounded sanitized output summaries, test and evaluation results, and optional release-artifact checks. A passing report is a reproducibility signal, not certification, source authentication, or proof that a deployment is secure.
 
-Review the [independent validation guide](docs/independent-validation.md), the [human report template](docs/validation-report-template.md), and the [machine-readable report schema](schemas/independent-validation-report.schema.json). Critical, negative, and incomplete results are welcome when they include a synthetic reproduction and clear trust-boundary impact.
+The `v0.2.0` tag predates the validation-kit files. To evaluate that immutable release, use one current validator checkout and one separate `v0.2.0` target checkout as documented in the [independent validation guide](docs/independent-validation.md). Also review the [human report template](docs/validation-report-template.md) and the [machine-readable report schema](schemas/independent-validation-report.schema.json). Critical, negative, and incomplete results are welcome when they include a synthetic reproduction and clear trust-boundary impact.
 
 ## Quick start
 
