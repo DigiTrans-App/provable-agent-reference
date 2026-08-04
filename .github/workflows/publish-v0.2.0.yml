@@ -1,0 +1,288 @@
+name: Publish v0.2.0 one-time
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-v0.2.0.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Verify, tag, and publish v0.2.0
+    if: github.repository == 'DigiTrans-App/provable-agent-reference'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      EXPECTED_SHA: 106b91ea790bf96b059d5d60c07f79f16c02eeea
+      RELEASE_TAG: v0.2.0
+      TAG_MESSAGE: Provable Agent Reference Framework v0.2.0
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Verify release preconditions
+        id: preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "working tree is not clean" >&2
+            git status --short >&2
+            exit 1
+          fi
+
+          if [ "$(git rev-parse "${EXPECTED_SHA}^{commit}")" != "${EXPECTED_SHA}" ]; then
+            echo "expected release commit is unavailable" >&2
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "${EXPECTED_SHA}" "${GITHUB_SHA}"; then
+            echo "expected release commit is not an ancestor of this main-branch event" >&2
+            exit 1
+          fi
+
+          python - <<'PY'
+          import os
+          import subprocess
+          import tomllib
+
+          sha = os.environ["EXPECTED_SHA"]
+
+          def show(path: str) -> str:
+              return subprocess.check_output(
+                  ["git", "show", f"{sha}:{path}"],
+                  text=True,
+              )
+
+          project = tomllib.loads(show("pyproject.toml"))["project"]
+          if project.get("version") != "0.2.0":
+              raise SystemExit("pyproject.toml version is not 0.2.0")
+
+          package_init = show("src/provable_agent_reference/__init__.py")
+          if '__version__ = "0.2.0"' not in package_init:
+              raise SystemExit("package __version__ is not 0.2.0")
+
+          if "## [0.2.0]" not in show("CHANGELOG.md"):
+              raise SystemExit("CHANGELOG.md does not contain the 0.2.0 entry")
+
+          show("docs/releases/v0.2.0.md")
+          release_workflow = show(".github/workflows/release.yml")
+          if "v*.*.*" not in release_workflow:
+              raise SystemExit("release workflow does not declare semantic-version tag handling")
+          PY
+
+          echo "tag_exists=false" >> "${GITHUB_OUTPUT}"
+          if gh api "/repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" > /tmp/existing-tag-ref.json 2>/dev/null; then
+            python - <<'PY'
+            import json
+            import os
+            import subprocess
+
+            with open("/tmp/existing-tag-ref.json", encoding="utf-8") as stream:
+                ref = json.load(stream)
+
+            if ref.get("object", {}).get("type") != "tag":
+                raise SystemExit("existing v0.2.0 ref is not an annotated tag")
+
+            tag_sha = ref["object"]["sha"]
+            subprocess.run(
+                [
+                    "gh",
+                    "api",
+                    f"/repos/{os.environ['GITHUB_REPOSITORY']}/git/tags/{tag_sha}",
+                ],
+                check=True,
+                stdout=open("/tmp/existing-tag-object.json", "w", encoding="utf-8"),
+            )
+
+            with open("/tmp/existing-tag-object.json", encoding="utf-8") as stream:
+                tag = json.load(stream)
+
+            if tag.get("object", {}).get("sha") != os.environ["EXPECTED_SHA"]:
+                raise SystemExit("existing v0.2.0 tag points to the wrong commit")
+            if tag.get("message") != os.environ["TAG_MESSAGE"]:
+                raise SystemExit("existing v0.2.0 tag has the wrong annotation")
+            PY
+            echo "tag_exists=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+          echo "release_exists=false" >> "${GITHUB_OUTPUT}"
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "release_exists=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Create annotated release tag
+        if: steps.preflight.outputs.tag_exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tagger_date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          gh api --method POST "/repos/${GITHUB_REPOSITORY}/git/tags" \
+            -f tag="${RELEASE_TAG}" \
+            -f message="${TAG_MESSAGE}" \
+            -f object="${EXPECTED_SHA}" \
+            -f type="commit" \
+            -f "tagger[name]=DigiTrans-App" \
+            -f "tagger[email]=279337775+DigiTrans-App@users.noreply.github.com" \
+            -f "tagger[date]=${tagger_date}" \
+            > /tmp/tag-object.json
+
+          tag_object_sha="$(python -c 'import json; print(json.load(open("/tmp/tag-object.json", encoding="utf-8"))["sha"])')"
+
+          gh api --method POST "/repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f ref="refs/tags/${RELEASE_TAG}" \
+            -f sha="${tag_object_sha}" \
+            > /tmp/tag-ref.json
+
+      - name: Verify remote annotated tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh api "/repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" > /tmp/verified-tag-ref.json
+
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+
+          with open("/tmp/verified-tag-ref.json", encoding="utf-8") as stream:
+              ref = json.load(stream)
+
+          if ref.get("object", {}).get("type") != "tag":
+              raise SystemExit("remote release ref is not an annotated tag")
+
+          tag_object_sha = ref["object"]["sha"]
+          with open("/tmp/verified-tag-object.json", "w", encoding="utf-8") as output:
+              subprocess.run(
+                  [
+                      "gh",
+                      "api",
+                      f"/repos/{os.environ['GITHUB_REPOSITORY']}/git/tags/{tag_object_sha}",
+                  ],
+                  check=True,
+                  stdout=output,
+              )
+
+          with open("/tmp/verified-tag-object.json", encoding="utf-8") as stream:
+              tag = json.load(stream)
+
+          if tag.get("object", {}).get("sha") != os.environ["EXPECTED_SHA"]:
+              raise SystemExit("remote tag does not peel to the expected release commit")
+          if tag.get("message") != os.environ["TAG_MESSAGE"]:
+              raise SystemExit("remote tag annotation does not match")
+
+          print(f"annotated tag object: {tag_object_sha}")
+          print(f"peeled release commit: {tag['object']['sha']}")
+          PY
+
+      - name: Checkout immutable release commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "${EXPECTED_SHA}"
+          test "$(git rev-parse HEAD)" = "${EXPECTED_SHA}"
+          test -z "$(git status --porcelain)"
+
+      - name: Install release dependencies
+        run: python -m pip install '.[dev,openai]'
+
+      - name: Run release validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -v
+          python scripts/validate_repo.py
+          python evals/run_local.py
+          ruff check .
+          python -m provable_agent_reference > /tmp/provable-agent-reference-demo.json
+
+      - name: Build and validate distributions
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf dist build
+          python -m build
+          python scripts/validate_dist.py > /tmp/ARTIFACTS.json
+          mv /tmp/ARTIFACTS.json dist/ARTIFACTS.json
+          (
+            cd dist
+            sha256sum *.whl *.tar.gz ARTIFACTS.json > SHA256SUMS
+          )
+
+      - name: Publish GitHub release
+        if: steps.preflight.outputs.release_exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "${RELEASE_TAG}" \
+            dist/*.whl \
+            dist/*.tar.gz \
+            dist/ARTIFACTS.json \
+            dist/SHA256SUMS \
+            --verify-tag \
+            --title "Provable Agent Reference Framework ${RELEASE_TAG}" \
+            --notes-file "docs/releases/${RELEASE_TAG}.md"
+
+      - name: Verify published release
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release view "${RELEASE_TAG}" \
+            --json url,tagName,isDraft,isPrerelease,assets \
+            > /tmp/release.json
+
+          python - <<'PY'
+          import json
+
+          with open("/tmp/release.json", encoding="utf-8") as stream:
+              release = json.load(stream)
+
+          expected_assets = {
+              "provable_agent_reference-0.2.0-py3-none-any.whl",
+              "provable_agent_reference-0.2.0.tar.gz",
+              "ARTIFACTS.json",
+              "SHA256SUMS",
+          }
+          actual_assets = {asset["name"] for asset in release.get("assets", [])}
+
+          if release.get("tagName") != "v0.2.0":
+              raise SystemExit("published release tag is incorrect")
+          if release.get("isDraft") or release.get("isPrerelease"):
+              raise SystemExit("release must be final, not draft or prerelease")
+          if actual_assets != expected_assets:
+              raise SystemExit(
+                  f"release asset mismatch: {sorted(actual_assets)} != {sorted(expected_assets)}"
+              )
+
+          print(release["url"])
+          PY
+
+          release_url="$(python -c 'import json; print(json.load(open("/tmp/release.json", encoding="utf-8"))["url"])')"
+          {
+            echo "## v0.2.0 published"
+            echo
+            echo "- Tag: ${RELEASE_TAG}"
+            echo "- Release commit: ${EXPECTED_SHA}"
+            echo "- Release: ${release_url}"
+            echo "- Assets: wheel, source distribution, ARTIFACTS.json, SHA256SUMS"
+          } >> "${GITHUB_STEP_SUMMARY}"
