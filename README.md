@@ -1,6 +1,8 @@
 # Provable Agent Reference Framework
 
 [![Validate](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/validate.yml/badge.svg)](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/validate.yml)
+[![CodeQL](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/codeql.yml/badge.svg)](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/scorecard.yml/badge.svg)](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/scorecard.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
@@ -159,7 +161,7 @@ tests/                                   Deterministic unit and integration test
 
 ## Security status
 
-This is a reference implementation, not a production security product. The cryptographic operations use standard SHA-256 hashing for deterministic record binding, not a production identity, signature, key-management, or attestation system. Review [SECURITY.md](SECURITY.md) and the [threat model](docs/threat-model.md) before reuse.
+This is a reference implementation, not a production security product. The cryptographic operations use standard SHA-256 hashing for deterministic record binding, not a production identity, signature, key-management, or attestation system. Automated CodeQL, dependency-review, and OpenSSF Scorecard workflows provide additional triage signals but do not constitute certification. Review [SECURITY.md](SECURITY.md) and the [threat model](docs/threat-model.md) before reuse.
 
 ## Contributing
 
