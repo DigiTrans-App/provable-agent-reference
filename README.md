@@ -61,6 +61,22 @@ The current release is **v0.2.0**, which adds a versioned runtime-adapter bounda
 
 Review the complete [v0.2.0 release notes](docs/releases/v0.2.0.md). GitHub Releases publish a wheel, source distribution, machine-readable artifact manifest, and SHA-256 checksum file. The package is not currently published to PyPI.
 
+## Independent validation
+
+External reviewers can reproduce the tagged release, verify the published artifacts, and generate a privacy-bounded machine-readable report:
+
+```bash
+git checkout --detach v0.2.0
+python -m pip install -e '.[dev,openai]'
+python scripts/run_external_validation.py \
+  --expected-tag v0.2.0 \
+  --expected-commit 106b91ea790bf96b059d5d60c07f79f16c02eeea
+```
+
+The runner records Git provenance, environment metadata, bounded sanitized output summaries, test and evaluation results, and optional release-artifact checks. A passing report is a reproducibility signal, not certification, source authentication, or proof that a deployment is secure.
+
+Review the [independent validation guide](docs/independent-validation.md), the [human report template](docs/validation-report-template.md), and the [machine-readable report schema](schemas/independent-validation-report.schema.json). Critical, negative, and incomplete results are welcome when they include a synthetic reproduction and clear trust-boundary impact.
+
 ## Quick start
 
 ```bash
@@ -162,7 +178,7 @@ schemas/                                 Machine-readable contracts
 examples/                                Synthetic and provider examples
 evals/                                   Local adversarial evaluation harness
 docs/                                    Architecture, threat model, and governance
-scripts/                                 Repository validation
+scripts/                                 Repository and external validation tools
 tests/                                   Deterministic unit and integration tests
 ```
 
@@ -172,7 +188,7 @@ This is a reference implementation, not a production security product. The crypt
 
 ## Contributing
 
-Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), the [roadmap](ROADMAP.md), and issues labeled `good first issue` or `help wanted`.
+Contributions and independent technical reviews are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), the [roadmap](ROADMAP.md), and issues labeled `good first issue` or `help wanted`.
 
 ## License
 
