@@ -1,0 +1,154 @@
+name: Verify and publish v0.2.0 from PR
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/verify-publish-v0.2.0-pr.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  verify-publish:
+    name: Verify tag, artifacts, and release
+    if: >-
+      github.repository == 'DigiTrans-App/provable-agent-reference' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'ops/observable-v0.2.0-publication'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_SHA: 106b91ea790bf96b059d5d60c07f79f16c02eeea
+      RELEASE_TAG: v0.2.0
+      TAG_MESSAGE: Provable Agent Reference Framework v0.2.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Verify annotated release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh api "/repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" \
+            > /tmp/tag-ref.json
+
+          test "$(jq -er '.object.type' /tmp/tag-ref.json)" = "tag"
+          tag_object_sha="$(jq -er '.object.sha' /tmp/tag-ref.json)"
+
+          gh api "/repos/${GITHUB_REPOSITORY}/git/tags/${tag_object_sha}" \
+            > /tmp/tag-object.json
+
+          test "$(jq -er '.object.type' /tmp/tag-object.json)" = "commit"
+          test "$(jq -er '.object.sha' /tmp/tag-object.json)" = "${EXPECTED_SHA}"
+          test "$(jq -er '.message' /tmp/tag-object.json)" = "${TAG_MESSAGE}"
+
+          echo "annotated tag object: ${tag_object_sha}"
+          echo "peeled release commit: ${EXPECTED_SHA}"
+
+      - name: Detect existing release
+        id: release-state
+        shell: bash
+        run: |
+          set -euo pipefail
+          exists=false
+          if gh release view "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            exists=true
+          fi
+          echo "exists=${exists}" >> "${GITHUB_OUTPUT}"
+          echo "release already exists: ${exists}"
+
+      - name: Checkout immutable release commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach "${EXPECTED_SHA}"
+          test "$(git rev-parse HEAD)" = "${EXPECTED_SHA}"
+          test -z "$(git status --porcelain)"
+
+      - name: Install release dependencies
+        run: python -m pip install '.[dev,openai]'
+
+      - name: Run release validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -v
+          python scripts/validate_repo.py
+          python evals/run_local.py
+          ruff check .
+          python -m provable_agent_reference \
+            > /tmp/provable-agent-reference-demo.json
+
+      - name: Build and validate distributions
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf dist build
+          python -m build
+          python scripts/validate_dist.py > /tmp/ARTIFACTS.json
+          mv /tmp/ARTIFACTS.json dist/ARTIFACTS.json
+          (
+            cd dist
+            sha256sum *.whl *.tar.gz ARTIFACTS.json > SHA256SUMS
+          )
+
+      - name: Publish GitHub release when absent
+        if: steps.release-state.outputs.exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "${RELEASE_TAG}" \
+            dist/*.whl \
+            dist/*.tar.gz \
+            dist/ARTIFACTS.json \
+            dist/SHA256SUMS \
+            --repo "${GITHUB_REPOSITORY}" \
+            --verify-tag \
+            --title "Provable Agent Reference Framework ${RELEASE_TAG}" \
+            --notes-file "docs/releases/${RELEASE_TAG}.md"
+
+      - name: Verify final release and exact assets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh release view "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --json url,tagName,isDraft,isPrerelease,assets \
+            > /tmp/release.json
+
+          test "$(jq -er '.tagName' /tmp/release.json)" = "${RELEASE_TAG}"
+          test "$(jq -er '.isDraft' /tmp/release.json)" = "false"
+          test "$(jq -er '.isPrerelease' /tmp/release.json)" = "false"
+
+          actual_assets="$(jq -c '[.assets[].name] | sort' /tmp/release.json)"
+          expected_assets='["ARTIFACTS.json","SHA256SUMS","provable_agent_reference-0.2.0-py3-none-any.whl","provable_agent_reference-0.2.0.tar.gz"]'
+          test "${actual_assets}" = "${expected_assets}"
+
+          release_url="$(jq -er '.url' /tmp/release.json)"
+          echo "release: ${release_url}"
+          {
+            echo "## v0.2.0 release verified"
+            echo
+            echo "- Annotated tag: ${RELEASE_TAG}"
+            echo "- Release commit: ${EXPECTED_SHA}"
+            echo "- Release: ${release_url}"
+            echo "- Assets: wheel, source distribution, ARTIFACTS.json, SHA256SUMS"
+          } >> "${GITHUB_STEP_SUMMARY}"
