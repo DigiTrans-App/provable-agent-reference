@@ -1,0 +1,209 @@
+name: Retry v0.2.0 publication
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/retry-publish-v0.2.0.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+
+concurrency:
+  group: retry-publish-v0.2.0
+  cancel-in-progress: false
+
+jobs:
+  dispatch-and-monitor:
+    name: Dispatch and monitor publisher
+    if: github.repository == 'DigiTrans-App/provable-agent-reference'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_SHA: 106b91ea790bf96b059d5d60c07f79f16c02eeea
+      RELEASE_TAG: v0.2.0
+      PUBLISH_WORKFLOW: publish-v0.2.0.yml
+      REPORT_PR: "17"
+    steps:
+      - name: Verify existing release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh api "/repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" \
+            > /tmp/tag-ref.json
+
+          object_type="$(jq -er '.object.type' /tmp/tag-ref.json)"
+          if [ "${object_type}" != "tag" ]; then
+            echo "${RELEASE_TAG} is not an annotated tag" >&2
+            exit 1
+          fi
+
+          tag_object_sha="$(jq -er '.object.sha' /tmp/tag-ref.json)"
+          gh api "/repos/${GITHUB_REPOSITORY}/git/tags/${tag_object_sha}" \
+            > /tmp/tag-object.json
+
+          peeled_sha="$(jq -er '.object.sha' /tmp/tag-object.json)"
+          if [ "${peeled_sha}" != "${EXPECTED_SHA}" ]; then
+            echo "${RELEASE_TAG} does not resolve to the reviewed release commit" >&2
+            exit 1
+          fi
+
+          echo "annotated tag object: ${tag_object_sha}"
+          echo "peeled release commit: ${peeled_sha}"
+
+      - name: Dispatch publisher workflow
+        id: dispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          previous_run_id="$(
+            gh run list \
+              --repo "${GITHUB_REPOSITORY}" \
+              --workflow "${PUBLISH_WORKFLOW}" \
+              --event workflow_dispatch \
+              --limit 1 \
+              --json databaseId \
+              --jq '.[0].databaseId // 0'
+          )"
+
+          gh workflow run "${PUBLISH_WORKFLOW}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --ref main
+
+          run_id=""
+          run_url=""
+          for attempt in $(seq 1 45); do
+            run_json="$(
+              gh run list \
+                --repo "${GITHUB_REPOSITORY}" \
+                --workflow "${PUBLISH_WORKFLOW}" \
+                --event workflow_dispatch \
+                --limit 1 \
+                --json databaseId,url,status,conclusion,createdAt
+            )"
+            candidate_id="$(jq -r '.[0].databaseId // 0' <<<"${run_json}")"
+            if [ "${candidate_id}" != "0" ] && \
+              [ "${candidate_id}" != "${previous_run_id}" ]; then
+              run_id="${candidate_id}"
+              run_url="$(jq -r '.[0].url' <<<"${run_json}")"
+              break
+            fi
+            sleep 2
+          done
+
+          if [ -z "${run_id}" ]; then
+            echo "dispatched publisher run was not discoverable" >&2
+            exit 1
+          fi
+
+          echo "run_id=${run_id}" >> "${GITHUB_OUTPUT}"
+          echo "run_url=${run_url}" >> "${GITHUB_OUTPUT}"
+          echo "publisher run: ${run_url}"
+
+      - name: Monitor publisher workflow
+        id: monitor
+        shell: bash
+        env:
+          RUN_ID: ${{ steps.dispatch.outputs.run_id }}
+        run: |
+          set -euo pipefail
+
+          set +e
+          gh run watch "${RUN_ID}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --exit-status
+          watch_exit=$?
+          set -e
+
+          gh run view "${RUN_ID}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --json databaseId,url,status,conclusion,event,headSha,workflowName,createdAt,updatedAt \
+            > /tmp/publisher-run.json
+
+          conclusion="$(jq -r '.conclusion // .status' /tmp/publisher-run.json)"
+          echo "conclusion=${conclusion}" >> "${GITHUB_OUTPUT}"
+
+          if [ "${watch_exit}" -ne 0 ]; then
+            exit "${watch_exit}"
+          fi
+
+      - name: Verify release and assets
+        id: release
+        if: steps.monitor.outputs.conclusion == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh release view "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --json url,tagName,isDraft,isPrerelease,assets \
+            > /tmp/release.json
+
+          expected_assets='[
+            "ARTIFACTS.json",
+            "SHA256SUMS",
+            "provable_agent_reference-0.2.0-py3-none-any.whl",
+            "provable_agent_reference-0.2.0.tar.gz"
+          ]'
+          actual_assets="$(jq -c '[.assets[].name] | sort' /tmp/release.json)"
+          normalized_expected="$(jq -c 'sort' <<<"${expected_assets}")"
+
+          if [ "$(jq -r '.tagName' /tmp/release.json)" != "${RELEASE_TAG}" ]; then
+            echo "release tag mismatch" >&2
+            exit 1
+          fi
+          if [ "$(jq -r '.isDraft' /tmp/release.json)" != "false" ] || \
+            [ "$(jq -r '.isPrerelease' /tmp/release.json)" != "false" ]; then
+            echo "release is draft or prerelease" >&2
+            exit 1
+          fi
+          if [ "${actual_assets}" != "${normalized_expected}" ]; then
+            echo "release asset mismatch" >&2
+            echo "actual: ${actual_assets}" >&2
+            echo "expected: ${normalized_expected}" >&2
+            exit 1
+          fi
+
+          release_url="$(jq -r '.url' /tmp/release.json)"
+          echo "release_url=${release_url}" >> "${GITHUB_OUTPUT}"
+          echo "release: ${release_url}"
+
+      - name: Report retry result
+        if: always()
+        continue-on-error: true
+        shell: bash
+        env:
+          PUBLISHER_RUN_ID: ${{ steps.dispatch.outputs.run_id }}
+          PUBLISHER_RUN_URL: ${{ steps.dispatch.outputs.run_url }}
+          PUBLISHER_CONCLUSION: ${{ steps.monitor.outputs.conclusion }}
+          RELEASE_URL: ${{ steps.release.outputs.release_url }}
+          DISPATCH_OUTCOME: ${{ steps.dispatch.outcome }}
+          MONITOR_OUTCOME: ${{ steps.monitor.outcome }}
+          RELEASE_OUTCOME: ${{ steps.release.outcome }}
+        run: |
+          set -u
+
+          report=/tmp/v0.2.0-publication-report.md
+          {
+            echo "## v0.2.0 publication retry"
+            echo
+            echo "- Dispatcher run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "- Publisher run: ${PUBLISHER_RUN_URL:-not discovered}"
+            echo "- Publisher run ID: ${PUBLISHER_RUN_ID:-not discovered}"
+            echo "- Publisher conclusion: ${PUBLISHER_CONCLUSION:-unknown}"
+            echo "- Dispatch step: ${DISPATCH_OUTCOME:-unknown}"
+            echo "- Monitor step: ${MONITOR_OUTCOME:-unknown}"
+            echo "- Release verification: ${RELEASE_OUTCOME:-unknown}"
+            echo "- Release: ${RELEASE_URL:-not verified}"
+            echo "- Expected release commit: ${EXPECTED_SHA}"
+          } > "${report}"
+
+          gh pr comment "${REPORT_PR}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --body-file "${report}"
