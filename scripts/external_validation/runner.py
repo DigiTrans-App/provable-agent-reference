@@ -13,7 +13,7 @@ import time
 import tomllib
 import zipfile
 from collections.abc import Callable, Sequence
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from email.parser import Parser
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -47,7 +47,7 @@ SECRET_PATTERNS = (
 
 
 def utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def sha256_file(path: Path) -> str:
