@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/independent-validation-report.schema.json",
+  "title": "Independent Validation Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "generated_at",
+    "status",
+    "project",
+    "provenance",
+    "environment",
+    "checks",
+    "artifacts",
+    "errors",
+    "limitations",
+    "report_sha256"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://digitrans.app/schemas/provable-agent-reference/independent-validation-report.schema.json"
+    },
+    "schema_version": {"const": "1.0.0"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["pass", "fail"]},
+    "project": {"$ref": "#/$defs/project"},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "environment": {"$ref": "#/$defs/environment"},
+    "checks": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/check"}
+    },
+    "artifacts": {"$ref": "#/$defs/artifacts"},
+    "errors": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "limitations": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "report_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "nullableString": {
+      "type": ["string", "null"]
+    },
+    "nullableSha": {
+      "anyOf": [
+        {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        {"type": "null"}
+      ]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string"},
+        "version": {"type": "string"}
+      }
+    },
+    "tag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "object_type",
+        "object_sha",
+        "peeled_commit_sha",
+        "message"
+      ],
+      "properties": {
+        "name": {"type": "string"},
+        "object_type": {"type": "string"},
+        "object_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "peeled_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "message": {"type": "string"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "available",
+        "status",
+        "repository_root_matches",
+        "commit_sha",
+        "dirty",
+        "exact_tags",
+        "expected_tag",
+        "expected_commit",
+        "origin_present",
+        "tag",
+        "errors"
+      ],
+      "properties": {
+        "available": {"type": "boolean"},
+        "status": {"enum": ["pass", "fail"]},
+        "repository_root_matches": {"type": ["boolean", "null"]},
+        "commit_sha": {"$ref": "#/$defs/nullableSha"},
+        "dirty": {"type": ["boolean", "null"]},
+        "exact_tags": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "expected_tag": {"$ref": "#/$defs/nullableString"},
+        "expected_commit": {"$ref": "#/$defs/nullableString"},
+        "origin_present": {"type": "boolean"},
+        "tag": {
+          "anyOf": [
+            {"$ref": "#/$defs/tag"},
+            {"type": "null"}
+          ]
+        },
+        "errors": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "python_version",
+        "python_implementation",
+        "platform_system",
+        "platform_release",
+        "platform_machine",
+        "os_name"
+      ],
+      "properties": {
+        "python_version": {"type": "string"},
+        "python_implementation": {"type": "string"},
+        "platform_system": {"type": "string"},
+        "platform_release": {"type": "string"},
+        "platform_machine": {"type": "string"},
+        "os_name": {"type": "string"}
+      }
+    },
+    "outputSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "tail", "truncated"],
+      "properties": {
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "tail": {"type": "string"},
+        "truncated": {"type": "boolean"}
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "required",
+        "status",
+        "command",
+        "started_at",
+        "duration_ms",
+        "returncode",
+        "stdout",
+        "stderr"
+      ],
+      "properties": {
+        "name": {"type": "string"},
+        "required": {"type": "boolean"},
+        "status": {"enum": ["pass", "fail", "timeout", "error"]},
+        "command": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        },
+        "started_at": {"type": "string", "format": "date-time"},
+        "duration_ms": {"type": "integer", "minimum": 0},
+        "returncode": {"type": ["integer", "null"]},
+        "stdout": {"$ref": "#/$defs/outputSummary"},
+        "stderr": {"$ref": "#/$defs/outputSummary"},
+        "validation_error": {"type": "string"},
+        "structured_output": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "artifactFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filename", "sha256", "size_bytes"],
+      "properties": {
+        "filename": {"type": "string"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 0}
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "required",
+        "status",
+        "directory",
+        "project",
+        "version",
+        "files",
+        "errors"
+      ],
+      "properties": {
+        "requested": {"type": "boolean"},
+        "required": {"type": "boolean"},
+        "status": {"enum": ["not_requested", "pass", "fail"]},
+        "directory": {"$ref": "#/$defs/nullableString"},
+        "project": {"$ref": "#/$defs/nullableString"},
+        "version": {"$ref": "#/$defs/nullableString"},
+        "files": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/artifactFile"}
+        },
+        "errors": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}
