@@ -13,6 +13,7 @@ from referencing import Registry, Resource
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIR = ROOT / "schemas"
 EXAMPLE_DIR = ROOT / "examples" / "records"
+GENERATED_DIRECTORIES = {"evals/results", "validation-results"}
 EXAMPLE_SCHEMA_MAP = {
     "semantic-draft.example.json": "semantic-draft.schema.json",
     "evidence-record.example.json": "evidence-record.schema.json",
@@ -27,6 +28,14 @@ EXAMPLE_SCHEMA_MAP = {
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def is_generated_path(path: Path) -> bool:
+    relative = path.relative_to(ROOT).as_posix()
+    return any(
+        relative == directory or relative.startswith(directory + "/")
+        for directory in GENERATED_DIRECTORIES
+    )
 
 
 def build_registry() -> tuple[dict[str, dict[str, Any]], Registry]:
@@ -66,7 +75,7 @@ def validate_examples(
 def validate_json_files() -> int:
     count = 0
     for path in sorted(ROOT.rglob("*.json")):
-        if "evals/results" in path.as_posix():
+        if is_generated_path(path):
             continue
         load_json(path)
         count += 1
@@ -97,7 +106,11 @@ def validate_secret_hygiene() -> None:
     suffixes = {".py", ".md", ".json", ".toml", ".yml", ".yaml", ".txt"}
     leaks: list[str] = []
     for path in ROOT.rglob("*"):
-        if not path.is_file() or path.suffix.lower() not in suffixes:
+        if (
+            not path.is_file()
+            or path.suffix.lower() not in suffixes
+            or is_generated_path(path)
+        ):
             continue
         if pattern.search(path.read_text(encoding="utf-8", errors="ignore")):
             leaks.append(path.relative_to(ROOT).as_posix())

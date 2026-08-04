@@ -28,6 +28,7 @@ Released on 2026-08-03.
 
 ## v0.2.x - Interoperability hardening
 
+- [x] Independent validation runner, report schema, artifact verification, reviewer guide, and public intake workflow
 - [ ] Additional provider or runtime example
 - [ ] Cross-runtime evidence-adapter conformance profile ([#12](https://github.com/DigiTrans-App/provable-agent-reference/issues/12))
 - [ ] Additional cross-runtime compatibility test vectors

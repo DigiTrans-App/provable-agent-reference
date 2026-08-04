@@ -16,7 +16,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
@@ -40,6 +40,49 @@ jobs:
         run: python evals/run_local.py
       - name: Lint
         run: ruff check .
+      - name: Independent validation runner
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          python scripts/run_external_validation.py \
+            --expected-commit "${EXPECTED_COMMIT}" \
+            --output /tmp/independent-validation-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          from jsonschema import Draft202012Validator
+
+          from scripts.external_validation.runner import report_digest
+
+          report_path = Path("/tmp/independent-validation-report.json")
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          schema = json.loads(
+              Path("schemas/independent-validation-report.schema.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          Draft202012Validator.check_schema(schema)
+          errors = sorted(
+              Draft202012Validator(schema).iter_errors(report),
+              key=lambda error: list(error.path),
+          )
+          if errors:
+              details = "; ".join(
+                  f"{'.'.join(map(str, error.path)) or '<root>'}: {error.message}"
+                  for error in errors
+              )
+              raise SystemExit(f"independent validation report is invalid: {details}")
+
+          claimed_digest = report["report_sha256"]
+          digest_input = dict(report)
+          del digest_input["report_sha256"]
+          actual_digest = report_digest(digest_input)
+          if actual_digest != claimed_digest:
+              raise SystemExit(
+                  f"report digest mismatch: {actual_digest} != {claimed_digest}"
+              )
+          PY
       - name: Build and validate distributions
         run: |
           python -m build

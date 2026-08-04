@@ -1,0 +1,109 @@
+name: Independent validation result
+description: Report an external reproduction, limitation, or technical finding using public synthetic data only.
+title: "[Validation]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for independently evaluating the project. Critical and negative results are welcome.
+
+        Do not include credentials, customer data, private evidence, production traces, or unpublished vulnerability details. Report security-sensitive findings through the private process in SECURITY.md.
+
+  - type: input
+    id: tag_or_commit
+    attributes:
+      label: Tag or commit
+      description: Identify the exact annotated tag or commit that you reviewed.
+      placeholder: v0.2.0 / 106b91ea790bf96b059d5d60c07f79f16c02eeea
+    validations:
+      required: true
+
+  - type: dropdown
+    id: automated_result
+    attributes:
+      label: Automated validation result
+      options:
+        - Passed
+        - Failed
+        - Partially completed
+        - Not run
+    validations:
+      required: true
+
+  - type: input
+    id: report_sha256
+    attributes:
+      label: Machine-readable report SHA-256
+      description: Optional. Paste report_sha256 from the generated JSON report after reviewing it for safe disclosure.
+      placeholder: 64 lowercase hexadecimal characters
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Provide Python version, operating system, architecture, and installation method. Do not include usernames, home-directory paths, or private infrastructure details.
+      placeholder: Python 3.12; Ubuntu 24.04; x86_64; source checkout with .[dev,openai]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: artifact_result
+    attributes:
+      label: Release artifact verification
+      options:
+        - Passed
+        - Failed
+        - Not tested
+    validations:
+      required: true
+
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands executed
+      description: Include the exact public commands needed to reproduce the result. Remove credentials and machine-specific secrets.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: observations
+    attributes:
+      label: Observations and findings
+      description: Describe pass results, failures, ambiguous claims, documentation gaps, limitations, or interoperability problems.
+    validations:
+      required: true
+
+  - type: textarea
+    id: synthetic_reproduction
+    attributes:
+      label: Minimal synthetic reproduction
+      description: Required for a failure or defect. Use synthetic data only; otherwise write "Not applicable."
+    validations:
+      required: true
+
+  - type: textarea
+    id: trust_impact
+    attributes:
+      label: Trust-boundary or assurance impact
+      description: Explain whether the result affects evidence binding, scope, verification, approval, authorization, auditability, privacy, or a documented non-goal.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested_action
+    attributes:
+      label: Suggested test, documentation change, or remediation
+      description: Optional. A focused failing test or documentation correction is especially useful.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Public disclosure confirmations
+      options:
+        - label: I used only public or synthetic inputs and removed credentials, private data, and machine-specific secrets.
+          required: true
+        - label: I reviewed any generated report or log excerpt before sharing it publicly.
+          required: true
+        - label: This issue does not contain an unpublished vulnerability that should be reported privately.
+          required: true

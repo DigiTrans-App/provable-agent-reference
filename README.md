@@ -61,6 +61,21 @@ The current release is **v0.2.0**, which adds a versioned runtime-adapter bounda
 
 Review the complete [v0.2.0 release notes](docs/releases/v0.2.0.md). GitHub Releases publish a wheel, source distribution, machine-readable artifact manifest, and SHA-256 checksum file. The package is not currently published to PyPI.
 
+## Independent validation
+
+External reviewers can validate a checkout that contains the kit and generate a privacy-bounded machine-readable report:
+
+```bash
+python -m pip install -e '.[dev,openai]'
+EXPECTED_COMMIT="$(git rev-parse HEAD)"
+python scripts/run_external_validation.py \
+  --expected-commit "${EXPECTED_COMMIT}"
+```
+
+The runner records Git provenance, environment metadata, bounded sanitized output summaries, test and evaluation results, and optional release-artifact checks. A passing report is a reproducibility signal, not certification, source authentication, or proof that a deployment is secure.
+
+The `v0.2.0` tag predates the validation-kit files. To evaluate that immutable release, use one current validator checkout and one separate `v0.2.0` target checkout as documented in the [independent validation guide](docs/independent-validation.md). Also review the [human report template](docs/validation-report-template.md) and the [machine-readable report schema](schemas/independent-validation-report.schema.json). Critical, negative, and incomplete results are welcome when they include a synthetic reproduction and clear trust-boundary impact.
+
 ## Quick start
 
 ```bash
@@ -162,7 +177,7 @@ schemas/                                 Machine-readable contracts
 examples/                                Synthetic and provider examples
 evals/                                   Local adversarial evaluation harness
 docs/                                    Architecture, threat model, and governance
-scripts/                                 Repository validation
+scripts/                                 Repository and external validation tools
 tests/                                   Deterministic unit and integration tests
 ```
 
@@ -172,7 +187,7 @@ This is a reference implementation, not a production security product. The crypt
 
 ## Contributing
 
-Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), the [roadmap](ROADMAP.md), and issues labeled `good first issue` or `help wanted`.
+Contributions and independent technical reviews are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), the [roadmap](ROADMAP.md), and issues labeled `good first issue` or `help wanted`.
 
 ## License
 
