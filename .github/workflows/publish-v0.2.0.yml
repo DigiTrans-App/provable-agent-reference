@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/publish-v0.2.0.yml"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -86,48 +87,45 @@ jobs:
           show("docs/releases/v0.2.0.md")
           release_workflow = show(".github/workflows/release.yml")
           if "v*.*.*" not in release_workflow:
-              raise SystemExit("release workflow does not declare semantic-version tag handling")
+              raise SystemExit(
+                  "release workflow does not declare semantic-version tag handling"
+              )
           PY
 
-          echo "tag_exists=false" >> "${GITHUB_OUTPUT}"
-          if gh api "/repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" > /tmp/existing-tag-ref.json 2>/dev/null; then
-            python - <<'PY'
-            import json
-            import os
-            import subprocess
+          tag_exists=false
+          if gh api "/repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" \
+            > /tmp/existing-tag-ref.json 2>/dev/null; then
+            object_type="$(jq -er '.object.type' /tmp/existing-tag-ref.json)"
+            if [ "${object_type}" != "tag" ]; then
+              echo "existing v0.2.0 ref is not an annotated tag" >&2
+              exit 1
+            fi
 
-            with open("/tmp/existing-tag-ref.json", encoding="utf-8") as stream:
-                ref = json.load(stream)
+            tag_object_sha="$(jq -er '.object.sha' /tmp/existing-tag-ref.json)"
+            gh api "/repos/${GITHUB_REPOSITORY}/git/tags/${tag_object_sha}" \
+              > /tmp/existing-tag-object.json
 
-            if ref.get("object", {}).get("type") != "tag":
-                raise SystemExit("existing v0.2.0 ref is not an annotated tag")
+            peeled_sha="$(jq -er '.object.sha' /tmp/existing-tag-object.json)"
+            existing_message="$(jq -er '.message' /tmp/existing-tag-object.json)"
 
-            tag_sha = ref["object"]["sha"]
-            subprocess.run(
-                [
-                    "gh",
-                    "api",
-                    f"/repos/{os.environ['GITHUB_REPOSITORY']}/git/tags/{tag_sha}",
-                ],
-                check=True,
-                stdout=open("/tmp/existing-tag-object.json", "w", encoding="utf-8"),
-            )
-
-            with open("/tmp/existing-tag-object.json", encoding="utf-8") as stream:
-                tag = json.load(stream)
-
-            if tag.get("object", {}).get("sha") != os.environ["EXPECTED_SHA"]:
-                raise SystemExit("existing v0.2.0 tag points to the wrong commit")
-            if tag.get("message") != os.environ["TAG_MESSAGE"]:
-                raise SystemExit("existing v0.2.0 tag has the wrong annotation")
-            PY
-            echo "tag_exists=true" >> "${GITHUB_OUTPUT}"
+            if [ "${peeled_sha}" != "${EXPECTED_SHA}" ]; then
+              echo "existing v0.2.0 tag points to the wrong commit" >&2
+              exit 1
+            fi
+            if [ "${existing_message}" != "${TAG_MESSAGE}" ]; then
+              echo "existing v0.2.0 tag has the wrong annotation" >&2
+              exit 1
+            fi
+            tag_exists=true
           fi
+          echo "tag_exists=${tag_exists}" >> "${GITHUB_OUTPUT}"
 
-          echo "release_exists=false" >> "${GITHUB_OUTPUT}"
-          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
-            echo "release_exists=true" >> "${GITHUB_OUTPUT}"
+          release_exists=false
+          if gh release view "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            release_exists=true
           fi
+          echo "release_exists=${release_exists}" >> "${GITHUB_OUTPUT}"
 
       - name: Create annotated release tag
         if: steps.preflight.outputs.tag_exists != 'true'
@@ -136,64 +134,67 @@ jobs:
           set -euo pipefail
 
           tagger_date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          gh api --method POST "/repos/${GITHUB_REPOSITORY}/git/tags" \
-            -f tag="${RELEASE_TAG}" \
-            -f message="${TAG_MESSAGE}" \
-            -f object="${EXPECTED_SHA}" \
-            -f type="commit" \
-            -f "tagger[name]=DigiTrans-App" \
-            -f "tagger[email]=279337775+DigiTrans-App@users.noreply.github.com" \
-            -f "tagger[date]=${tagger_date}" \
-            > /tmp/tag-object.json
+          jq -n \
+            --arg tag "${RELEASE_TAG}" \
+            --arg message "${TAG_MESSAGE}" \
+            --arg object "${EXPECTED_SHA}" \
+            --arg tagger_date "${tagger_date}" \
+            '{
+              tag: $tag,
+              message: $message,
+              object: $object,
+              type: "commit",
+              tagger: {
+                name: "DigiTrans-App",
+                email: "279337775+DigiTrans-App@users.noreply.github.com",
+                date: $tagger_date
+              }
+            }' > /tmp/tag-payload.json
 
-          tag_object_sha="$(python -c 'import json; print(json.load(open("/tmp/tag-object.json", encoding="utf-8"))["sha"])')"
+          gh api --method POST "/repos/${GITHUB_REPOSITORY}/git/tags" \
+            --input /tmp/tag-payload.json > /tmp/tag-object.json
+
+          tag_object_sha="$(jq -er '.sha' /tmp/tag-object.json)"
+          jq -n \
+            --arg ref "refs/tags/${RELEASE_TAG}" \
+            --arg sha "${tag_object_sha}" \
+            '{ref: $ref, sha: $sha}' > /tmp/tag-ref-payload.json
 
           gh api --method POST "/repos/${GITHUB_REPOSITORY}/git/refs" \
-            -f ref="refs/tags/${RELEASE_TAG}" \
-            -f sha="${tag_object_sha}" \
-            > /tmp/tag-ref.json
+            --input /tmp/tag-ref-payload.json > /tmp/tag-ref.json
 
       - name: Verify remote annotated tag
         shell: bash
         run: |
           set -euo pipefail
 
-          gh api "/repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" > /tmp/verified-tag-ref.json
+          gh api "/repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" \
+            > /tmp/verified-tag-ref.json
 
-          python - <<'PY'
-          import json
-          import os
-          import subprocess
+          object_type="$(jq -er '.object.type' /tmp/verified-tag-ref.json)"
+          if [ "${object_type}" != "tag" ]; then
+            echo "remote release ref is not an annotated tag" >&2
+            exit 1
+          fi
 
-          with open("/tmp/verified-tag-ref.json", encoding="utf-8") as stream:
-              ref = json.load(stream)
+          tag_object_sha="$(jq -er '.object.sha' /tmp/verified-tag-ref.json)"
+          gh api "/repos/${GITHUB_REPOSITORY}/git/tags/${tag_object_sha}" \
+            > /tmp/verified-tag-object.json
 
-          if ref.get("object", {}).get("type") != "tag":
-              raise SystemExit("remote release ref is not an annotated tag")
+          peeled_sha="$(jq -er '.object.sha' /tmp/verified-tag-object.json)"
+          verified_message="$(jq -er '.message' /tmp/verified-tag-object.json)"
 
-          tag_object_sha = ref["object"]["sha"]
-          with open("/tmp/verified-tag-object.json", "w", encoding="utf-8") as output:
-              subprocess.run(
-                  [
-                      "gh",
-                      "api",
-                      f"/repos/{os.environ['GITHUB_REPOSITORY']}/git/tags/{tag_object_sha}",
-                  ],
-                  check=True,
-                  stdout=output,
-              )
+          if [ "${peeled_sha}" != "${EXPECTED_SHA}" ]; then
+            echo "remote tag does not peel to the expected release commit" >&2
+            exit 1
+          fi
+          if [ "${verified_message}" != "${TAG_MESSAGE}" ]; then
+            echo "remote tag annotation does not match" >&2
+            exit 1
+          fi
 
-          with open("/tmp/verified-tag-object.json", encoding="utf-8") as stream:
-              tag = json.load(stream)
-
-          if tag.get("object", {}).get("sha") != os.environ["EXPECTED_SHA"]:
-              raise SystemExit("remote tag does not peel to the expected release commit")
-          if tag.get("message") != os.environ["TAG_MESSAGE"]:
-              raise SystemExit("remote tag annotation does not match")
-
-          print(f"annotated tag object: {tag_object_sha}")
-          print(f"peeled release commit: {tag['object']['sha']}")
-          PY
+          echo "annotated tag object: ${tag_object_sha}"
+          echo "peeled release commit: ${peeled_sha}"
 
       - name: Checkout immutable release commit
         shell: bash
@@ -214,7 +215,8 @@ jobs:
           python scripts/validate_repo.py
           python evals/run_local.py
           ruff check .
-          python -m provable_agent_reference > /tmp/provable-agent-reference-demo.json
+          python -m provable_agent_reference \
+            > /tmp/provable-agent-reference-demo.json
 
       - name: Build and validate distributions
         shell: bash
@@ -239,6 +241,7 @@ jobs:
             dist/*.tar.gz \
             dist/ARTIFACTS.json \
             dist/SHA256SUMS \
+            --repo "${GITHUB_REPOSITORY}" \
             --verify-tag \
             --title "Provable Agent Reference Framework ${RELEASE_TAG}" \
             --notes-file "docs/releases/${RELEASE_TAG}.md"
@@ -248,6 +251,7 @@ jobs:
         run: |
           set -euo pipefail
           gh release view "${RELEASE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
             --json url,tagName,isDraft,isPrerelease,assets \
             > /tmp/release.json
 
@@ -271,13 +275,14 @@ jobs:
               raise SystemExit("release must be final, not draft or prerelease")
           if actual_assets != expected_assets:
               raise SystemExit(
-                  f"release asset mismatch: {sorted(actual_assets)} != {sorted(expected_assets)}"
+                  f"release asset mismatch: {sorted(actual_assets)} != "
+                  f"{sorted(expected_assets)}"
               )
 
           print(release["url"])
           PY
 
-          release_url="$(python -c 'import json; print(json.load(open("/tmp/release.json", encoding="utf-8"))["url"])')"
+          release_url="$(jq -er '.url' /tmp/release.json)"
           {
             echo "## v0.2.0 published"
             echo
