@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build and publish GitHub release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install release dependencies
+        run: python -m pip install '.[dev,openai]'
+      - name: Verify tag and release metadata
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import os
+          import tomllib
+          from pathlib import Path
+
+          project = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]
+          expected_tag = f"v{project['version']}"
+          actual_tag = os.environ["RELEASE_TAG"]
+          if actual_tag != expected_tag:
+              raise SystemExit(f"tag/version mismatch: {actual_tag} != {expected_tag}")
+
+          notes = Path("docs") / "releases" / f"{actual_tag}.md"
+          if not notes.is_file():
+              raise SystemExit(f"release notes not found: {notes}")
+          PY
+      - name: Run release validation
+        run: |
+          python -m unittest discover -s tests -v
+          python scripts/validate_repo.py
+          python evals/run_local.py
+          ruff check .
+      - name: Build distributions
+        run: python -m build
+      - name: Validate distributions and generate manifests
+        run: |
+          python scripts/validate_dist.py > dist/ARTIFACTS.json
+          cd dist
+          sha256sum *.whl *.tar.gz ARTIFACTS.json > SHA256SUMS
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            dist/*.whl \
+            dist/*.tar.gz \
+            dist/ARTIFACTS.json \
+            dist/SHA256SUMS \
+            --verify-tag \
+            --title "Provable Agent Reference Framework ${GITHUB_REF_NAME}" \
+            --notes-file "docs/releases/${GITHUB_REF_NAME}.md"

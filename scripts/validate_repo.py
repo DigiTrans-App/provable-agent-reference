@@ -3,6 +3,7 @@ from __future__ import annotations
 import compileall
 import json
 import re
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -104,6 +105,34 @@ def validate_secret_hygiene() -> None:
         raise RuntimeError("possible API key pattern found in: " + ", ".join(leaks))
 
 
+def validate_version_metadata() -> str:
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))[
+        "project"
+    ]
+    version = str(project["version"])
+
+    init_text = (
+        ROOT / "src" / "provable_agent_reference" / "__init__.py"
+    ).read_text(encoding="utf-8")
+    match = re.search(r'^__version__ = "([^"]+)"$', init_text, flags=re.MULTILINE)
+    if match is None:
+        raise RuntimeError("package __version__ declaration was not found")
+    if match.group(1) != version:
+        raise RuntimeError(
+            f"version mismatch: pyproject.toml={version}, package={match.group(1)}"
+        )
+
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    if f"## [{version}]" not in changelog:
+        raise RuntimeError(f"CHANGELOG.md has no section for {version}")
+
+    release_notes = ROOT / "docs" / "releases" / f"v{version}.md"
+    if not release_notes.is_file():
+        raise RuntimeError(f"release notes not found: {release_notes.relative_to(ROOT)}")
+
+    return version
+
+
 def compile_python() -> int:
     roots = [ROOT / "src", ROOT / "scripts", ROOT / "evals", ROOT / "examples"]
     passed = 0
@@ -118,6 +147,7 @@ def compile_python() -> int:
 def main() -> int:
     schemas, registry = build_registry()
     result = {
+        "version": validate_version_metadata(),
         "schemas": len(schemas),
         "examples": validate_examples(schemas, registry),
         "json_files": validate_json_files(),

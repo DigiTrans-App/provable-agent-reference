@@ -1,6 +1,7 @@
 # Provable Agent Reference Framework
 
 [![Validate](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/validate.yml/badge.svg)](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/DigiTrans-App/provable-agent-reference?display_name=tag&sort=semver)](https://github.com/DigiTrans-App/provable-agent-reference/releases)
 [![CodeQL](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/codeql.yml/badge.svg)](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/scorecard.yml/badge.svg)](https://github.com/DigiTrans-App/provable-agent-reference/actions/workflows/scorecard.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -53,6 +54,12 @@ This repository contains generic, reusable building blocks:
 ## What is not in this repository
 
 This repository does **not** contain the DigiTrust hosted platform, enterprise orchestration, customer-specific workflows, managed evidence operations, commercial integrations, SaaS administration, customer data, production infrastructure, or a private product roadmap. See [Open-source boundary](docs/open-source-boundary.md).
+
+## Release
+
+The current release is **v0.2.0**, which adds a versioned runtime-adapter boundary, the experimental Codex Evidence Adapter, offline OpenAI Agents SDK compatibility validation, repository security automation, and validated GitHub release artifacts.
+
+Review the complete [v0.2.0 release notes](docs/releases/v0.2.0.md). GitHub Releases publish a wheel, source distribution, machine-readable artifact manifest, and SHA-256 checksum file. The package is not currently published to PyPI.
 
 ## Quick start
 

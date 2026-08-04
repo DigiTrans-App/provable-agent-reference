@@ -40,5 +40,9 @@ jobs:
         run: python evals/run_local.py
       - name: Lint
         run: ruff check .
+      - name: Build and validate distributions
+        run: |
+          python -m build
+          python scripts/validate_dist.py
       - name: Demo
         run: python -m provable_agent_reference > /tmp/provable-agent-reference-demo.json
