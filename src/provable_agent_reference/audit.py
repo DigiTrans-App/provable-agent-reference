@@ -68,8 +68,34 @@ def verify_audit_manifest(
         errors.append("authorization_binding_mismatch")
     if verification.candidate_hash != candidate.candidate_hash:
         errors.append("verification_candidate_mismatch")
+    if verification.candidate_id != candidate.candidate_id:
+        errors.append("verification_candidate_id_mismatch")
+    if not verification.status_matches_findings():
+        errors.append("verification_status_mismatch")
     if approval.candidate_hash != candidate.candidate_hash:
         errors.append("approval_candidate_mismatch")
+    if approval.candidate_id != candidate.candidate_id:
+        errors.append("approval_candidate_id_mismatch")
+    if approval.verification_result_hash != verification.result_hash:
+        errors.append("approval_verification_mismatch")
+    if approval.decision == "approved" and verification.status != "pass":
+        errors.append("approval_verification_status_mismatch")
     if authorization.candidate_hash != candidate.candidate_hash:
         errors.append("authorization_candidate_mismatch")
+    if authorization.candidate_id != candidate.candidate_id:
+        errors.append("authorization_candidate_id_mismatch")
+    if authorization.approval_id != approval.approval_id:
+        errors.append("authorization_approval_mismatch")
+    if authorization.authorized and approval.decision != "approved":
+        errors.append("authorization_approval_decision_mismatch")
+    if authorization.authorized and (
+        authorization.purpose != candidate.run_context.purpose
+        or authorization.audience != candidate.run_context.audience
+    ):
+        errors.append("authorization_scope_mismatch")
+    expected_reason = (
+        "EXACT_USE_AUTHORIZED" if authorization.authorized else "EXACT_USE_MISMATCH"
+    )
+    if authorization.reason != expected_reason:
+        errors.append("authorization_reason_mismatch")
     return not errors, tuple(errors)

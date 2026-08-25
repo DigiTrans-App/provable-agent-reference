@@ -5,6 +5,7 @@ import unittest
 from helpers import context, evidence
 
 from provable_agent_reference import EvidenceBundle, SemanticDraft
+from provable_agent_reference.canonical import canonical_json
 from provable_agent_reference.errors import ContractError
 
 
@@ -64,6 +65,10 @@ class ContractTests(unittest.TestCase):
                 case_id=run_context.case_id,
                 records=[record],
             )
+
+    def test_canonical_json_rejects_non_finite_numbers(self) -> None:
+        with self.assertRaisesRegex(ValueError, "JSON compliant"):
+            canonical_json({"value": float("nan")})
 
 
 if __name__ == "__main__":

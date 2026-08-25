@@ -4,3 +4,5 @@
 {"id":"output_substitution","expected":"authorization_denied"}
 {"id":"purpose_drift","expected":"authorization_denied"}
 {"id":"audit_manifest_tamper","expected":"audit_failure"}
+{"id":"candidate_hash_tamper","expected":"authorization_error"}
+{"id":"audit_verification_substitution","expected":"audit_failure"}

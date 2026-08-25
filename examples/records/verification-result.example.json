@@ -40,7 +40,9 @@
       "severity": "warning"
     }
   ],
-  "result_hash": "sha256:28e15d9fd0fe0ddf9bd648de1cf0eab8e027d5a191082118ed59623b8f2b346a",
-  "result_id": "verification_efcfc5a40d670e73f508b6fc",
-  "status": "pass"
+  "result_hash": "sha256:310b1bbad7a629b9f792615d4d3b6ad2b2abe9e7dd6da3a76ab06eaf5095722f",
+  "result_id": "verification_94c751a61227f59b8e037855",
+  "status": "pass",
+  "verifier_id": "provable_agent_reference.verifier",
+  "verifier_version": "0.1.0"
 }

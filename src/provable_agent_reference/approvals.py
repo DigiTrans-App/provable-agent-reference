@@ -13,10 +13,17 @@ def record_approval(
     decision: str = "approved",
     rationale: str = "Verified candidate approved for the requested exact use.",
 ) -> ApprovalRecord:
-    if verification.candidate_hash != candidate.candidate_hash:
+    if not candidate.verify_hash():
+        raise ApprovalError("candidate hash is invalid")
+    if (
+        verification.candidate_id != candidate.candidate_id
+        or verification.candidate_hash != candidate.candidate_hash
+    ):
         raise ApprovalError("verification is bound to a different candidate")
     if not verification.verify_hash():
         raise ApprovalError("verification record hash is invalid")
+    if not verification.status_matches_findings():
+        raise ApprovalError("verification status does not match its findings")
     if verification.status != "pass" and decision == "approved":
         raise ApprovalError("a failed candidate cannot be approved")
     if decision not in {"approved", "rejected", "changes_requested"}:

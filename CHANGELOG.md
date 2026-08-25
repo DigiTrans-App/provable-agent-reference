@@ -9,6 +9,21 @@ All notable changes to this project will be documented here.
 - Independent validation runner for reproducible offline tests, evaluations, linting, demonstrations, Git provenance, and privacy-bounded JSON reports.
 - Optional verification of release wheels, source distributions, `ARTIFACTS.json`, and `SHA256SUMS` without extracting archives.
 - Machine-readable independent-validation report schema, human reviewer guide and template, public issue form, and fail-closed test coverage.
+- Verifier identity and version bindings in verification results and their deterministic hashes.
+
+### Changed
+
+- Updated the optional OpenAI Agents SDK compatibility range to `>=0.22,<0.23`.
+- Migrated package license metadata to the current SPDX expression format.
+- Raised the build baseline to a patched Setuptools release and upgraded packaging tools explicitly in CI before auditing dependencies.
+- Canonical JSON now rejects non-finite numbers, and the Codex JSONL adapter rejects duplicate object keys, excessive nesting, and oversized aggregate streams.
+
+### Security
+
+- Approval and exact-use authorization now reject candidates whose deterministic hash is invalid.
+- Approval validates candidate identifiers and requires verification status to agree with error-level findings.
+- Audit reconstruction now validates every candidate, verification, approval, authorization, scope, decision, and reason relationship in the control chain.
+- Validation and release workflows now audit the resolved Python environment for known dependency vulnerabilities.
 
 ## [0.2.0] - 2026-08-03
 

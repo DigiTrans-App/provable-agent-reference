@@ -22,6 +22,8 @@ class VerificationTests(unittest.TestCase):
             evidence_bundle=evidence_bundle,
         )
         self.assertEqual(result.status, "pass")
+        self.assertEqual(result.verifier_id, "provable_agent_reference.verifier")
+        self.assertEqual(result.verifier_version, "0.1.0")
         self.assertTrue(result.verify_hash())
 
     def test_sensitive_unredacted_output_fails(self) -> None:

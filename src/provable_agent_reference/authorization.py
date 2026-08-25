@@ -13,6 +13,8 @@ def authorize_exact_use(
     audience: str,
     output: dict[str, object],
 ) -> AuthorizationResult:
+    if not candidate.verify_hash():
+        raise AuthorizationError("candidate hash is invalid")
     if approval.decision != "approved":
         raise AuthorizationError("candidate does not have an approved decision")
     if not approval.verify_hash():

@@ -22,10 +22,12 @@ from provable_agent_reference import (  # noqa: E402
     TrustedCompiler,
     TrustedRunContext,
     authorize_exact_use,
+    build_audit_manifest,
     record_approval,
     verify_audit_manifest,
 )
-from provable_agent_reference.errors import ContractError  # noqa: E402
+from provable_agent_reference.canonical import sha256_uri  # noqa: E402
+from provable_agent_reference.errors import AuthorizationError, ContractError  # noqa: E402
 
 
 def fixture() -> tuple[TrustedRunContext, EvidenceBundle, SemanticDraft]:
@@ -167,6 +169,62 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
             manifest=tampered,
             candidate=result.candidate,
             verification=result.verification,
+            approval=result.approval,
+            authorization=result.authorization,
+        )
+        return {
+            "status": "completed" if valid else "audit_failure",
+            "errors": list(errors),
+        }
+
+    if case_id == "candidate_hash_tamper":
+        current_context, candidate, verification = compiled()
+        approval = record_approval(
+            candidate=candidate,
+            verification=verification,
+            approver_id="human_eval_reviewer",
+        )
+        tampered = replace(candidate, assurance_statement="Unapproved replacement.")
+        try:
+            authorize_exact_use(
+                candidate=tampered,
+                approval=approval,
+                purpose=current_context.purpose,
+                audience=current_context.audience,
+                output={
+                    "assurance_statement": tampered.assurance_statement,
+                    "limitations": list(tampered.limitations),
+                },
+            )
+        except AuthorizationError:
+            return {"status": "authorization_error"}
+
+    if case_id == "audit_verification_substitution":
+        result = ProvableAgentPipeline().run(
+            context=context,
+            draft=draft,
+            evidence_bundle=bundle,
+            approver_id="human_eval_reviewer",
+        )
+        provisional = replace(
+            result.verification,
+            evaluated_at="2099-01-01T00:00:00Z",
+            result_hash="sha256:" + "0" * 64,
+        )
+        substituted = replace(
+            provisional,
+            result_hash=sha256_uri(provisional.payload()),
+        )
+        manifest = build_audit_manifest(
+            candidate=result.candidate,
+            verification=substituted,
+            approval=result.approval,
+            authorization=result.authorization,
+        )
+        valid, errors = verify_audit_manifest(
+            manifest=manifest,
+            candidate=result.candidate,
+            verification=substituted,
             approval=result.approval,
             authorization=result.authorization,
         )
