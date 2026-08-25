@@ -15,6 +15,7 @@ All notable changes to this project will be documented here.
 
 - Updated the optional OpenAI Agents SDK compatibility range to `>=0.22,<0.23`.
 - Migrated package license metadata to the current SPDX expression format.
+- Raised the build baseline to a patched Setuptools release and upgraded packaging tools explicitly in CI before auditing dependencies.
 - Canonical JSON now rejects non-finite numbers, and the Codex JSONL adapter rejects duplicate object keys, excessive nesting, and oversized aggregate streams.
 
 ### Security
