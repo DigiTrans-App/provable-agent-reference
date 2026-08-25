@@ -96,6 +96,8 @@ class DeterministicVerifier:
         result_id = "verification_" + sha256_uri(
             {
                 "candidate_hash": candidate.candidate_hash,
+                "verifier_id": self.verifier_id,
+                "verifier_version": self.verifier_version,
                 "findings": [item.to_dict() for item in findings],
             }
         ).split(":", 1)[1][:24]
@@ -103,6 +105,8 @@ class DeterministicVerifier:
             result_id=result_id,
             candidate_id=candidate.candidate_id,
             candidate_hash=candidate.candidate_hash,
+            verifier_id=self.verifier_id,
+            verifier_version=self.verifier_version,
             status=status,
             findings=tuple(findings),
             evaluated_at=candidate.created_at,

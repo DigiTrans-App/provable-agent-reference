@@ -122,6 +122,23 @@ class CodexEvidenceAdapterTests(unittest.TestCase):
         with self.assertRaisesRegex(AdapterValidationError, "not valid JSON"):
             self.build(execution_jsonl='{"type":"thread.started"')
 
+    def test_rejects_duplicate_json_object_keys(self) -> None:
+        with self.assertRaisesRegex(AdapterValidationError, "duplicate JSON object key"):
+            self.build(
+                execution_jsonl=(
+                    '{"type":"turn.started","type":"turn.completed"}\n'
+                )
+            )
+
+    def test_rejects_excessive_json_nesting(self) -> None:
+        nested: object = "value"
+        for _ in range(66):
+            nested = {"nested": nested}
+        execution = json.dumps({"type": "turn.started", "payload": nested})
+
+        with self.assertRaisesRegex(AdapterValidationError, "nesting depth"):
+            self.build(execution_jsonl=execution)
+
     def test_rejects_stream_without_supported_events(self) -> None:
         with self.assertRaisesRegex(AdapterValidationError, "no supported Codex events"):
             self.build(

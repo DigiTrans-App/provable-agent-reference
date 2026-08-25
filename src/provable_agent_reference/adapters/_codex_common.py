@@ -11,7 +11,9 @@ from .base import AdapterValidationError
 
 _MAX_EVENT_COUNT = 10_000
 _MAX_LINE_BYTES = 262_144
+_MAX_STREAM_BYTES = 64 * 1024 * 1024
 _MAX_STRING_LENGTH = 32_768
+_MAX_NESTING_DEPTH = 64
 _SAFE_TOKEN = re.compile(r"^[A-Za-z0-9_.:/-]{1,128}$")
 _USAGE_FIELDS = {
     "input_tokens",
@@ -33,6 +35,10 @@ _SECRET_PATTERNS = (
 
 
 def parse_jsonl(stream_name: str, text: str) -> list[dict[str, Any]]:
+    if len(text.encode("utf-8")) > _MAX_STREAM_BYTES:
+        raise AdapterValidationError(
+            f"{stream_name} exceeds {_MAX_STREAM_BYTES} bytes"
+        )
     events: list[dict[str, Any]] = []
     for line_number, raw_line in enumerate(text.splitlines(), start=1):
         if not raw_line.strip():
@@ -42,7 +48,11 @@ def parse_jsonl(stream_name: str, text: str) -> list[dict[str, Any]]:
                 f"{stream_name} line {line_number} exceeds {_MAX_LINE_BYTES} bytes"
             )
         try:
-            event = json.loads(raw_line, parse_constant=_raise_non_finite)
+            event = json.loads(
+                raw_line,
+                parse_constant=_raise_non_finite,
+                object_pairs_hook=_reject_duplicate_keys,
+            )
         except (json.JSONDecodeError, AdapterValidationError) as exc:
             raise AdapterValidationError(
                 f"{stream_name} line {line_number} is not valid JSON: {exc}"
@@ -96,7 +106,20 @@ def _raise_non_finite(value: str) -> None:
     raise AdapterValidationError(f"non-finite number {value!r} is not supported")
 
 
-def _validate_value(value: Any, location: str) -> None:
+def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise AdapterValidationError(f"duplicate JSON object key {key!r}")
+        result[key] = value
+    return result
+
+
+def _validate_value(value: Any, location: str, depth: int = 0) -> None:
+    if depth > _MAX_NESTING_DEPTH:
+        raise AdapterValidationError(
+            f"{location} exceeds maximum nesting depth {_MAX_NESTING_DEPTH}"
+        )
     if isinstance(value, str):
         if len(value) > _MAX_STRING_LENGTH:
             raise AdapterValidationError(
@@ -112,11 +135,11 @@ def _validate_value(value: Any, location: str) -> None:
         for key, child in value.items():
             if not isinstance(key, str):
                 raise AdapterValidationError(f"{location} contains a non-string object key")
-            _validate_value(child, location)
+            _validate_value(child, location, depth + 1)
         return
     if isinstance(value, list):
         for child in value:
-            _validate_value(child, location)
+            _validate_value(child, location, depth + 1)
         return
     if isinstance(value, float):
         if not math.isfinite(value):

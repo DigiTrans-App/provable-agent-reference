@@ -1,7 +1,7 @@
 {
-  "approval_id": "approval_819cf12184c091972d9c20ed",
+  "approval_id": "approval_037cbe4de4a16e456998acd6",
   "audience": "security reviewer",
-  "authorization_id": "authorization_5abf154070999109a51bb455",
+  "authorization_id": "authorization_6457b7aa0633e1c15a1473cb",
   "authorized": true,
   "authorized_at": "2026-01-01T00:00:00Z",
   "candidate_hash": "sha256:556083dd71ed01078f5bd1a6164abd88660824ed2170030d0bfa13f0cdd00b6d",
@@ -9,5 +9,5 @@
   "output_hash": "sha256:b7916b633a079a4d4e2ccc2359ec441405af3cb1bd0ee0ca5d8a8f43c64872b3",
   "purpose": "Prepare a synthetic assurance statement.",
   "reason": "EXACT_USE_AUTHORIZED",
-  "record_hash": "sha256:fe5aada9b18cf596aa492f865849f4466c5e933059496bf1b7d99baa08be8dd8"
+  "record_hash": "sha256:3d6777f5501c52ccd9848267a6f69154ec27ca333f0e689144c93876b3b9501d"
 }

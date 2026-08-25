@@ -287,6 +287,14 @@ class VerificationFinding:
     passed: bool
     message: str
 
+    def __post_init__(self) -> None:
+        _bounded(self.code, "code", 128)
+        if self.severity not in {"info", "warning", "error"}:
+            raise ContractError("verification finding severity is not supported")
+        if not isinstance(self.passed, bool):
+            raise ContractError("verification finding passed must be a boolean")
+        _bounded(self.message, "message", 2000)
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
@@ -296,16 +304,46 @@ class VerificationResult:
     result_id: str
     candidate_id: str
     candidate_hash: str
+    verifier_id: str
+    verifier_version: str
     status: Literal["pass", "fail"]
     findings: tuple[VerificationFinding, ...]
     evaluated_at: str
     result_hash: str
+
+    def __post_init__(self) -> None:
+        _identifier(self.result_id, "result_id")
+        _identifier(self.candidate_id, "candidate_id")
+        _hash_uri(self.candidate_hash, "candidate_hash")
+        _identifier(self.verifier_id, "verifier_id")
+        _bounded(self.verifier_version, "verifier_version", 64)
+        if self.status not in {"pass", "fail"}:
+            raise ContractError("verification status is not supported")
+        if not self.findings:
+            raise ContractError("verification result must contain at least one finding")
+        codes = [finding.code for finding in self.findings]
+        if len(codes) != len(set(codes)):
+            raise ContractError("verification result contains duplicate finding codes")
+        if not self.status_matches_findings():
+            raise ContractError("verification status does not match error findings")
+        _bounded(self.evaluated_at, "evaluated_at", 100)
+        _hash_uri(self.result_hash, "result_hash")
+
+    def status_matches_findings(self) -> bool:
+        expected = (
+            "pass"
+            if all(finding.passed for finding in self.findings if finding.severity == "error")
+            else "fail"
+        )
+        return self.status == expected
 
     def payload(self) -> dict[str, Any]:
         return {
             "result_id": self.result_id,
             "candidate_id": self.candidate_id,
             "candidate_hash": self.candidate_hash,
+            "verifier_id": self.verifier_id,
+            "verifier_version": self.verifier_version,
             "status": self.status,
             "findings": [finding.to_dict() for finding in self.findings],
             "evaluated_at": self.evaluated_at,

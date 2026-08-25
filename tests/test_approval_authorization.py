@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 
 from helpers import bundle, context, draft
 
@@ -10,7 +11,7 @@ from provable_agent_reference import (
     authorize_exact_use,
     record_approval,
 )
-from provable_agent_reference.errors import ApprovalError
+from provable_agent_reference.errors import ApprovalError, AuthorizationError, ContractError
 
 
 class ApprovalAuthorizationTests(unittest.TestCase):
@@ -77,6 +78,46 @@ class ApprovalAuthorizationTests(unittest.TestCase):
                 candidate=failed_candidate,
                 verification=failed_verification,
                 approver_id="human_reviewer",
+            )
+
+    def test_tampered_candidate_cannot_be_approved_or_authorized(self) -> None:
+        approval = record_approval(
+            candidate=self.candidate,
+            verification=self.verification,
+            approver_id="human_reviewer",
+        )
+        tampered = replace(
+            self.candidate,
+            assurance_statement="Unapproved replacement.",
+        )
+
+        with self.assertRaisesRegex(ApprovalError, "candidate hash is invalid"):
+            record_approval(
+                candidate=tampered,
+                verification=self.verification,
+                approver_id="human_reviewer",
+            )
+        with self.assertRaisesRegex(AuthorizationError, "candidate hash is invalid"):
+            authorize_exact_use(
+                candidate=tampered,
+                approval=approval,
+                purpose=self.context.purpose,
+                audience=self.context.audience,
+                output={
+                    "assurance_statement": tampered.assurance_statement,
+                    "limitations": list(tampered.limitations),
+                },
+            )
+
+    def test_verification_status_must_match_error_findings(self) -> None:
+        findings = list(self.verification.findings)
+        findings[0] = replace(findings[0], passed=False)
+
+        with self.assertRaisesRegex(ContractError, "status does not match"):
+            replace(
+                self.verification,
+                status="pass",
+                findings=tuple(findings),
             )
 
 
