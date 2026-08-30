@@ -23,6 +23,18 @@
 | Purpose or audience drift | Exact-use authorization compares both fields |
 | Output substitution | Output hash and exact structure must match the approved candidate |
 | Audit record substitution | Manifest and linked record hashes are independently recomputed |
+| Assurance packet substitution | Packet, bundle, record, manifest, and exact-output bindings are recomputed |
+| Profile inflation | Claims must be a cumulative prefix of implemented, versioned profiles |
+| Authorized output omitted | The packet carries the exact output and recomputes its authorization hash |
+| Agent self-approval in governed packets | Approver and agent identifiers must differ |
+
+## Assurance Packet limitations
+
+A valid candidate packet provides deterministic integrity and linkage evidence only under its
+declared protocol assumptions. It does not authenticate the producer or approver, prove source
+or runtime completeness, establish trusted time, demonstrate that an external action occurred,
+or make predictable hashes confidential. Unknown protocol versions, invalid profile sequences,
+missing evidence, output substitution, and any broken cross-record binding fail closed.
 
 ## Out of scope for v0.1
 
@@ -34,3 +46,4 @@
 - production storage and tenant isolation;
 - provider-side model or API guarantees;
 - regulated-data compliance certification.
+- durable emission, consumption, expiry, revocation, and supersession records.

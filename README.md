@@ -13,6 +13,14 @@ The central rule is simple:
 
 > A model may propose meaning. Trusted software must construct identity, evidence bindings, verification, approval, authorization, and audit history.
 
+The project is evolving toward a technology-neutral **Reference Architecture Candidate**:
+the protocol and conformance requirements are separate from the Python reference
+implementation and provider-specific adapters. Review the
+[candidate architecture](docs/reference-architecture-candidate.md),
+[protocol candidate](docs/spec/README.md), and
+[normative change process](docs/change-process.md). Candidate status does not imply a stable
+standard, certification, or production-security claim.
+
 Instead of treating model output as authoritative, the framework accepts a bounded semantic draft and then performs a deterministic control sequence:
 
 1. resolve evidence from a trusted, scoped bundle;
@@ -46,6 +54,7 @@ This repository contains generic, reusable building blocks:
 - human-approval records;
 - exact-use authorization;
 - audit reconstruction and tamper detection;
+- a candidate portable Assurance Packet with offline reference verification;
 - synthetic examples, adversarial tests, and local evaluations;
 - an optional OpenAI Agents SDK example;
 - an experimental privacy-minimized Codex evidence adapter;
@@ -147,6 +156,35 @@ result = ProvableAgentPipeline().run(
 assert result.authorization.authorized
 assert result.audit_valid
 ```
+
+Create a deterministic candidate Assurance Packet from the verified control-chain result:
+
+```python
+from provable_agent_reference import (
+    build_assurance_packet,
+    load_assurance_packet,
+    verify_assurance_packet,
+)
+
+packet = build_assurance_packet(
+    evidence_bundle=bundle,
+    result=result,
+    limitations=(
+        "Digest bindings do not authenticate the producer or prove source completeness.",
+    ),
+)
+
+valid, errors = verify_assurance_packet(packet)
+assert valid, errors
+
+# A separate process can parse and verify the JSON-compatible packet.
+received = load_assurance_packet(packet.to_dict())
+assert received.packet_hash == packet.packet_hash
+```
+
+The packet carries the exact authorized output so an offline verifier can recompute its
+authorization binding. Its current protocol version, `0.3.0-candidate.1`, is experimental and
+independent of the Python package release version.
 
 ## OpenAI Agents SDK example
 

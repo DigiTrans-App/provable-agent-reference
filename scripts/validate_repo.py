@@ -15,6 +15,7 @@ SCHEMA_DIR = ROOT / "schemas"
 EXAMPLE_DIR = ROOT / "examples" / "records"
 GENERATED_DIRECTORIES = {"evals/results", "validation-results"}
 EXAMPLE_SCHEMA_MAP = {
+    "assurance-packet.example.json": "assurance-packet.schema.json",
     "semantic-draft.example.json": "semantic-draft.schema.json",
     "evidence-record.example.json": "evidence-record.schema.json",
     "evidence-bundle.example.json": "evidence-bundle.schema.json",

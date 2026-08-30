@@ -35,7 +35,17 @@ Released on 2026-08-03.
 - [ ] JSON-LD or equivalent provenance profile exploration
 - [ ] Pluggable policy rules
 
-## v0.3 - Community and cryptographic hardening
+## v0.3 - Reference Architecture Candidate
+
+- [x] Separate the architecture, protocol candidate, Python implementation, adapters, and conformance model
+- [x] Normative lifecycle state machine and fail-closed invalidation rules
+- [x] Candidate portable Assurance Packet schema, builder, verifier, and synthetic vector
+- [x] Cumulative versioned conformance profiles
+- [x] Public RFC and immutable ADR process
+- [ ] Independent architecture and security review of the candidate ([#27](https://github.com/DigiTrans-App/provable-agent-reference/issues/27))
+- [ ] Second non-OpenAI runtime adapter
+- [ ] Second-language verifier or equivalent independent implementation
+- [ ] Provider-neutral golden canonicalization and negative conformance vectors
 
 - [ ] 100+ synthetic evaluation cases
 - [ ] Property-based tests for canonicalization and replay resistance ([#11](https://github.com/DigiTrans-App/provable-agent-reference/issues/11))
@@ -44,6 +54,15 @@ Released on 2026-08-03.
 - [ ] Formal threat-model review
 - [ ] Reproducible benchmark reports
 - [ ] Maintainer onboarding and expanded release automation
+
+## v1.0 - Stable reference architecture
+
+- [ ] Two independent technical reviews completed and findings resolved or documented
+- [ ] Stable protocol version and compatibility policy
+- [ ] Independent implementation passes the public conformance kit
+- [ ] Positive, negative, downgrade, and replay vectors published
+- [ ] Release-candidate feedback period completed
+- [ ] Assurance claims and non-properties reviewed for stable publication
 
 ## Non-goals
 
