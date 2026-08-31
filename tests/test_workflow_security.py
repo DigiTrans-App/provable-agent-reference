@@ -73,6 +73,16 @@ jobs: {}
         with self.assertRaisesRegex(RuntimeError, "pull_request_target"):
             validate_workflow_security(self.root)
 
+    def test_quoted_inline_pull_request_target_fails_closed(self) -> None:
+        self.write_workflow(
+            """name: test
+"on": [push, pull_request_target]
+jobs: {}
+"""
+        )
+        with self.assertRaisesRegex(RuntimeError, "pull_request_target"):
+            validate_workflow_security(self.root)
+
     def test_checkout_must_disable_persisted_credentials(self) -> None:
         sha = "b" * 40
         self.write_workflow(
@@ -84,6 +94,24 @@ jobs:
     steps:
       - uses: actions/checkout@{sha}
       - run: python scripts/check.py
+"""
+        )
+        with self.assertRaisesRegex(RuntimeError, "persist-credentials"):
+            validate_workflow_security(self.root)
+
+    def test_checkout_input_must_belong_to_the_checkout_step(self) -> None:
+        sha = "d" * 40
+        self.write_workflow(
+            f"""name: test
+on: [push]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@{sha}
+      - uses: example/action@{sha}
+        with:
+          persist-credentials: false
 """
         )
         with self.assertRaisesRegex(RuntimeError, "persist-credentials"):

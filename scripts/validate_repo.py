@@ -122,7 +122,9 @@ def validate_workflow_security(root: Path = ROOT) -> int:
             line = raw_line.split("#", 1)[0].rstrip()
             if not line:
                 continue
-            inline_unsafe_trigger = re.match(r"^on\s*:", line) and re.search(
+            inline_unsafe_trigger = re.match(
+                r"^\s*['\"]?on['\"]?\s*:", line
+            ) and re.search(
                 r"\bpull_request_target\b", line
             )
             if PULL_REQUEST_TARGET_KEY_PATTERN.match(line) or inline_unsafe_trigger:
@@ -147,12 +149,11 @@ def validate_workflow_security(root: Path = ROOT) -> int:
                 continue
 
             action_indent = len(raw_line) - len(raw_line.lstrip())
-            step_indent = max(action_indent - 2, 0)
             step_lines: list[str] = []
             for following_line in lines[index + 1 :]:
                 stripped = following_line.lstrip()
                 following_indent = len(following_line) - len(stripped)
-                if stripped.startswith("- ") and following_indent <= step_indent:
+                if stripped.startswith("- ") and following_indent <= action_indent:
                     break
                 step_lines.append(following_line.split("#", 1)[0])
 
