@@ -78,6 +78,12 @@ def _array(value: Any, name: str) -> list[Any]:
     return value
 
 
+def _has_visible_text(value: Any) -> bool:
+    return isinstance(value, str) and value == value.strip() and any(
+        character.isalnum() for character in value
+    )
+
+
 def _exact_fields(value: dict[str, Any], name: str, fields: set[str]) -> None:
     actual = set(value)
     if actual != fields:
@@ -383,8 +389,8 @@ def build_assurance_packet(
     claimed_profiles: tuple[str, ...] = SUPPORTED_ASSURANCE_PROFILES,
 ) -> AssurancePacket:
     limitation_tuple = tuple(limitations)
-    if not limitation_tuple:
-        raise ContractError("assurance packet must state at least one limitation")
+    if not limitation_tuple or len(limitation_tuple) > 20:
+        raise ContractError("assurance packet must state between 1 and 20 limitations")
     if len(limitation_tuple) != len(set(limitation_tuple)):
         raise ContractError("assurance packet limitations must not contain duplicates")
     if any(not value or len(value) > 2000 for value in limitation_tuple):
@@ -450,6 +456,8 @@ def verify_assurance_packet(packet: AssurancePacket) -> tuple[bool, tuple[str, .
         errors.append("packet_id_invalid")
     if not packet.limitations:
         errors.append("packet_limitations_missing")
+    elif len(packet.limitations) > 20:
+        errors.append("packet_limitations_invalid")
     elif any(not isinstance(value, str) for value in packet.limitations):
         errors.append("packet_limitations_invalid")
     else:
@@ -548,10 +556,16 @@ def verify_assurance_packet(packet: AssurancePacket) -> tuple[bool, tuple[str, .
     if packet.approval.decision != "approved":
         errors.append("approval_not_approved")
     governed_claimed = "par.governed.v1" in packet.claimed_profiles
-    if governed_claimed and (
-        packet.approval.approver_id == packet.candidate.run_context.agent_id
-    ):
-        errors.append("approval_separation_of_duties_failed")
+    if governed_claimed:
+        if not _has_visible_text(packet.approval.approver_id):
+            errors.append("approval_identity_missing")
+        elif (
+            packet.approval.approver_id.casefold()
+            == packet.candidate.run_context.agent_id.casefold()
+        ):
+            errors.append("approval_separation_of_duties_failed")
+        if not _has_visible_text(packet.approval.rationale):
+            errors.append("approval_rationale_missing")
     if not packet.authorization.authorized:
         errors.append("exact_use_not_authorized")
     if packet.created_at != packet.audit_manifest.generated_at:

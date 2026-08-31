@@ -24,8 +24,8 @@
       "pattern": "^sha256:[0-9a-f]{64}$"
     },
     "decision": {"enum": ["approved", "rejected", "changes_requested"]},
-    "approver_id": {"type": "string"},
-    "rationale": {"type": "string"},
+    "approver_id": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "rationale": {"type": "string", "minLength": 1, "maxLength": 2000},
     "decided_at": {"type": "string"},
     "record_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
   }

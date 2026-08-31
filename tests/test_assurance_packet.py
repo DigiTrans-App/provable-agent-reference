@@ -39,6 +39,38 @@ class AssurancePacketTests(unittest.TestCase):
             ),
         )
 
+    def rebind_approval(self, packet, **changes):
+        approval_provisional = replace(
+            packet.approval,
+            **changes,
+            record_hash="sha256:" + "0" * 64,
+        )
+        approval = replace(
+            approval_provisional,
+            record_hash=sha256_uri(approval_provisional.payload()),
+        )
+        manifest = build_audit_manifest(
+            candidate=packet.candidate,
+            verification=packet.verification,
+            approval=approval,
+            authorization=packet.authorization,
+        )
+        identity_payload = {
+            "protocol_version": ASSURANCE_PACKET_PROTOCOL_VERSION,
+            "candidate_hash": packet.candidate.candidate_hash,
+            "manifest_hash": manifest.manifest_hash,
+            "evidence_bundle_hash": packet.evidence_bundle.bundle_hash,
+        }
+        provisional = replace(
+            packet,
+            approval=approval,
+            audit_manifest=manifest,
+            packet_id="packet_"
+            + sha256_uri(identity_payload).split(":", 1)[1][:24],
+            packet_hash="sha256:" + "0" * 64,
+        )
+        return replace(provisional, packet_hash=sha256_uri(provisional.payload()))
+
     def test_packet_is_deterministic_and_verifiable(self) -> None:
         first = self.build_packet()
         second = self.build_packet()
@@ -137,6 +169,29 @@ class AssurancePacketTests(unittest.TestCase):
         self.assertIn("packet_payload_not_canonicalizable", errors)
         self.assertIn("authorized_output_not_canonicalizable", errors)
 
+    def test_packet_limitations_respect_schema_bound(self) -> None:
+        packet = self.build_packet()
+        limitations = tuple(f"Synthetic limitation {index}." for index in range(21))
+
+        with self.assertRaisesRegex(ContractError, "between 1 and 20"):
+            build_assurance_packet(
+                evidence_bundle=packet.evidence_bundle,
+                result=ProvableAgentPipeline().run(
+                    context=packet.candidate.run_context,
+                    draft=draft(),
+                    evidence_bundle=packet.evidence_bundle,
+                    approver_id="human_reviewer",
+                ),
+                limitations=limitations,
+            )
+
+        provisional = replace(packet, limitations=limitations)
+        invalid = replace(provisional, packet_hash=sha256_uri(provisional.payload()))
+        valid, errors = verify_assurance_packet(invalid)
+
+        self.assertFalse(valid)
+        self.assertIn("packet_limitations_invalid", errors)
+
     def test_semantically_false_rehashed_verification_is_detected(self) -> None:
         packet = self.build_packet()
         candidate_provisional = replace(
@@ -228,6 +283,30 @@ class AssurancePacketTests(unittest.TestCase):
                 result=result,
                 limitations=("Synthetic test only.",),
             )
+
+    def test_governed_profile_requires_visible_approval_metadata(self) -> None:
+        packet = self.build_packet()
+        invalid = self.rebind_approval(packet, approver_id="", rationale="")
+
+        valid, errors = verify_assurance_packet(invalid)
+
+        self.assertFalse(valid)
+        self.assertNotIn("packet_hash_invalid", errors)
+        self.assertFalse(any(error.startswith("audit_") for error in errors))
+        self.assertIn("approval_identity_missing", errors)
+        self.assertIn("approval_rationale_missing", errors)
+
+    def test_governed_profile_rejects_case_variant_self_approval(self) -> None:
+        packet = self.build_packet()
+        invalid = self.rebind_approval(
+            packet,
+            approver_id=packet.candidate.run_context.agent_id.upper(),
+        )
+
+        valid, errors = verify_assurance_packet(invalid)
+
+        self.assertFalse(valid)
+        self.assertIn("approval_separation_of_duties_failed", errors)
 
 
 if __name__ == "__main__":
