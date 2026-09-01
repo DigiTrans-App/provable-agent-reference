@@ -24,6 +24,10 @@ python scripts/validate_repo.py
 ruff check .
 ```
 
+Security-sensitive canonicalization and replay properties run with at least 100 generated
+examples in CI. See the [property-testing guide](docs/property-testing.md) for focused commands,
+the 1,000-example extended profile, and the failure-reproduction workflow.
+
 ## Independent validation
 
 Independent technical reviews are welcome, including critical, negative, and incomplete results. Start with the [independent validation guide](docs/independent-validation.md) and use the [validation report template](docs/validation-report-template.md) for the human assessment.
