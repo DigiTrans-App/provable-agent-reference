@@ -10,6 +10,7 @@ All notable changes to this project will be documented here.
 - Optional verification of release wheels, source distributions, `ARTIFACTS.json`, and `SHA256SUMS` without extracting archives.
 - Machine-readable independent-validation report schema, human reviewer guide and template, public issue form, and fail-closed test coverage.
 - Verifier identity and version bindings in verification results and their deterministic hashes.
+- Hypothesis property tests for canonicalization, lifecycle integrity bindings, replay resistance, audit-record substitution, and adapter context isolation, with standard and extended profiles.
 
 ### Changed
 

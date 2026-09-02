@@ -89,6 +89,8 @@ python -m provable_agent_reference
 
 The final command runs a fully local synthetic assurance workflow. It makes no network request and requires no API key.
 
+For security-sensitive changes, also review the [property-based testing guide](docs/property-testing.md), which documents focused replay and canonicalization checks plus an extended local profile.
+
 ## Minimal example
 
 ```python
