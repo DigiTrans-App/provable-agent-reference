@@ -17,6 +17,40 @@ This runbook turns the repository's review policy into GitHub controls. Apply it
 
 Do not invite a shared account or use the repository owner as evidence of independent review.
 
+## Reviewer contingency
+
+Pending or declined invitations do not relax the approval policy. Use the following escalation
+path when the initial reviewer pool is unavailable:
+
+1. After three business days, send one concise reminder with the pull-request URL, requested
+   review scope, expected effort, and a clear option to decline.
+2. Confirm **Settings → Moderation options → Code review limits**. In a public repository,
+   GitHub permits any user to submit an approving or changes-requested review by default. If
+   review limits are enabled, only users with explicit read access or higher can submit those
+   decisions. A qualified reviewer may therefore review the public pull request directly
+   without repository write access when the repository settings permit it.
+3. After five business days without two available reviewers, expand the candidate pool. Select
+   named individuals with relevant public work, no authorship of the change, no shared account,
+   and no undisclosed conflict. Ask for availability before assigning paths or granting access.
+4. If volunteer coverage is still unavailable after ten business days, commission an
+   independent review. Record the reviewer's scope, relevant expertise, compensation and
+   conflicts, and require the same exact-head approval and public findings process. Payment
+   must not depend on approval.
+5. If reviewer scarcity becomes recurring, prepare a separately reviewed migration from the
+   account-owned repository to a GitHub organization with team-based ownership and at least two
+   administrators. Do not transfer the repository as an ad hoc response to one blocked pull
+   request; first inventory URLs, Actions, environments, secrets, packages, rulesets, and
+   release integrations.
+
+While escalation is in progress, keep security-critical pull requests open as candidates. CI,
+adversarial testing, documentation, and non-release review artifacts may continue, but do not
+lower approval counts, count the author or an AI system as an independent reviewer, publish a
+stable release, or use an administrative bypass for a non-urgent change.
+
+GitHub's current review behavior is documented in
+[Managing pull request reviews](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-pull-request-reviews-in-your-repository)
+and [Requesting a pull request review](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/requesting-a-pull-request-review).
+
 ## Protect `main`
 
 Create a branch ruleset targeting the default branch and enable:
