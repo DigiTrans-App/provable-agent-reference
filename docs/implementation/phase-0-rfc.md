@@ -103,12 +103,21 @@ Phase 0 is complete when:
 - storing prompts, private reasoning, secrets, or unrestricted tool payloads by default;
 - requiring microservices when the logical boundaries can be preserved in a modular deployment.
 
-## Open decisions before Phase 1
+## Phase 0 decision disposition
 
-- record granularity for delegation, tool, memory, effect, receipt, and revocation events;
-- signature envelope, issuer discovery, key rotation, and verifier trust configuration;
-- minimum immutability and retention requirements by deployment profile;
-- portable representation of SaaS and cloud-provider execution receipts;
-- privacy-preserving representation of memory retrieval and data-access evidence;
-- whether the first reference runtime should be Python-only or paired immediately with a
-  TypeScript verifier.
+The five architecture questions are resolved as proposed directions in the
+[Phase 0 design decisions](phase-0-decisions.md):
+
+- one record per security-relevant boundary transition;
+- a DSSE-style packet envelope with verifier-pinned issuer trust;
+- a portable execution receipt that separates submission from observed effect;
+- metadata-and-commitment-first memory evidence;
+- storage assurance reported separately at levels S0 through S3.
+
+These directions authorize experimental Phase 1 design, not protocol claims. Each normative
+extension still requires an accepted RFC, schema, canonicalization rules, positive and negative
+vectors, migration behavior, and independent review.
+
+The remaining Phase 1 scoping choice is implementation sequencing. The recommended order is a
+Python reference control plane and synthetic adapter first, followed immediately by a
+separately maintained TypeScript verifier before any stable interoperability claim.
