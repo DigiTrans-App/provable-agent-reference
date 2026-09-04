@@ -5,6 +5,10 @@ Status: **informative Phase 0 proposal**.
 This playbook is the delivery path from architecture selection to a controlled pilot. Teams
 must adapt legal, privacy, security, and operational gates to their organization.
 
+Implementation teams should record any deviation from the
+[Phase 0 design decisions](phase-0-decisions.md), including its trust-boundary impact, tests,
+owner, and expiration or promotion plan.
+
 ## Team and decision rights
 
 | Role | Accountable for |
