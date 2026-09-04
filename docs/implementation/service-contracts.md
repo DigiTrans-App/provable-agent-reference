@@ -3,6 +3,11 @@
 Status: **informative Phase 0 proposal**. Names and fields are implementation inputs, not
 normative protocol additions.
 
+Record boundaries follow the proposed
+[activity-granularity decision](decision-proposals/0003-activity-record-granularity.md). External
+effect semantics follow the proposed
+[portable receipt decision](decision-proposals/0005-portable-execution-receipts.md).
+
 ## Contract principles
 
 - Expose logical contracts before selecting service boundaries.
