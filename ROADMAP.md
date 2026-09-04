@@ -55,6 +55,20 @@ Released on 2026-08-03.
 - [ ] Reproducible benchmark reports
 - [ ] Maintainer onboarding and expanded release automation
 
+## Phase 0 - Implementable full agentic reference architecture
+
+Tracked in [#35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35). These
+items are informative design work until accepted through the normative change process.
+
+- [x] Define the Phase 0 implementation RFC and scope
+- [x] Define full agentic actors, activities, authority flow, and privacy boundary
+- [x] Define logical service, API, event, storage, identity, and signing contracts
+- [x] Define a local and AWS minimum reference deployment profile
+- [x] Publish the team implementation playbook and maturity gates
+- [ ] Resolve record granularity, signature envelope, receipt portability, and memory privacy
+- [ ] Accept or revise the proposed architecture decisions
+- [ ] Approve Phase 1 implementation scope after v0.3 candidate disposition
+
 ## v1.0 - Stable reference architecture
 
 - [ ] Two independent technical reviews completed and findings resolved or documented
