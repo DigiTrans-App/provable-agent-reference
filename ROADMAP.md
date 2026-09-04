@@ -65,7 +65,7 @@ items are informative design work until accepted through the normative change pr
 - [x] Define logical service, API, event, storage, identity, and signing contracts
 - [x] Define a local and AWS minimum reference deployment profile
 - [x] Publish the team implementation playbook and maturity gates
-- [ ] Resolve record granularity, signature envelope, receipt portability, and memory privacy
+- [x] Resolve record granularity, signature envelope, receipt portability, memory privacy, and storage assurance
 - [ ] Accept or revise the proposed architecture decisions
 - [ ] Approve Phase 1 implementation scope after v0.3 candidate disposition
 
