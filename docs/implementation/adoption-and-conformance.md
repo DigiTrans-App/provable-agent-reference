@@ -16,6 +16,10 @@ Status: **informative Phase 0 proposal**.
 Passing a level is an internal implementation claim unless independently evaluated. It is not
 a certification, legal conclusion, or statement that model outputs are correct.
 
+Storage behavior is reported separately using the proposed
+[S0-S3 storage assurance levels](decision-proposals/0007-storage-assurance-levels.md); it is not
+inferred from protocol or maturity level alone.
+
 ## Phase 1 acceptance
 
 The minimum deployable reference should demonstrate Levels 0 and 1:
