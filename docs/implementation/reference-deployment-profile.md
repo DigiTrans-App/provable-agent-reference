@@ -5,6 +5,10 @@ Status: **informative Phase 0 proposal**. Profile label: `par-deploy.reference.0
 The label identifies this document version; it is not a protocol conformance claim and must not
 appear in candidate Assurance Packets.
 
+The detailed [signature/key-discovery](decision-proposals/0004-signature-envelope-and-key-discovery.md)
+and [storage-assurance](decision-proposals/0007-storage-assurance-levels.md) proposals define the
+Phase 1 interpretation of the controls below.
+
 ## Behavioral requirements
 
 A reference deployment must provide:
