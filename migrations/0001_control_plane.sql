@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS capability_grants (
     case_id text NOT NULL,
     run_id text NOT NULL REFERENCES runs(run_id),
     parent_grant_id text REFERENCES capability_grants(grant_id),
-    grant jsonb NOT NULL,
+    grant_document jsonb NOT NULL,
     grant_hash text NOT NULL CHECK (grant_hash ~ '^sha256:[0-9a-f]{64}$'),
     valid_until timestamptz NOT NULL,
     revoked_at timestamptz,

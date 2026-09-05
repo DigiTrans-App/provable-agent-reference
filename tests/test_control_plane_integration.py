@@ -72,6 +72,8 @@ class ControlPlaneIntegrationTests(unittest.TestCase):
         self.assertEqual(counts, (1, 1, 1))
 
     def test_failed_mutation_rolls_back_state_journal_and_outbox(self) -> None:
+        import psycopg
+
         run_id = "00000000-0000-4000-8000-000000000111"
         payload = {
             "run_id": run_id,
@@ -111,7 +113,7 @@ class ControlPlaneIntegrationTests(unittest.TestCase):
             "result_ref": run_id,
         }
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(psycopg.errors.CheckViolation):
             self.store.create_run(payload, event, outbox, idempotency)
         with self.store.transaction() as connection:
             count = connection.execute("SELECT count(*) FROM runs WHERE run_id = %s", (run_id,)).fetchone()[0]
