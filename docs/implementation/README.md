@@ -11,6 +11,8 @@ requirements from one opinionated deployment example.
 
 - [Phase 0 RFC](phase-0-rfc.md)
 - [Phase 0 design decisions](phase-0-decisions.md)
+- [Internal architecture and security pre-review](internal-architecture-security-review.md)
+- [Phase 1 implementation plan](phase-1-implementation-plan.md)
 - [Full agentic reference architecture](agentic-reference-architecture.md)
 - [Minimum reference deployment profile](reference-deployment-profile.md)
 - [Logical service and event contracts](service-contracts.md)
