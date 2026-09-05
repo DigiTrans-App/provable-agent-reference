@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/agentic-semantic-vector-set.schema.json",
+  "title": "Experimental Agentic Semantic Negative Vector Set",
+  "description": "Cross-record vectors that remain schema-valid but must fail a named semantic invariant.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "vector_version", "cases"],
+  "properties": {
+    "$schema": {
+      "const": "https://digitrans.app/schemas/provable-agent-reference/agentic-semantic-vector-set.schema.json"
+    },
+    "vector_version": {"const": "0.1-draft"},
+    "cases": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_id",
+          "semantic_rule",
+          "records",
+          "expected_semantic_valid",
+          "failure_class"
+        ],
+        "properties": {
+          "case_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+          "semantic_rule": {
+            "enum": [
+              "same_case_scope",
+              "unique_event_identity",
+              "monotonic_run_sequence",
+              "previous_hash_chain",
+              "receipt_reconciliation_binding"
+            ]
+          },
+          "records": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["example", "mutations"],
+              "properties": {
+                "example": {"type": "string", "pattern": "^[a-z0-9-]+\\.example\\.json$"},
+                "mutations": {
+                  "type": "array",
+                  "maxItems": 20,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["operation", "path"],
+                    "properties": {
+                      "operation": {"enum": ["add", "replace", "remove"]},
+                      "path": {"type": "string", "pattern": "^/(?:[^~/]|~[01])+(?:/(?:[^~/]|~[01])+)*$"},
+                      "value": {}
+                    },
+                    "allOf": [
+                      {
+                        "if": {"properties": {"operation": {"enum": ["add", "replace"]}}},
+                        "then": {"required": ["value"]},
+                        "else": {"not": {"required": ["value"]}}
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "expected_semantic_valid": {"const": false},
+          "failure_class": {"enum": ["scope", "binding", "replay", "ordering"]}
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "semantic_rule": {"const": "receipt_reconciliation_binding"}
+              }
+            },
+            "then": {"properties": {"records": {"minItems": 2, "maxItems": 2}}}
+          }
+        ]
+      }
+    }
+  }
+}

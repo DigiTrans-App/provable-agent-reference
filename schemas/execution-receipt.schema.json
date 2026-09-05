@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/execution-receipt.schema.json",
+  "title": "Experimental Portable Execution Receipt",
+  "description": "Draft Phase 1 capability contract. Acknowledgement is not proof of effect.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "receipt_id",
+    "tenant_id",
+    "case_id",
+    "run_id",
+    "operation_id",
+    "attempt_id",
+    "correlation_id",
+    "authorization_id",
+    "authorization_hash",
+    "executor",
+    "adapter",
+    "provider",
+    "operation_type",
+    "policy_version",
+    "action_hash",
+    "target_ref",
+    "idempotency_key_commitment",
+    "attempt_number",
+    "submitted_at",
+    "acknowledged_at",
+    "observed_at",
+    "reconciled_at",
+    "time_assurance",
+    "provider_evidence",
+    "submission_status",
+    "effect_status",
+    "reconciliation_required",
+    "reconciliation_method",
+    "errors",
+    "authenticated_record_ref",
+    "limitations",
+    "record_hash"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://digitrans.app/schemas/provable-agent-reference/execution-receipt.schema.json"
+    },
+    "schema_version": {"const": "0.1-draft"},
+    "receipt_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "tenant_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "case_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "run_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "operation_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "attempt_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "correlation_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "authorization_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "authorization_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "executor": {"$ref": "agentic-common.schema.json#/$defs/actor"},
+    "adapter": {"$ref": "agentic-common.schema.json#/$defs/adapter"},
+    "provider": {"type": "string", "minLength": 1, "maxLength": 200},
+    "operation_type": {"type": "string", "minLength": 1, "maxLength": 200},
+    "policy_version": {"type": "string", "minLength": 1, "maxLength": 500},
+    "action_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "target_ref": {"type": "string", "minLength": 1, "maxLength": 500},
+    "idempotency_key_commitment": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "attempt_number": {"type": "integer", "minimum": 1, "maximum": 1000},
+    "submitted_at": {
+      "anyOf": [
+        {"$ref": "agentic-common.schema.json#/$defs/timestamp"},
+        {"type": "null"}
+      ]
+    },
+    "acknowledged_at": {
+      "anyOf": [
+        {"$ref": "agentic-common.schema.json#/$defs/timestamp"},
+        {"type": "null"}
+      ]
+    },
+    "observed_at": {
+      "anyOf": [
+        {"$ref": "agentic-common.schema.json#/$defs/timestamp"},
+        {"type": "null"}
+      ]
+    },
+    "reconciled_at": {
+      "anyOf": [
+        {"$ref": "agentic-common.schema.json#/$defs/timestamp"},
+        {"type": "null"}
+      ]
+    },
+    "time_assurance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["submitted", "acknowledged", "observed", "reconciled"],
+      "properties": {
+        "submitted": {"$ref": "agentic-common.schema.json#/$defs/timeAssurance"},
+        "acknowledged": {"$ref": "agentic-common.schema.json#/$defs/timeAssurance"},
+        "observed": {"$ref": "agentic-common.schema.json#/$defs/timeAssurance"},
+        "reconciled": {"$ref": "agentic-common.schema.json#/$defs/timeAssurance"}
+      }
+    },
+    "provider_evidence": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["evidence_type", "provider_receipt_ref", "evidence_hash", "semantics_version"],
+          "properties": {
+            "evidence_type": {
+              "enum": ["signed_response", "immutable_event", "state_snapshot", "delivery_record", "transaction_record", "human_completion"]
+            },
+            "provider_receipt_ref": {"type": "string", "minLength": 1, "maxLength": 500},
+            "evidence_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+            "semantics_version": {"type": "string", "minLength": 1, "maxLength": 100}
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "submission_status": {"enum": ["not_submitted", "submitted", "acknowledged", "rejected", "unknown"]},
+    "effect_status": {"enum": ["not_observed", "succeeded", "failed", "partial", "compensated", "unknown"]},
+    "reconciliation_required": {"type": "boolean"},
+    "reconciliation_method": {
+      "anyOf": [
+        {"enum": ["provider_query", "immutable_event", "state_comparison", "human_confirmation", "compensation_check"]},
+        {"type": "null"}
+      ]
+    },
+    "errors": {
+      "type": "array",
+      "maxItems": 50,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 500}
+    },
+    "authenticated_record_ref": {
+      "anyOf": [
+        {"type": "string", "minLength": 1, "maxLength": 500},
+        {"type": "null"}
+      ]
+    },
+    "limitations": {"$ref": "agentic-common.schema.json#/$defs/limitations"},
+    "record_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"submission_status": {"const": "not_submitted"}}},
+      "then": {"properties": {"submitted_at": {"type": "null"}, "acknowledged_at": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"effect_status": {"const": "succeeded"}}},
+      "then": {
+        "properties": {
+          "provider_evidence": {"type": "object"},
+          "observed_at": {"$ref": "agentic-common.schema.json#/$defs/timestamp"},
+          "reconciliation_required": {"const": false}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"effect_status": {"enum": ["not_observed", "unknown", "partial"]}}},
+      "then": {"properties": {"reconciliation_required": {"const": true}}}
+    },
+    {
+      "if": {"properties": {"reconciled_at": {"type": "null"}}},
+      "then": {
+        "properties": {
+          "reconciliation_method": {"type": "null"},
+          "time_assurance": {"properties": {"reconciled": {"const": "unavailable"}}}
+        }
+      },
+      "else": {
+        "properties": {
+          "reconciliation_method": {"type": "string"},
+          "time_assurance": {
+            "properties": {"reconciled": {"not": {"const": "unavailable"}}}
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"submitted_at": {"type": "null"}}},
+      "then": {
+        "properties": {
+          "time_assurance": {"properties": {"submitted": {"const": "unavailable"}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"acknowledged_at": {"type": "null"}}},
+      "then": {
+        "properties": {
+          "time_assurance": {"properties": {"acknowledged": {"const": "unavailable"}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"observed_at": {"type": "null"}}},
+      "then": {
+        "properties": {
+          "time_assurance": {"properties": {"observed": {"const": "unavailable"}}}
+        }
+      }
+    }
+  ]
+}

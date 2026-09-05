@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/tool-activity-body.schema.json",
+  "title": "Experimental Tool Activity Body",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "body_type",
+    "phase",
+    "tool_id",
+    "tool_version",
+    "capability_id",
+    "request_hash",
+    "idempotency_key_commitment",
+    "result_hash",
+    "result_status",
+    "completeness"
+  ],
+  "properties": {
+    "body_type": {"const": "tool_activity"},
+    "phase": {"enum": ["requested", "completed"]},
+    "tool_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "tool_version": {"type": "string", "minLength": 1, "maxLength": 100},
+    "capability_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "request_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "idempotency_key_commitment": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "result_hash": {"$ref": "agentic-common.schema.json#/$defs/nullableDigest"},
+    "result_status": {"enum": ["not_available", "succeeded", "failed", "partial", "unknown"]},
+    "completeness": {"enum": ["complete", "partial", "unavailable"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"phase": {"const": "requested"}}},
+      "then": {
+        "properties": {
+          "result_hash": {"type": "null"},
+          "result_status": {"const": "not_available"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"phase": {"const": "completed"}}},
+      "then": {
+        "properties": {
+          "result_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"}
+        }
+      }
+    }
+  ]
+}

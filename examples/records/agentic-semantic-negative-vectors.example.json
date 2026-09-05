@@ -1,0 +1,99 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/agentic-semantic-vector-set.schema.json",
+  "vector_version": "0.1-draft",
+  "cases": [
+    {
+      "case_id": "semantic_cross_tenant_activity",
+      "semantic_rule": "same_case_scope",
+      "records": [
+        {"example": "agent-activity-delegation.example.json", "mutations": []},
+        {
+          "example": "agent-activity-memory.example.json",
+          "mutations": [
+            {"operation": "replace", "path": "/tenant_id", "value": "tenant_other"}
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "scope"
+    },
+    {
+      "case_id": "semantic_cross_case_activity",
+      "semantic_rule": "same_case_scope",
+      "records": [
+        {"example": "agent-activity-delegation.example.json", "mutations": []},
+        {
+          "example": "agent-activity-memory.example.json",
+          "mutations": [
+            {"operation": "replace", "path": "/case_id", "value": "case_other"}
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "scope"
+    },
+    {
+      "case_id": "semantic_duplicate_event_replay",
+      "semantic_rule": "unique_event_identity",
+      "records": [
+        {"example": "agent-activity-delegation.example.json", "mutations": []},
+        {"example": "agent-activity-delegation.example.json", "mutations": []}
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "replay"
+    },
+    {
+      "case_id": "semantic_duplicate_run_sequence",
+      "semantic_rule": "monotonic_run_sequence",
+      "records": [
+        {"example": "agent-activity-delegation.example.json", "mutations": []},
+        {
+          "example": "agent-activity-memory.example.json",
+          "mutations": [
+            {"operation": "replace", "path": "/sequence", "value": 0}
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "ordering"
+    },
+    {
+      "case_id": "semantic_broken_previous_hash",
+      "semantic_rule": "previous_hash_chain",
+      "records": [
+        {"example": "agent-activity-delegation.example.json", "mutations": []},
+        {
+          "example": "agent-activity-memory.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/previous_event_hash",
+              "value": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "binding"
+    },
+    {
+      "case_id": "semantic_receipt_reconciliation_substitution",
+      "semantic_rule": "receipt_reconciliation_binding",
+      "records": [
+        {"example": "execution-receipt.example.json", "mutations": []},
+        {
+          "example": "reconciliation-record.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/receipt_hash",
+              "value": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "binding"
+    }
+  ]
+}

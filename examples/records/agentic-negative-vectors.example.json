@@ -1,0 +1,167 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/agentic-negative-vector-set.schema.json",
+  "vector_version": "0.1-draft",
+  "cases": [
+    {
+      "case_id": "negative_unknown_event",
+      "schema": "agent-activity-record.schema.json",
+      "base_example": "agent-activity-delegation.example.json",
+      "mutations": [
+        {"operation": "replace", "path": "/event_type", "value": "agent.unbounded"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "downgrade"
+    },
+    {
+      "case_id": "negative_delegation_missing_grant",
+      "schema": "agent-activity-record.schema.json",
+      "base_example": "agent-activity-delegation.example.json",
+      "mutations": [
+        {"operation": "remove", "path": "/body/capability_grant"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "scope"
+    },
+    {
+      "case_id": "negative_memory_raw_content",
+      "schema": "agent-activity-record.schema.json",
+      "base_example": "agent-activity-memory.example.json",
+      "mutations": [
+        {"operation": "add", "path": "/body/raw_content", "value": "prohibited"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "privacy"
+    },
+    {
+      "case_id": "negative_tool_result_on_request",
+      "schema": "agent-activity-record.schema.json",
+      "base_example": "agent-activity-tool.example.json",
+      "mutations": [
+        {"operation": "replace", "path": "/body/result_status", "value": "succeeded"},
+        {"operation": "replace", "path": "/body/result_hash", "value": "sha256:8888888888888888888888888888888888888888888888888888888888888888"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "binding"
+    },
+    {
+      "case_id": "negative_policy_unknown_decision",
+      "schema": "agent-activity-record.schema.json",
+      "base_example": "agent-activity-policy.example.json",
+      "mutations": [
+        {"operation": "replace", "path": "/body/decision", "value": "bypass"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "trust"
+    },
+    {
+      "case_id": "negative_superseded_without_successor",
+      "schema": "agent-activity-record.schema.json",
+      "base_example": "agent-activity-lifecycle.example.json",
+      "mutations": [
+        {"operation": "replace", "path": "/event_type", "value": "record.superseded"},
+        {"operation": "replace", "path": "/body/status", "value": "superseded"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "binding"
+    },
+    {
+      "case_id": "negative_acknowledgement_as_success",
+      "schema": "execution-receipt.schema.json",
+      "base_example": "execution-receipt.example.json",
+      "mutations": [
+        {"operation": "replace", "path": "/provider_evidence", "value": null},
+        {"operation": "replace", "path": "/observed_at", "value": null}
+      ],
+      "expected_invalid": true,
+      "failure_class": "effect"
+    },
+    {
+      "case_id": "negative_compensation_without_authorization",
+      "schema": "reconciliation-record.schema.json",
+      "base_example": "reconciliation-record.example.json",
+      "mutations": [
+        {"operation": "replace", "path": "/effect_status", "value": "compensated"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "effect"
+    },
+    {
+      "case_id": "negative_dsse_extra_trust_field",
+      "schema": "dsse-assurance-envelope.schema.json",
+      "base_example": "dsse-assurance-envelope.example.json",
+      "mutations": [
+        {"operation": "add", "path": "/issuer", "value": "untrusted-packet-value"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "trust"
+    },
+    {
+      "case_id": "negative_core_profile_inflation",
+      "schema": "agentic-conformance-report.schema.json",
+      "base_example": "agentic-conformance-report.example.json",
+      "mutations": [
+        {"operation": "add", "path": "/core_profiles/5", "value": "par.authenticated-records.v1"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "downgrade"
+    },
+    {
+      "case_id": "negative_event_version_upgrade",
+      "schema": "agent-activity-record.schema.json",
+      "base_example": "agent-activity-delegation.example.json",
+      "mutations": [
+        {"operation": "replace", "path": "/event_version", "value": "0.2-draft"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "downgrade"
+    },
+    {
+      "case_id": "negative_receipt_version_upgrade",
+      "schema": "execution-receipt.schema.json",
+      "base_example": "execution-receipt.example.json",
+      "mutations": [
+        {"operation": "replace", "path": "/schema_version", "value": "1.0"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "downgrade"
+    },
+    {
+      "case_id": "negative_dsse_payload_type_version",
+      "schema": "dsse-assurance-envelope.schema.json",
+      "base_example": "dsse-assurance-envelope.example.json",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": "/payloadType",
+          "value": "application/vnd.digitrans.provable-agent.assurance-packet+json;version=999"
+        }
+      ],
+      "expected_invalid": true,
+      "failure_class": "downgrade"
+    },
+    {
+      "case_id": "negative_delegation_task_size",
+      "schema": "agent-activity-record.schema.json",
+      "base_example": "agent-activity-delegation.example.json",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": "/body/task",
+          "value": "This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture. This deliberately exceeds the draft maximum by using an otherwise harmless synthetic marker repeated through the validator fixture."
+        }
+      ],
+      "expected_invalid": true,
+      "failure_class": "schema"
+    },
+    {
+      "case_id": "negative_tool_event_phase_mismatch",
+      "schema": "agent-activity-record.schema.json",
+      "base_example": "agent-activity-tool.example.json",
+      "mutations": [
+        {"operation": "replace", "path": "/event_type", "value": "tool.completed"}
+      ],
+      "expected_invalid": true,
+      "failure_class": "binding"
+    }
+  ]
+}
