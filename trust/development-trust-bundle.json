@@ -1,0 +1,22 @@
+{
+  "bundle_version": "development-v1",
+  "environment": "synthetic-development-only",
+  "keys": [
+    {
+      "algorithm": "Ed25519",
+      "issuer": "https://github.com/DigiTrans-App/provable-agent-reference#development",
+      "keyid": "development:packet-issuer:ed25519:v1",
+      "not_after": "2030-01-01T00:00:00Z",
+      "not_before": "2026-01-01T00:00:00Z",
+      "public_key_base64": "mbj1xksGw/r8PIWila9le5sIBKryYOKZf7rwF+3CyWE=",
+      "revoked_at": null,
+      "role": "packet_issuer",
+      "status": "active"
+    }
+  ],
+  "limitations": [
+    "The corresponding deterministic private key is public by design.",
+    "This bundle MUST NOT be used to authenticate production or customer records.",
+    "Verification does not establish a trusted signing time."
+  ]
+}

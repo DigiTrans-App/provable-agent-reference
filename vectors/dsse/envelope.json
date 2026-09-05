@@ -1,0 +1,10 @@
+{
+  "payload": "eyJhdXRob3JpemVkX291dHB1dCI6eyJhc3N1cmFuY2Vfc3RhdGVtZW50IjoiU3ludGhldGljIHZlcmlmaWNhdGlvbiBwYXNzZWQuIn0sImNsYWltZWRfcHJvZmlsZXMiOlsicGFyLmNvcmUudjEiXSwiY3JlYXRlZF9hdCI6IjIwMjYtMDEtMDFUMDA6MDA6MDBaIiwibGltaXRhdGlvbnMiOlsiU3ludGhldGljIGRhdGEgYW5kIGRldmVsb3BtZW50IHNpZ25hdHVyZSBvbmx5LiJdLCJwYWNrZXRfaGFzaCI6InNoYTI1NjpkMmVhMTUzMzU4YTAzZDNhMzU5N2ExNTRjNzBkYTU0NjZjYWI3YTQwN2VmYzQ2MDZkNjkzNGU0Y2FiMDkxNTc3IiwicGFja2V0X2lkIjoicGFja2V0X2Rzc2VfdmVjdG9yXzAwMSIsInByb3RvY29sX3ZlcnNpb24iOiIwLjMuMC1jYW5kaWRhdGUuMSJ9",
+  "payloadType": "application/vnd.digitrans.provable-agent.assurance-packet+json;version=0.3.0-candidate.1",
+  "signatures": [
+    {
+      "keyid": "development:packet-issuer:ed25519:v1",
+      "sig": "NcuT03vC4tpRyfzfHDfDfgdrNrcHFs8wSo6y4xfygyM6HuOBbLKwYB2O4l6cB/IfBZAkMU/pT15vg/vte6MDBg=="
+    }
+  ]
+}
