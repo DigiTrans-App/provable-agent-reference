@@ -65,7 +65,7 @@ This repository contains generic, reusable building blocks:
 
 ## What is not in this repository
 
-This repository does **not** contain the DigiTrust hosted platform, enterprise orchestration, customer-specific workflows, managed evidence operations, commercial integrations, SaaS administration, customer data, production infrastructure, or a private product roadmap. See [Open-source boundary](docs/open-source-boundary.md).
+This repository does **not** contain the DigiTrust hosted platform, production or customer-specific enterprise orchestration, customer-specific workflows, managed evidence operations, commercial integrations, SaaS administration, customer data, production infrastructure, or a private product roadmap. See [Open-source boundary](docs/open-source-boundary.md).
 
 ## Release
 
@@ -224,7 +224,11 @@ tests/                                   Deterministic unit and integration test
 
 ## Security status
 
-This is a reference implementation, not a production security product. The cryptographic operations use standard SHA-256 hashing for deterministic record binding, not a production identity, signature, key-management, or attestation system. Automated CodeQL, dependency-review, and OpenSSF Scorecard workflows provide additional triage signals but do not constitute certification. Review [SECURITY.md](SECURITY.md) and the [threat model](docs/threat-model.md) before reuse.
+This is a reference implementation, not a production security product. It uses SHA-256 for deterministic record binding and a public, reproducible development-only Ed25519 DSSE signer for interoperability tests. Neither is a production identity, key-management, trusted-time, or attestation system. Automated CodeQL, dependency-review, and OpenSSF Scorecard workflows provide additional triage signals but do not constitute certification. Review [SECURITY.md](SECURITY.md) and the [threat model](docs/threat-model.md) before reuse.
+
+## Phase 1 synthetic operator path
+
+The [Phase 1 operator guide](docs/implementation/phase-1-operator-guide.md) provides the fresh-clone readiness command, operational walkthrough, machine-readable self-report, and explicit non-production limitations.
 
 ## Contributing
 

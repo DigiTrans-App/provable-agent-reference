@@ -1,8 +1,8 @@
 # Phase 1 implementation plan
 
-Status: **planned and dependency-gated**. Code implementation begins only after the maintainer
-records the disposition of PR #28 and approves this scope. Experimental design and test-vector
-preparation may continue on the stacked branch.
+Status: **implementation in progress; PR A through PR D complete**. The maintainer recorded the
+disposition of PR #28, explicitly approved synthetic Phase 1, and documented the independent-review
+exception. PR E completes operator and adopter readiness. Production use remains prohibited.
 
 ## Phase 1 outcome
 

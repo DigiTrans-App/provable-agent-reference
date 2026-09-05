@@ -1,0 +1,38 @@
+name: Phase 1 Readiness
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install complete synthetic profile
+        run: python -m pip install -e '.[dev,control-plane,openai,signing]'
+      - name: Run fresh-clone readiness gate
+        run: >-
+          python scripts/run_phase1_readiness.py
+          --source-revision "${{ github.sha }}"
+          --output /tmp/phase1-readiness.json
+      - name: Display bounded report
+        run: python -m json.tool /tmp/phase1-readiness.json
