@@ -9,7 +9,10 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
-from validate_agentic_contracts import validate_agentic_contracts
+try:
+    from scripts.validate_agentic_contracts import validate_agentic_contracts
+except ModuleNotFoundError:
+    from validate_agentic_contracts import validate_agentic_contracts
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIR = ROOT / "schemas"
