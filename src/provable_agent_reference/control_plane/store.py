@@ -156,20 +156,79 @@ class PostgresStore:
                 metadata,
             )
 
-    def finalize_artifact(self, digest: str, storage_key: str) -> None:
+    def claim_artifacts(self, worker_id: str, limit: int = 50) -> list[dict[str, Any]]:
+        if not worker_id or not 1 <= limit <= 500:
+            raise ValueError("worker_id and limit are invalid")
+        with self.transaction() as connection:
+            rows = connection.execute(
+                """WITH candidates AS (
+                       SELECT digest FROM artifacts
+                       WHERE status = 'staged'
+                         AND reconcile_available_at <= clock_timestamp()
+                         AND (reconcile_claimed_at IS NULL OR
+                              reconcile_claimed_at < clock_timestamp() - interval '60 seconds')
+                       ORDER BY created_at, digest
+                       FOR UPDATE SKIP LOCKED
+                       LIMIT %s
+                   )
+                   UPDATE artifacts AS item
+                   SET reconcile_claimed_at = clock_timestamp(), reconcile_claimed_by = %s,
+                       reconcile_attempts = reconcile_attempts + 1
+                   FROM candidates
+                   WHERE item.digest = candidates.digest
+                   RETURNING item.digest, item.storage_key, item.byte_length,
+                             item.reconcile_attempts""",
+                (limit, worker_id),
+            ).fetchall()
+        return [
+            {
+                "digest": row[0],
+                "storage_key": row[1],
+                "byte_length": row[2],
+                "attempts": row[3],
+            }
+            for row in rows
+        ]
+
+    def finalize_artifact(self, digest: str, storage_key: str, worker_id: str) -> None:
         with self.transaction() as connection:
             cursor = connection.execute(
-                """UPDATE artifacts SET status = 'available', finalized_at = clock_timestamp()
-                   WHERE digest = %s AND storage_key = %s AND status = 'staged'""",
-                (digest, storage_key),
+                """UPDATE artifacts SET status = 'available', finalized_at = clock_timestamp(),
+                          reconcile_claimed_at = NULL, reconcile_claimed_by = NULL,
+                          last_reconcile_error = NULL
+                   WHERE digest = %s AND storage_key = %s AND status = 'staged'
+                     AND reconcile_claimed_by = %s""",
+                (digest, storage_key, worker_id),
             )
             if cursor.rowcount != 1:
-                raise RuntimeError("artifact is missing, mismatched, or already finalized")
+                raise RuntimeError("artifact lease is missing, stale, mismatched, or finalized")
 
-    def unavailable_artifact(self, digest: str) -> None:
+    def unavailable_artifact(self, digest: str, worker_id: str, reason: str) -> None:
+        if not reason or len(reason) > 500:
+            raise ValueError("a bounded unavailability reason is required")
         with self.transaction() as connection:
-            connection.execute(
-                """UPDATE artifacts SET status = 'unavailable'
-                   WHERE digest = %s AND status = 'staged'""",
-                (digest,),
+            cursor = connection.execute(
+                """UPDATE artifacts SET status = 'unavailable', reconcile_claimed_at = NULL,
+                          reconcile_claimed_by = NULL, last_reconcile_error = %s
+                   WHERE digest = %s AND status = 'staged' AND reconcile_claimed_by = %s""",
+                (reason, digest, worker_id),
             )
+            if cursor.rowcount != 1:
+                raise RuntimeError("artifact lease is missing, stale, or already reconciled")
+
+    def retry_artifact(
+        self, digest: str, worker_id: str, error: str, delay_seconds: int
+    ) -> None:
+        if not error or len(error) > 500 or not 1 <= delay_seconds <= 3600:
+            raise ValueError("bounded retry error and delay are required")
+        with self.transaction() as connection:
+            cursor = connection.execute(
+                """UPDATE artifacts
+                   SET reconcile_available_at = clock_timestamp() + %s,
+                       reconcile_claimed_at = NULL, reconcile_claimed_by = NULL,
+                       last_reconcile_error = %s
+                   WHERE digest = %s AND status = 'staged' AND reconcile_claimed_by = %s""",
+                (timedelta(seconds=delay_seconds), error, digest, worker_id),
+            )
+            if cursor.rowcount != 1:
+                raise RuntimeError("artifact lease is missing, stale, or already reconciled")

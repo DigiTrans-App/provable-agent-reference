@@ -18,9 +18,10 @@ Each authoritative mutation writes state, its immutable journal event, and its o
 one PostgreSQL transaction. Journal rows reject updates and deletes. Outbox delivery is
 at-least-once; consumers must deduplicate by event identity and content binding.
 
-Artifact bytes use staged, content-addressed publication. Database metadata may become
-`available` only after digest verification and finalization. Missing or orphaned bytes remain
-unavailable and require reconciliation.
+Artifact bytes use staged, content-addressed publication. A lease-based reconciler marks database
+metadata `available` only after digest and byte-length verification. Missing or corrupt bytes fail
+closed to `unavailable`; transient storage errors use bounded exponential retry without persisting
+provider error details.
 
 The `Control Plane Integration` workflow starts an isolated PostgreSQL service, runs migrations
 and deterministic seeding twice, verifies atomic commit/rollback and outbox lease exclusion, then
@@ -46,6 +47,6 @@ environment markers, and any confirmation value other than the exact literal abo
 - local development credentials only;
 - no production destination or external effect;
 - no authenticated-record or append-only-storage claim beyond logical S0 behavior;
-- artifact reconciliation and broader failure injection remain acceptance work within PR B;
+- broader failure injection remains acceptance work within PR B;
 - container tags remain version-locked but require verified upstream digest capture before the
   final PR B acceptance decision.

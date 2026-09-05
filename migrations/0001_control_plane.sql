@@ -95,8 +95,16 @@ CREATE TABLE IF NOT EXISTS artifacts (
     byte_length bigint NOT NULL CHECK (byte_length >= 0),
     storage_key text NOT NULL UNIQUE,
     status text NOT NULL CHECK (status IN ('staged', 'available', 'unavailable')),
+    reconcile_claimed_at timestamptz,
+    reconcile_claimed_by text,
+    reconcile_attempts integer NOT NULL DEFAULT 0 CHECK (reconcile_attempts >= 0),
+    reconcile_available_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+    last_reconcile_error text,
     created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
     finalized_at timestamptz
 );
+
+CREATE INDEX IF NOT EXISTS artifacts_reconcile_idx
+ON artifacts (reconcile_available_at, created_at) WHERE status = 'staged';
 
 COMMIT;

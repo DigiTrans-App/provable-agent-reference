@@ -47,3 +47,38 @@ class LocalArtifactStore:
         if hashlib.sha256(content).hexdigest() != hex_digest:
             raise RuntimeError("artifact integrity verification failed")
         return content
+
+
+class ArtifactReconciler:
+    """Reconcile staged metadata against verified content-addressed bytes."""
+
+    def __init__(self, store, artifacts: LocalArtifactStore, worker_id: str) -> None:
+        if not worker_id:
+            raise ValueError("worker_id is required")
+        self.store = store
+        self.artifacts = artifacts
+        self.worker_id = worker_id
+
+    def run_once(self, limit: int = 50) -> tuple[int, int, int]:
+        available = unavailable = retried = 0
+        for item in self.store.claim_artifacts(self.worker_id, limit):
+            digest = item["digest"]
+            try:
+                content = self.artifacts.read(digest)
+                if len(content) != item["byte_length"]:
+                    raise RuntimeError("artifact byte length mismatch")
+            except (FileNotFoundError, RuntimeError):
+                self.store.unavailable_artifact(
+                    digest, self.worker_id, "artifact bytes missing or failed verification"
+                )
+                unavailable += 1
+            except OSError:
+                delay = min(2 ** min(item["attempts"], 10), 3600)
+                self.store.retry_artifact(
+                    digest, self.worker_id, "artifact storage temporarily unavailable", delay
+                )
+                retried += 1
+            else:
+                self.store.finalize_artifact(digest, item["storage_key"], self.worker_id)
+                available += 1
+        return available, unavailable, retried
