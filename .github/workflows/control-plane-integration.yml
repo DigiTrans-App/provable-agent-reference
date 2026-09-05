@@ -62,12 +62,19 @@ jobs:
         run: python -m unittest tests/test_control_plane_integration.py -v
       - name: Demonstrate logical backup and restore
         run: |
-          pg_dump --host localhost --port 55432 --username par_local \
+          docker exec -e PGPASSWORD=local-synthetic-only \
+            "${{ job.services.postgres.id }}" pg_dump --username par_local \
             --dbname provable_agent_synthetic --format=custom --file=/tmp/control-plane.dump
-          python scripts/control_plane_reset.py --confirm RESET-LOCAL-SYNTHETIC
-          pg_restore --host localhost --port 55432 --username par_local \
-            --dbname provable_agent_synthetic --clean --if-exists --no-owner \
+          docker cp "${{ job.services.postgres.id }}:/tmp/control-plane.dump" \
             /tmp/control-plane.dump
-          psql --host localhost --port 55432 --username par_local \
+          python scripts/control_plane_reset.py --confirm RESET-LOCAL-SYNTHETIC
+          docker cp /tmp/control-plane.dump \
+            "${{ job.services.postgres.id }}:/tmp/control-plane-restore.dump"
+          docker exec -e PGPASSWORD=local-synthetic-only \
+            "${{ job.services.postgres.id }}" pg_restore --username par_local \
+            --dbname provable_agent_synthetic --clean --if-exists --no-owner \
+            /tmp/control-plane-restore.dump
+          docker exec -e PGPASSWORD=local-synthetic-only \
+            "${{ job.services.postgres.id }}" psql --username par_local \
             --dbname provable_agent_synthetic --tuples-only --command \
             "SELECT count(*) FROM journal_records"
