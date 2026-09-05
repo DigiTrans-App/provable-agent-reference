@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 15
     services:
       postgres:
-        image: postgres:17.6-alpine
+        image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
         env:
           POSTGRES_DB: provable_agent_synthetic
           POSTGRES_USER: par_local
@@ -52,11 +52,13 @@ jobs:
           cache: pip
       - name: Install control-plane dependencies
         run: python -m pip install -e '.[control-plane]'
-      - name: Resolve container manifest digests
+      - name: Verify pinned container manifests
         run: |
-          docker image inspect postgres:17.6-alpine --format '{{index .RepoDigests 0}}'
-          docker pull python:3.12.11-slim
-          docker image inspect python:3.12.11-slim --format '{{index .RepoDigests 0}}'
+          docker image inspect \
+            postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94 \
+            --format '{{index .RepoDigests 0}}'
+          docker pull \
+            python:3.12.11-slim@sha256:47ae396f09c1303b8653019811a8498470603d7ffefc29cb07c88f1f8cb3d19f
       - name: Migrate and seed twice
         run: |
           python scripts/control_plane_migrate.py

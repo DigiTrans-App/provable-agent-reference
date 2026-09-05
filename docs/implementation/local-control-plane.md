@@ -10,7 +10,9 @@ docker compose up --build --wait
 ```
 
 The stack binds PostgreSQL only to loopback, uses an internal container network, requires no
-external credentials, and stores artifacts in a dedicated local volume.
+external credentials, and stores artifacts in a dedicated local volume. PostgreSQL and Python
+base images are pinned by both human-readable version and CI-captured multi-platform manifest
+digest.
 
 ## Transaction boundary
 
@@ -52,6 +54,4 @@ environment markers, and any confirmation value other than the exact literal abo
 - local development credentials only;
 - no production destination or external effect;
 - no authenticated-record or append-only-storage claim beyond logical S0 behavior;
-- broader failure injection remains acceptance work within PR B;
-- container tags remain version-locked but require verified upstream digest capture before the
-  final PR B acceptance decision.
+- broader production-grade fault injection remains outside this synthetic S0 reference scope.
