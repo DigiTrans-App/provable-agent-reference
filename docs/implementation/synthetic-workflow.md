@@ -21,5 +21,11 @@ sequence, and creates a contiguous hash chain. PostgreSQL persists the activity 
 outbox notification per record in a single transaction; reconstruction recomputes every body and
 record hash and rejects gaps or reordered links.
 
-This slice does not yet claim the complete PR C outcome. Simulated Tier 3 effect receipts,
-unknown-outcome reconciliation, revocation, supersession, and packet export remain acceptance work.
+After exact-use authorization, the workflow consumes the authorization once and invokes only the
+embedded `synthetic://customer-review/inbox` adapter. The adapter records provider acknowledgement
+as `not_observed`, never as effect success. A separate state-comparison reconciliation binds the
+receipt hash and records the later synthetic observation. Alternate fixtures cover unknown outcome,
+revocation, supersession, duplicate consumption, mutated output, and non-synthetic destinations.
+
+This slice does not yet claim the complete PR C outcome. Durable receipt/lifecycle persistence and
+customer-safe packet/audit export remain acceptance work.

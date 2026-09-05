@@ -77,6 +77,9 @@ class SyntheticWorkflowTests(unittest.TestCase):
         self.assertEqual(result.activities[1]["body"]["minimization_decision"], "minimized")
         self.assertEqual(result.activities[2]["body"]["result_status"], "succeeded")
         self.assertEqual(result.activities[1]["previous_event_hash"], result.activities[0]["record_hash"])
+        self.assertEqual(result.activities[3]["event_type"], "authorization.consumed")
+        self.assertEqual(result.receipt["effect_status"], "not_observed")
+        self.assertEqual(result.reconciliation["effect_status"], "succeeded")
 
     def test_trusted_activity_envelope_ignores_adapter_identity_fields(self):
         class FakeStore:
@@ -94,9 +97,9 @@ class SyntheticWorkflowTests(unittest.TestCase):
             question="synthetic question",
             approver_id="reviewer_synthetic",
         )
-        self.assertEqual(len(store.records), 3)
+        self.assertEqual(len(store.records), 4)
         self.assertTrue(all(item["tenant_id"] == "tenant_synthetic" for item in store.records))
-        self.assertEqual([item["sequence"] for item in store.records], [0, 1, 2])
+        self.assertEqual([item["sequence"] for item in store.records], [0, 1, 2, 3])
 
     def test_cross_scope_memory_grant_fails_closed(self):
         with self.assertRaisesRegex(GovernedAdapterError, "outside"):

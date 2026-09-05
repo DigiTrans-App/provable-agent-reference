@@ -8,6 +8,11 @@ from .canonical import sha256_uri
 from .contracts import EvidenceBundle, EvidenceRecord, SemanticDraft, TrustedRunContext
 from .control_plane.models import CapabilityGrant
 from .pipeline import PipelineResult, ProvableAgentPipeline
+from .synthetic_effects import (
+    SYNTHETIC_TARGET,
+    AuthorizationLifecycle,
+    SyntheticEffectExecutor,
+)
 
 
 class GovernedAdapterError(PermissionError):
@@ -151,11 +156,15 @@ class PolicyEnforcingToolGateway:
 class SyntheticWorkflowResult:
     pipeline: PipelineResult
     activities: tuple[dict[str, Any], ...]
+    receipt: dict[str, Any]
+    reconciliation: dict[str, Any]
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "pipeline": self.pipeline.to_dict(),
             "activities": list(self.activities),
+            "receipt": self.receipt,
+            "reconciliation": self.reconciliation,
             "limitations": [
                 "Synthetic evidence and identities only.",
                 "No network destination or external effect is reachable.",
@@ -170,6 +179,8 @@ class SyntheticVendorAssuranceWorkflow:
     def __init__(self, memory: PrivacyBoundedMemory, activity_store=None) -> None:
         self.memory = memory
         self.gateway = PolicyEnforcingToolGateway()
+        self.effects = SyntheticEffectExecutor()
+        self.lifecycle = AuthorizationLifecycle()
         self.activity_store = activity_store
 
     def run(
@@ -246,10 +257,33 @@ class SyntheticVendorAssuranceWorkflow:
             evidence_bundle=bundle,
             approver_id=approver_id,
         )
-        activities = (delegation, memory_activity, tool_activity)
+        lifecycle_body = self.lifecycle.transition(
+            pipeline.authorization, "consumed", effective_at=context.created_at
+        )
+        lifecycle_activity = builder.append(
+            "authorization.consumed",
+            lifecycle_body,
+            actor_subject="control-plane:synthetic",
+            actor_type="control_plane",
+        )
+        output = {
+            "assurance_statement": pipeline.candidate.assurance_statement,
+            "limitations": list(pipeline.candidate.limitations),
+        }
+        receipt = self.effects.execute(
+            context=context,
+            authorization=pipeline.authorization,
+            output=output,
+            target_ref=SYNTHETIC_TARGET,
+            outcome="acknowledged",
+        )
+        reconciliation = self.effects.reconcile(
+            receipt, observed_effect=True, reconciled_at=context.created_at
+        )
+        activities = (delegation, memory_activity, tool_activity, lifecycle_activity)
         if self.activity_store is not None:
             self.activity_store.append_agent_activities(list(activities))
-        return SyntheticWorkflowResult(pipeline, activities)
+        return SyntheticWorkflowResult(pipeline, activities, receipt, reconciliation)
 
 
 class ActivityRecordBuilder:
