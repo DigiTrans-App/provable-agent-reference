@@ -1,5 +1,10 @@
 # Architecture
 
+This page describes the implemented v0.2 control flow. The technology-neutral
+[Reference Architecture Candidate](reference-architecture-candidate.md) and its
+[protocol candidate](spec/README.md) define the proposed v0.3 separation between normative
+requirements, the Python reference implementation, adapters, and conformance evaluation.
+
 The framework separates semantic generation from authoritative controls.
 
 ```mermaid
@@ -14,6 +19,7 @@ flowchart TD
     V -->|pass| H[Human approval]
     H --> X[Exact-use authorization]
     X --> O[Authorized output]
+    O --> P[Portable assurance packet]
     K -. hash .-> M[Audit manifest]
     V -. result hash .-> M
     H -. approval hash .-> M
@@ -29,6 +35,8 @@ flowchart TD
 5. A human decision is bound to the exact candidate and verification hash.
 6. `authorize_exact_use` compares purpose, audience, and exact output.
 7. `build_audit_manifest` binds the complete control chain.
+8. `build_assurance_packet` packages the evidence, records, exact authorized output,
+   limitations, and packet binding for offline verification.
 
 ```mermaid
 sequenceDiagram
@@ -52,6 +60,8 @@ sequenceDiagram
 - **Minimal model authority:** models select evidence identifiers and draft semantic content only.
 - **Exact-use control:** approved content cannot be silently repurposed or substituted.
 - **Auditable:** a manifest reconstructs candidate, verification, approval, and authorization relationships.
+- **Portable candidate:** an Assurance Packet carries the complete reconstructable chain and
+  exact authorized output for an independent verifier.
 
 ## Reference versus production
 

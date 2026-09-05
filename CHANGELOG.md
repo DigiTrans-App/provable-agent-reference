@@ -6,6 +6,8 @@ All notable changes to this project will be documented here.
 
 ### Added
 
+- Reference Architecture Candidate, normative lifecycle, cumulative conformance profiles, and RFC/ADR change process.
+- Versioned portable Assurance Packet schema, synthetic vector, Python builder, strict loader, and offline semantic verifier.
 - Independent validation runner for reproducible offline tests, evaluations, linting, demonstrations, Git provenance, and privacy-bounded JSON reports.
 - Optional verification of release wheels, source distributions, `ARTIFACTS.json`, and `SHA256SUMS` without extracting archives.
 - Machine-readable independent-validation report schema, human reviewer guide and template, public issue form, and fail-closed test coverage.
@@ -22,6 +24,8 @@ All notable changes to this project will be documented here.
 
 ### Security
 
+- Assurance Packet verification recomputes packet, evidence, output, record, manifest, and deterministic rule bindings; malformed profile claims, self-approval under the governed profile, and semantically false rehashed findings fail closed.
+- Packet lifecycle state is limited to `reconstructed`; the reference does not infer emission, delivery, consumption, revocation, or supersession.
 - Approval and exact-use authorization now reject candidates whose deterministic hash is invalid.
 - Approval validates candidate identifiers and requires verification status to agree with error-level findings.
 - Audit reconstruction now validates every candidate, verification, approval, authorization, scope, decision, and reason relationship in the control chain.

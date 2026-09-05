@@ -1,0 +1,162 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/assurance-packet.schema.json",
+  "authorized_output": {
+    "assurance_statement": "A synthetic control test was completed.",
+    "limitations": [
+      "Synthetic evidence only."
+    ]
+  },
+  "claimed_profiles": [
+    "par.core.v1",
+    "par.evidence-bound.v1",
+    "par.governed.v1",
+    "par.exact-use.v1",
+    "par.reconstructable.v1"
+  ],
+  "created_at": "2026-01-01T00:00:00Z",
+  "evidence_bundle": {
+    "bundle_hash": "sha256:a2b0e68b5e2e03437bbb07310c0eb8f823fc36524e1ef7bfbe64baaac498ff0f",
+    "bundle_id": "bundle_test",
+    "case_id": "case_test",
+    "records": [
+      {
+        "case_id": "case_test",
+        "classification": "internal",
+        "content_hash": "sha256:65272c8c29eb71de44a6647803caa696108894ed50896528c6b673b4eb7b8c04",
+        "evidence_id": "evidence_test_001",
+        "source_uri": "synthetic://control-test/001",
+        "summary": "Synthetic control-test evidence.",
+        "tenant_id": "tenant_test"
+      }
+    ],
+    "tenant_id": "tenant_test"
+  },
+  "lifecycle": {
+    "state": "reconstructed"
+  },
+  "limitations": [
+    "Digest bindings do not authenticate the producer or prove source completeness."
+  ],
+  "packet_hash": "sha256:cc32002d0945fda660e94be808f60747b642554c52cc458d35d64c17c04be61f",
+  "packet_id": "packet_2c11631b1ca1134e58477dff",
+  "protocol_version": "0.3.0-candidate.1",
+  "records": {
+    "approval": {
+      "approval_id": "approval_dc1ccba36acdcbfabfd8d557",
+      "approver_id": "human_reviewer",
+      "candidate_hash": "sha256:92fcc30bd4deeae3b4705b5b81d04cd444ad13fee188a772772bc2f1df10822b",
+      "candidate_id": "candidate_2664913a4b84881cd54c5e46",
+      "decided_at": "2026-01-01T00:00:00Z",
+      "decision": "approved",
+      "rationale": "Verified candidate approved for the requested exact use.",
+      "record_hash": "sha256:ca8f76d5c4d5f3c7e1e3163db1952aaf812841c0c489a6cdb1c40f8c9a999f82",
+      "verification_result_hash": "sha256:0fb9367a240fa1a96892741e4e12dd6179b5d73475ab324bdc6f7c129d8e0268"
+    },
+    "audit_manifest": {
+      "approval_record_hash": "sha256:ca8f76d5c4d5f3c7e1e3163db1952aaf812841c0c489a6cdb1c40f8c9a999f82",
+      "authorization_record_hash": "sha256:582c13ef7f9838ed4e89aebaed16bdf14f047f77b57156178600b08c1ba96225",
+      "candidate_hash": "sha256:92fcc30bd4deeae3b4705b5b81d04cd444ad13fee188a772772bc2f1df10822b",
+      "generated_at": "2026-01-01T00:00:00Z",
+      "manifest_hash": "sha256:8ddacfcc4c3e08592134f20e185f6c99ccaac6238482b8acea6e402e7361321b",
+      "manifest_id": "audit_cd075dbf06657d416b45e3f0",
+      "verification_result_hash": "sha256:0fb9367a240fa1a96892741e4e12dd6179b5d73475ab324bdc6f7c129d8e0268"
+    },
+    "authorization": {
+      "approval_id": "approval_dc1ccba36acdcbfabfd8d557",
+      "audience": "security reviewer",
+      "authorization_id": "authorization_462128f260ee97d277abfae3",
+      "authorized": true,
+      "authorized_at": "2026-01-01T00:00:00Z",
+      "candidate_hash": "sha256:92fcc30bd4deeae3b4705b5b81d04cd444ad13fee188a772772bc2f1df10822b",
+      "candidate_id": "candidate_2664913a4b84881cd54c5e46",
+      "output_hash": "sha256:79fa1b368cbd671fa479ebeb8fb399dcc8863716888478880d3a1557c8690f97",
+      "purpose": "Prepare a synthetic assurance statement.",
+      "reason": "EXACT_USE_AUTHORIZED",
+      "record_hash": "sha256:582c13ef7f9838ed4e89aebaed16bdf14f047f77b57156178600b08c1ba96225"
+    },
+    "candidate": {
+      "assurance_statement": "A synthetic control test was completed.",
+      "candidate_hash": "sha256:92fcc30bd4deeae3b4705b5b81d04cd444ad13fee188a772772bc2f1df10822b",
+      "candidate_id": "candidate_2664913a4b84881cd54c5e46",
+      "claim_id": "claim_5cf1d2370d994392abfc8151",
+      "claim_text": "The synthetic control was tested.",
+      "compiler_id": "provable_agent_reference.compiler",
+      "compiler_version": "0.1.0",
+      "content_categories": [],
+      "created_at": "2026-01-01T00:00:00Z",
+      "evidence": {
+        "case_id": "case_test",
+        "classification": "internal",
+        "content_hash": "sha256:65272c8c29eb71de44a6647803caa696108894ed50896528c6b673b4eb7b8c04",
+        "evidence_id": "evidence_test_001",
+        "source_uri": "synthetic://control-test/001",
+        "summary": "Synthetic control-test evidence.",
+        "tenant_id": "tenant_test"
+      },
+      "evidence_bundle_hash": "sha256:a2b0e68b5e2e03437bbb07310c0eb8f823fc36524e1ef7bfbe64baaac498ff0f",
+      "limitations": [
+        "Synthetic evidence only."
+      ],
+      "redacted": false,
+      "run_context": {
+        "agent_id": "agent_test",
+        "audience": "security reviewer",
+        "case_id": "case_test",
+        "classification": "internal",
+        "created_at": "2026-01-01T00:00:00Z",
+        "purpose": "Prepare a synthetic assurance statement.",
+        "run_id": "run_test",
+        "tenant_id": "tenant_test"
+      },
+      "schema_version": "0.1"
+    },
+    "verification": {
+      "candidate_hash": "sha256:92fcc30bd4deeae3b4705b5b81d04cd444ad13fee188a772772bc2f1df10822b",
+      "candidate_id": "candidate_2664913a4b84881cd54c5e46",
+      "evaluated_at": "2026-01-01T00:00:00Z",
+      "findings": [
+        {
+          "code": "CANDIDATE_HASH_VALID",
+          "message": "Canonical candidate hash must match its deterministic payload.",
+          "passed": true,
+          "severity": "error"
+        },
+        {
+          "code": "EVIDENCE_BUNDLE_BOUND",
+          "message": "Candidate must bind the exact authorized evidence bundle.",
+          "passed": true,
+          "severity": "error"
+        },
+        {
+          "code": "EVIDENCE_REFERENCE_VALID",
+          "message": "Candidate evidence must resolve exactly in the authorized bundle.",
+          "passed": true,
+          "severity": "error"
+        },
+        {
+          "code": "SCOPE_MATCH",
+          "message": "Run, evidence, and bundle scopes must match.",
+          "passed": true,
+          "severity": "error"
+        },
+        {
+          "code": "DISCLOSURE_SAFE",
+          "message": "Sensitive categories require explicit redaction intent.",
+          "passed": true,
+          "severity": "error"
+        },
+        {
+          "code": "LIMITATION_PRESENT",
+          "message": "Consequential outputs must state at least one limitation.",
+          "passed": true,
+          "severity": "warning"
+        }
+      ],
+      "result_hash": "sha256:0fb9367a240fa1a96892741e4e12dd6179b5d73475ab324bdc6f7c129d8e0268",
+      "result_id": "verification_774a55971c2e57f8c181aa7a",
+      "status": "pass",
+      "verifier_id": "provable_agent_reference.verifier",
+      "verifier_version": "0.1.0"
+    }
+  }
+}
