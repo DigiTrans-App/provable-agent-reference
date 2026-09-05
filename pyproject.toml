@@ -23,9 +23,9 @@ dependencies = []
 
 [project.optional-dependencies]
 control-plane = ["psycopg[binary]>=3.2,<4"]
-dev = ["build>=1.2,<2", "cryptography>=46,<47", "jsonschema>=4.23,<5", "pip-audit>=2.10,<3", "ruff>=0.9,<1"]
+dev = ["build>=1.2,<2", "cryptography>=50,<51", "jsonschema>=4.23,<5", "pip-audit>=2.10,<3", "ruff>=0.9,<1"]
 openai = ["openai-agents>=0.22,<0.23", "pydantic>=2.10,<3"]
-signing = ["cryptography>=46,<47"]
+signing = ["cryptography>=50,<51"]
 
 [project.urls]
 Homepage = "https://github.com/DigiTrans-App/provable-agent-reference"
