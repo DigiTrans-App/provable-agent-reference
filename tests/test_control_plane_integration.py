@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import os
 import unittest
+from datetime import UTC, datetime, timedelta
 
-from provable_agent_reference.control_plane.store import PostgresStore
+from provable_agent_reference.control_plane.models import CapabilityGrant
+from provable_agent_reference.control_plane.service import ControlPlaneService
+from provable_agent_reference.control_plane.store import PostgresStore, canonical_json, sha256_uri
 
 
 @unittest.skipUnless(os.environ.get("PAR_DATABASE_URL"), "requires local synthetic PostgreSQL")
@@ -31,7 +34,7 @@ class ControlPlaneIntegrationTests(unittest.TestCase):
             "tenant_id": run["tenant_id"],
             "case_id": run["case_id"],
             "run_id": run_id,
-            "sequence": 1,
+            "sequence": 0,
             "previous_event_hash": None,
             "body": body,
             "body_hash": "sha256:" + "1" * 64,
@@ -121,6 +124,81 @@ class ControlPlaneIntegrationTests(unittest.TestCase):
         with self.store.transaction() as connection:
             count = connection.execute("SELECT count(*) FROM runs WHERE run_id = %s", (run_id,)).fetchone()[0]
         self.assertEqual(count, 0)
+
+    def test_delegation_uses_persisted_parent_and_is_replay_safe(self) -> None:
+        valid_until = datetime.now(UTC) + timedelta(hours=1)
+        with self.store.transaction() as connection:
+            run_id, tenant_id, case_id = connection.execute(
+                "SELECT run_id, tenant_id, case_id FROM runs ORDER BY created_at LIMIT 1"
+            ).fetchone()
+            parent_document = {
+                "allowed_effects": ["draft"],
+                "capabilities": ["evidence.read", "tool.prepare"],
+                "case_id": case_id,
+                "delegation_depth": 2,
+                "max_model_calls": 3,
+                "max_tool_calls": 5,
+                "tenant_id": tenant_id,
+                "valid_until": valid_until.isoformat(),
+            }
+            connection.execute(
+                """INSERT INTO capability_grants
+                   (grant_id, tenant_id, case_id, run_id, parent_grant_id, grant_document,
+                    grant_hash, valid_until)
+                   VALUES ('grant_synthetic_root', %s, %s, %s, NULL, %s::jsonb, %s, %s)""",
+                (
+                    tenant_id,
+                    case_id,
+                    run_id,
+                    canonical_json(parent_document),
+                    sha256_uri(parent_document),
+                    valid_until,
+                ),
+            )
+        child = CapabilityGrant(
+            capabilities=frozenset({"evidence.read"}),
+            tenant_id=tenant_id,
+            case_id=case_id,
+            allowed_effects=frozenset({"draft"}),
+            max_tool_calls=2,
+            max_model_calls=1,
+            valid_until=valid_until,
+            delegation_depth=1,
+        )
+        service = ControlPlaneService(self.store)
+        grant_id = service.delegate_capability(
+            run_id, "grant_synthetic_root", child, "delegation-replay-test"
+        )
+        self.assertEqual(
+            service.delegate_capability(
+                run_id, "grant_synthetic_root", child, "delegation-replay-test"
+            ),
+            grant_id,
+        )
+        expanded = CapabilityGrant(
+            capabilities=frozenset({"evidence.read", "effect.send"}),
+            tenant_id=tenant_id,
+            case_id=case_id,
+            allowed_effects=frozenset({"draft"}),
+            max_tool_calls=2,
+            max_model_calls=1,
+            valid_until=valid_until,
+            delegation_depth=1,
+        )
+        with self.assertRaises(PermissionError):
+            service.delegate_capability(
+                run_id, "grant_synthetic_root", expanded, "delegation-expanded-test"
+            )
+        with self.store.transaction() as connection:
+            counts = connection.execute(
+                """SELECT
+                     (SELECT count(*) FROM capability_grants WHERE grant_id = %s),
+                     (SELECT count(*) FROM journal_records
+                      WHERE body->>'grant_id' = %s),
+                     (SELECT count(*) FROM outbox WHERE aggregate_id = %s)""",
+                (grant_id, grant_id, grant_id),
+            ).fetchone()
+        self.assertEqual(counts, (1, 1, 1))
 
 
 if __name__ == "__main__":

@@ -18,6 +18,11 @@ Each authoritative mutation writes state, its immutable journal event, and its o
 one PostgreSQL transaction. Journal rows reject updates and deletes. Outbox delivery is
 at-least-once; consumers must deduplicate by event identity and content binding.
 
+Capability delegation locks both the persisted run and parent grant, verifies the stored parent
+document hash, rejects revoked or expired authority, and checks every attenuation dimension before
+atomically inserting the child grant, chained journal event, and outbox record. Deterministic child
+grant identity makes an identical retry replay-safe; mismatched collisions fail closed.
+
 Artifact bytes use staged, content-addressed publication. A lease-based reconciler marks database
 metadata `available` only after digest and byte-length verification. Missing or corrupt bytes fail
 closed to `unavailable`; transient storage errors use bounded exponential retry without persisting

@@ -57,3 +57,47 @@ class ControlPlaneService:
     def require_attenuation(parent: CapabilityGrant, child: CapabilityGrant) -> None:
         if not parent.permits_child(child):
             raise PermissionError("child capability grant expands parent authority")
+
+    def delegate_capability(
+        self,
+        run_id: str,
+        parent_grant_id: str,
+        child: CapabilityGrant,
+        idempotency_key: str,
+    ) -> str:
+        if not run_id or not parent_grant_id:
+            raise ValueError("run_id and parent_grant_id are required")
+        if not idempotency_key or len(idempotency_key) > 500:
+            raise ValueError("a bounded idempotency key is required")
+        document = {
+            "allowed_effects": sorted(child.allowed_effects),
+            "capabilities": sorted(child.capabilities),
+            "case_id": child.case_id,
+            "delegation_depth": child.delegation_depth,
+            "max_model_calls": child.max_model_calls,
+            "max_tool_calls": child.max_tool_calls,
+            "tenant_id": child.tenant_id,
+            "valid_until": child.valid_until.isoformat(),
+        }
+        identity = {
+            "document": document,
+            "idempotency_key": idempotency_key,
+            "parent_grant_id": parent_grant_id,
+            "run_id": run_id,
+        }
+        grant_id = "grant_" + sha256_uri(identity).split(":", 1)[1][:24]
+        record = {
+            "grant_id": grant_id,
+            "tenant_id": child.tenant_id,
+            "case_id": child.case_id,
+            "run_id": run_id,
+            "parent_grant_id": parent_grant_id,
+            "grant_document": document,
+            "grant_hash": sha256_uri(document),
+            "valid_until": child.valid_until,
+        }
+        return self.store.create_delegation(
+            record,
+            event_id="evt_" + uuid.uuid4().hex,
+            outbox_id="outbox_" + uuid.uuid4().hex,
+        )

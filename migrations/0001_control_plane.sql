@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS journal_records (
     created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
     UNIQUE (run_id, sequence),
     CHECK ((sequence = 0 AND previous_event_hash IS NULL) OR
-           (sequence > 0 AND previous_event_hash ~ '^sha256:[0-9a-f]{64}$'))
+           (sequence > 0 AND previous_event_hash IS NOT NULL AND
+            previous_event_hash ~ '^sha256:[0-9a-f]{64}$'))
 );
 
 CREATE OR REPLACE FUNCTION reject_journal_mutation() RETURNS trigger

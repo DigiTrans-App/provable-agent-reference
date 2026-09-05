@@ -4,8 +4,10 @@ import hashlib
 import json
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
+
+from .models import CapabilityGrant
 
 
 def canonical_json(value: Any) -> str:
@@ -95,6 +97,106 @@ class PostgresStore:
                 idempotency,
             )
         return str(idempotency["result_ref"])
+
+    def create_delegation(
+        self,
+        grant_record: dict[str, Any],
+        event_id: str,
+        outbox_id: str,
+    ) -> str:
+        """Persist an attenuated child grant and its audit records atomically."""
+        child_document = grant_record["grant_document"]
+        child = _capability_grant(child_document)
+        with self.transaction() as connection:
+            run_scope = connection.execute(
+                "SELECT tenant_id, case_id FROM runs WHERE run_id = %s FOR UPDATE",
+                (grant_record["run_id"],),
+            ).fetchone()
+            if run_scope is None or tuple(run_scope) != (child.tenant_id, child.case_id):
+                raise PermissionError("child grant is outside the persisted run scope")
+            parent_row = connection.execute(
+                """SELECT tenant_id, case_id, run_id, grant_document, grant_hash,
+                          valid_until, revoked_at
+                   FROM capability_grants WHERE grant_id = %s FOR UPDATE""",
+                (grant_record["parent_grant_id"],),
+            ).fetchone()
+            if parent_row is None:
+                raise PermissionError("parent capability grant does not exist")
+            parent_document = parent_row[3]
+            if parent_row[4] != sha256_uri(parent_document):
+                raise RuntimeError("persisted parent grant failed integrity verification")
+            if parent_row[6] is not None or parent_row[5] <= datetime.now(UTC):
+                raise PermissionError("parent capability grant is revoked or expired")
+            if tuple(parent_row[:3]) != (
+                child.tenant_id,
+                child.case_id,
+                grant_record["run_id"],
+            ):
+                raise PermissionError("parent capability grant is outside the run scope")
+            if not _capability_grant(parent_document).permits_child(child):
+                raise PermissionError("child capability grant expands parent authority")
+
+            inserted = connection.execute(
+                """INSERT INTO capability_grants
+                   (grant_id, tenant_id, case_id, run_id, parent_grant_id, grant_document,
+                    grant_hash, valid_until)
+                   VALUES (%(grant_id)s, %(tenant_id)s, %(case_id)s, %(run_id)s,
+                           %(parent_grant_id)s, %(grant_document)s::jsonb, %(grant_hash)s,
+                           %(valid_until)s)
+                   ON CONFLICT (grant_id) DO NOTHING
+                   RETURNING grant_id""",
+                {**grant_record, "grant_document": canonical_json(child_document)},
+            ).fetchone()
+            if inserted is None:
+                existing = connection.execute(
+                    """SELECT parent_grant_id, grant_hash FROM capability_grants
+                       WHERE grant_id = %s""",
+                    (grant_record["grant_id"],),
+                ).fetchone()
+                if existing != (grant_record["parent_grant_id"], grant_record["grant_hash"]):
+                    raise RuntimeError("grant identity collision or mismatched replay")
+                return str(grant_record["grant_id"])
+
+            previous = connection.execute(
+                """SELECT sequence, record_hash FROM journal_records
+                   WHERE run_id = %s ORDER BY sequence DESC LIMIT 1""",
+                (grant_record["run_id"],),
+            ).fetchone()
+            sequence = 0 if previous is None else previous[0] + 1
+            previous_hash = None if previous is None else previous[1]
+            body = {
+                "event_type": "capability.delegated",
+                "grant_hash": grant_record["grant_hash"],
+                "grant_id": grant_record["grant_id"],
+                "parent_grant_id": grant_record["parent_grant_id"],
+            }
+            event = {
+                "event_id": event_id,
+                "tenant_id": child.tenant_id,
+                "case_id": child.case_id,
+                "run_id": grant_record["run_id"],
+                "sequence": sequence,
+                "previous_event_hash": previous_hash,
+                "body": body,
+                "body_hash": sha256_uri(body),
+            }
+            event["record_hash"] = sha256_uri(event)
+            connection.execute(
+                """INSERT INTO journal_records
+                   (event_id, tenant_id, case_id, run_id, sequence, previous_event_hash,
+                    body, body_hash, record_hash)
+                   VALUES (%(event_id)s, %(tenant_id)s, %(case_id)s, %(run_id)s,
+                           %(sequence)s, %(previous_event_hash)s, %(body)s::jsonb,
+                           %(body_hash)s, %(record_hash)s)""",
+                {**event, "body": canonical_json(body)},
+            )
+            connection.execute(
+                """INSERT INTO outbox
+                   (outbox_id, tenant_id, aggregate_type, aggregate_id, event_type, payload)
+                   VALUES (%s, %s, 'capability_grant', %s, 'capability.delegated', %s::jsonb)""",
+                (outbox_id, child.tenant_id, grant_record["grant_id"], canonical_json(body)),
+            )
+        return str(grant_record["grant_id"])
 
     def claim_outbox(self, worker_id: str, limit: int = 50) -> list[dict[str, Any]]:
         if not worker_id or not 1 <= limit <= 500:
@@ -232,3 +334,16 @@ class PostgresStore:
             )
             if cursor.rowcount != 1:
                 raise RuntimeError("artifact lease is missing, stale, or already reconciled")
+
+
+def _capability_grant(document: dict[str, Any]) -> CapabilityGrant:
+    return CapabilityGrant(
+        capabilities=frozenset(document["capabilities"]),
+        tenant_id=document["tenant_id"],
+        case_id=document["case_id"],
+        allowed_effects=frozenset(document["allowed_effects"]),
+        max_tool_calls=document["max_tool_calls"],
+        max_model_calls=document["max_model_calls"],
+        valid_until=datetime.fromisoformat(document["valid_until"]),
+        delegation_depth=document["delegation_depth"],
+    )
