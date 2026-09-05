@@ -198,6 +198,95 @@ class PostgresStore:
             )
         return str(grant_record["grant_id"])
 
+    def append_agent_activities(self, records: list[dict[str, Any]]) -> None:
+        if not records:
+            raise ValueError("at least one activity record is required")
+        run_id = records[0]["run_id"]
+        with self.transaction() as connection:
+            run_scope = connection.execute(
+                "SELECT tenant_id, case_id FROM runs WHERE run_id = %s FOR UPDATE", (run_id,)
+            ).fetchone()
+            if run_scope is None:
+                raise RuntimeError("activity run does not exist")
+            previous = connection.execute(
+                """SELECT sequence, record_hash FROM agent_activity_records
+                   WHERE run_id = %s ORDER BY sequence DESC LIMIT 1""",
+                (run_id,),
+            ).fetchone()
+            expected_sequence = 0 if previous is None else previous[0] + 1
+            expected_previous = None if previous is None else previous[1]
+            for record in records:
+                if (
+                    record["run_id"] != run_id
+                    or (record["tenant_id"], record["case_id"]) != tuple(run_scope)
+                    or record["sequence"] != expected_sequence
+                    or record["previous_event_hash"] != expected_previous
+                    or record["body_hash"] != sha256_uri(record["body"])
+                ):
+                    raise RuntimeError("activity scope, order, chain, or body hash is invalid")
+                payload = {key: value for key, value in record.items() if key != "record_hash"}
+                if record["record_hash"] != sha256_uri(payload):
+                    raise RuntimeError("activity record hash is invalid")
+                connection.execute(
+                    """INSERT INTO agent_activity_records
+                       (event_id, tenant_id, case_id, run_id, sequence, previous_event_hash,
+                        event_type, body, body_hash, record, record_hash)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s::jsonb, %s)""",
+                    (
+                        record["event_id"],
+                        record["tenant_id"],
+                        record["case_id"],
+                        run_id,
+                        record["sequence"],
+                        record["previous_event_hash"],
+                        record["event_type"],
+                        canonical_json(record["body"]),
+                        record["body_hash"],
+                        canonical_json(record),
+                        record["record_hash"],
+                    ),
+                )
+                connection.execute(
+                    """INSERT INTO outbox
+                       (outbox_id, tenant_id, aggregate_type, aggregate_id, event_type, payload)
+                       VALUES (%s, %s, 'agent_activity', %s, %s, %s::jsonb)""",
+                    (
+                        "outbox_" + record["event_id"],
+                        record["tenant_id"],
+                        record["event_id"],
+                        record["event_type"],
+                        canonical_json(
+                            {
+                                "event_id": record["event_id"],
+                                "record_hash": record["record_hash"],
+                            }
+                        ),
+                    ),
+                )
+                expected_sequence += 1
+                expected_previous = record["record_hash"]
+
+    def reconstruct_agent_activities(self, run_id: str) -> list[dict[str, Any]]:
+        with self.transaction() as connection:
+            rows = connection.execute(
+                """SELECT record FROM agent_activity_records
+                   WHERE run_id = %s ORDER BY sequence""",
+                (run_id,),
+            ).fetchall()
+        records = [row[0] for row in rows]
+        previous = None
+        for sequence, record in enumerate(records):
+            payload = {key: value for key, value in record.items() if key != "record_hash"}
+            if (
+                record["sequence"] != sequence
+                or record["previous_event_hash"] != previous
+                or record["body_hash"] != sha256_uri(record["body"])
+                or record["record_hash"] != sha256_uri(payload)
+            ):
+                raise RuntimeError("persisted activity reconstruction failed closed")
+            previous = record["record_hash"]
+        return records
+
     def claim_outbox(self, worker_id: str, limit: int = 50) -> list[dict[str, Any]]:
         if not worker_id or not 1 <= limit <= 500:
             raise ValueError("worker_id and limit are invalid")

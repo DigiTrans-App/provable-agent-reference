@@ -167,9 +167,10 @@ class SyntheticWorkflowResult:
 class SyntheticVendorAssuranceWorkflow:
     """Deterministic first PR C slice spanning specialist adapters and the v0.3 chain."""
 
-    def __init__(self, memory: PrivacyBoundedMemory) -> None:
+    def __init__(self, memory: PrivacyBoundedMemory, activity_store=None) -> None:
         self.memory = memory
         self.gateway = PolicyEnforcingToolGateway()
+        self.activity_store = activity_store
 
     def run(
         self,
@@ -179,17 +180,49 @@ class SyntheticVendorAssuranceWorkflow:
         question: str,
         approver_id: str,
     ) -> SyntheticWorkflowResult:
-        evidence, memory_activity = self.memory.query(
+        builder = ActivityRecordBuilder(context)
+        delegation = builder.append(
+            "delegation.granted",
+            {
+                "body_type": "delegation",
+                "delegation_id": f"delegation_{context.run_id}",
+                "parent_subject": "agent:synthetic-orchestrator",
+                "child_subject": f"agent:{context.agent_id}",
+                "task": question,
+                "capability_grant": sorted(specialist_grant.capabilities),
+                "budget": {
+                    "max_tool_calls": specialist_grant.max_tool_calls,
+                    "max_model_calls": specialist_grant.max_model_calls,
+                },
+                "valid_until": specialist_grant.valid_until.isoformat(),
+                "status": "granted",
+            },
+            actor_subject="agent:synthetic-orchestrator",
+            actor_type="agent",
+        )
+        evidence, memory_body = self.memory.query(
             context=context, grant=specialist_grant, query=question, limit=10
+        )
+        memory_activity = builder.append(
+            "memory.accessed",
+            memory_body,
+            actor_subject=f"agent:{context.agent_id}",
+            actor_type="agent",
         )
         if not evidence:
             raise GovernedAdapterError("no in-scope evidence is available")
-        tool_result, tool_activity = self.gateway.invoke(
+        tool_result, tool_body = self.gateway.invoke(
             context=context,
             grant=specialist_grant,
             tool_id="control_lookup",
             request={"control_id": "CTL-SYNTHETIC-ACCESS-REVIEW"},
             idempotency_key=f"{context.run_id}:control-lookup",
+        )
+        tool_activity = builder.append(
+            "tool.completed",
+            tool_body,
+            actor_subject="gateway:synthetic-tool",
+            actor_type="tool_gateway",
         )
         selected = evidence[0]
         draft = SemanticDraft(
@@ -213,7 +246,73 @@ class SyntheticVendorAssuranceWorkflow:
             evidence_bundle=bundle,
             approver_id=approver_id,
         )
-        return SyntheticWorkflowResult(pipeline, (memory_activity, tool_activity))
+        activities = (delegation, memory_activity, tool_activity)
+        if self.activity_store is not None:
+            self.activity_store.append_agent_activities(list(activities))
+        return SyntheticWorkflowResult(pipeline, activities)
+
+
+class ActivityRecordBuilder:
+    """Assign trusted identity, ordering, and hashes around untrusted activity bodies."""
+
+    def __init__(self, context: TrustedRunContext) -> None:
+        self.context = context
+        self.previous_hash: str | None = None
+        self.sequence = 0
+
+    def append(
+        self,
+        event_type: str,
+        body: dict[str, Any],
+        *,
+        actor_subject: str,
+        actor_type: str,
+    ) -> dict[str, Any]:
+        body_hash = sha256_uri(body)
+        event_id = "event_" + sha256_uri(
+            {
+                "run_id": self.context.run_id,
+                "sequence": self.sequence,
+                "event_type": event_type,
+                "body_hash": body_hash,
+            }
+        )[7:31]
+        payload = {
+            "$schema": (
+                "https://digitrans.app/schemas/provable-agent-reference/"
+                "agent-activity-record.schema.json"
+            ),
+            "event_version": "0.1-draft",
+            "record_type": "agent_activity",
+            "event_id": event_id,
+            "event_type": event_type,
+            "tenant_id": self.context.tenant_id,
+            "case_id": self.context.case_id,
+            "run_id": self.context.run_id,
+            "parent_run_id": None,
+            "sequence": self.sequence,
+            "actor": {
+                "subject": actor_subject,
+                "issuer": "synthetic://local-test-issuer",
+                "actor_type": actor_type,
+            },
+            "policy_version": "policy:synthetic:1",
+            "occurred_at": self.context.created_at,
+            "occurred_at_assurance": "source_declared",
+            "observed_at": self.context.created_at,
+            "observed_at_assurance": "control_plane_observed",
+            "previous_event_hash": self.previous_hash,
+            "correlation_id": f"correlation_{self.context.run_id}",
+            "operation_id": None,
+            "attempt_id": None,
+            "body": body,
+            "body_hash": body_hash,
+            "limitations": ["Synthetic activity with development-only time assurance."],
+        }
+        record = {**payload, "record_hash": sha256_uri(payload)}
+        self.sequence += 1
+        self.previous_hash = record["record_hash"]
+        return record
 
 
 def _require_grant(

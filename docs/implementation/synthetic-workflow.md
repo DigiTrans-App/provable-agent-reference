@@ -15,6 +15,11 @@ memory text is used to calculate the evidence digest but is not returned in acti
 Authoritative run identity and scope always come from `TrustedRunContext`, never an adapter or
 agent response.
 
-This slice does not yet claim the complete PR C outcome. Durable activity persistence, simulated
-Tier 3 effect receipts, unknown-outcome reconciliation, revocation, supersession, packet export,
-and reconstruction remain acceptance work.
+The orchestrator emits an explicit, bounded delegation to the evidence specialist. Trusted code
+wraps delegation, memory, and tool bodies in schema-shaped activity records, assigns scope and
+sequence, and creates a contiguous hash chain. PostgreSQL persists the activity batch and one
+outbox notification per record in a single transaction; reconstruction recomputes every body and
+record hash and rejects gaps or reordered links.
+
+This slice does not yet claim the complete PR C outcome. Simulated Tier 3 effect receipts,
+unknown-outcome reconciliation, revocation, supersession, and packet export remain acceptance work.
