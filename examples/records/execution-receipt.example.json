@@ -1,0 +1,56 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/execution-receipt.schema.json",
+  "schema_version": "0.1-draft",
+  "receipt_id": "receipt_synthetic_001",
+  "tenant_id": "tenant_synthetic",
+  "case_id": "case_vendor_review",
+  "run_id": "run_orchestrator_001",
+  "operation_id": "op_delivery_001",
+  "attempt_id": "attempt_delivery_001",
+  "correlation_id": "corr_delivery_001",
+  "authorization_id": "authorization_synthetic_001",
+  "authorization_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "executor": {
+    "subject": "workload:synthetic-delivery",
+    "issuer": "https://issuer.synthetic.invalid",
+    "actor_type": "effect_executor"
+  },
+  "adapter": {
+    "adapter_id": "adapter.synthetic-delivery",
+    "adapter_version": "0.1-draft"
+  },
+  "provider": "synthetic-delivery-provider",
+  "operation_type": "deliver_customer_safe_packet",
+  "policy_version": "policy:synthetic:1",
+  "action_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "target_ref": "synthetic-destination:vendor-review",
+  "idempotency_key_commitment": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "attempt_number": 1,
+  "submitted_at": "2026-01-01T00:05:00Z",
+  "acknowledged_at": "2026-01-01T00:05:01Z",
+  "observed_at": "2026-01-01T00:05:02Z",
+  "reconciled_at": "2026-01-01T00:05:03Z",
+  "time_assurance": {
+    "submitted": "control_plane_observed",
+    "acknowledged": "source_declared",
+    "observed": "provider_attested",
+    "reconciled": "control_plane_observed"
+  },
+  "provider_evidence": {
+    "evidence_type": "immutable_event",
+    "provider_receipt_ref": "synthetic-receipt:001",
+    "evidence_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "semantics_version": "synthetic-1",
+    "effect_semantics": "observed_effect"
+  },
+  "submission_status": "acknowledged",
+  "effect_status": "succeeded",
+  "reconciliation_required": false,
+  "reconciliation_method": "immutable_event",
+  "errors": [],
+  "authenticated_record_ref": null,
+  "limitations": [
+    "The provider and effect are synthetic; this receipt proves no external delivery."
+  ],
+  "record_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+}

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/reconciliation-record.schema.json",
+  "title": "Experimental Effect Reconciliation Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "reconciliation_id",
+    "tenant_id",
+    "case_id",
+    "run_id",
+    "receipt_id",
+    "receipt_hash",
+    "method",
+    "effect_status",
+    "reconciled_at",
+    "evidence_refs",
+    "discrepancies",
+    "compensating_authorization_id",
+    "limitations",
+    "record_hash"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://digitrans.app/schemas/provable-agent-reference/reconciliation-record.schema.json"
+    },
+    "schema_version": {"const": "0.1-draft"},
+    "reconciliation_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "tenant_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "case_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "run_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "receipt_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "receipt_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "method": {"enum": ["provider_query", "immutable_event", "state_comparison", "human_confirmation", "compensation_check"]},
+    "effect_status": {"enum": ["succeeded", "failed", "partial", "compensated", "unknown"]},
+    "reconciled_at": {"$ref": "agentic-common.schema.json#/$defs/timestamp"},
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 500}
+    },
+    "discrepancies": {
+      "type": "array",
+      "maxItems": 50,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 2000}
+    },
+    "compensating_authorization_id": {
+      "anyOf": [
+        {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+        {"type": "null"}
+      ]
+    },
+    "limitations": {"$ref": "agentic-common.schema.json#/$defs/limitations"},
+    "record_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"effect_status": {"const": "compensated"}}},
+      "then": {
+        "properties": {
+          "compensating_authorization_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"}
+        }
+      }
+    }
+  ]
+}

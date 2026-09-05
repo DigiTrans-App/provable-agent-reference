@@ -10,6 +10,11 @@ from typing import Any
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
+try:
+    from scripts.validate_agentic_contracts import validate_agentic_contracts
+except ModuleNotFoundError:
+    from validate_agentic_contracts import validate_agentic_contracts
+
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIR = ROOT / "schemas"
 EXAMPLE_DIR = ROOT / "examples" / "records"
@@ -251,6 +256,7 @@ def main() -> int:
         "version": validate_version_metadata(),
         "schemas": len(schemas),
         "examples": validate_examples(schemas, registry),
+        "agentic_contracts": validate_agentic_contracts(ROOT, schemas, registry),
         "json_files": validate_json_files(),
         "markdown_links": validate_markdown_links(),
         "workflow_actions": validate_workflow_security(),

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/lifecycle-status-activity-body.schema.json",
+  "title": "Experimental Lifecycle Status Activity Body",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "body_type",
+    "target_id",
+    "target_hash",
+    "status",
+    "authority",
+    "effective_at",
+    "reason",
+    "successor_ref"
+  ],
+  "properties": {
+    "body_type": {"const": "lifecycle_status"},
+    "target_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "target_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "status": {"enum": ["consumed", "expired", "revoked", "superseded"]},
+    "authority": {"$ref": "agentic-common.schema.json#/$defs/actor"},
+    "effective_at": {"$ref": "agentic-common.schema.json#/$defs/timestamp"},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "successor_ref": {
+      "anyOf": [
+        {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+        {"type": "null"}
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "superseded"}}},
+      "then": {
+        "properties": {
+          "successor_ref": {"$ref": "agentic-common.schema.json#/$defs/identifier"}
+        }
+      },
+      "else": {"properties": {"successor_ref": {"type": "null"}}}
+    }
+  ]
+}

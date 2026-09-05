@@ -1,0 +1,67 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/agentic-conformance-report.schema.json",
+  "schema_version": "0.1-draft",
+  "generated_at": "2026-01-01T01:00:00Z",
+  "claim_scope": "core_profiles_only",
+  "core_profile_status": "incomplete",
+  "self_issued": true,
+  "implementation": {
+    "name": "synthetic-phase1-reference",
+    "version": "0.1-draft",
+    "source_revision": "0000000000000000000000000000000000000000",
+    "language": "python"
+  },
+  "protocol_version": "0.3.0-candidate.1",
+  "vector_revision": "agentic-vectors:0.1-draft",
+  "core_profiles": [
+    "par.core.v1",
+    "par.evidence-bound.v1",
+    "par.governed.v1",
+    "par.exact-use.v1",
+    "par.reconstructable.v1"
+  ],
+  "capability_results": [
+    {
+      "capability_id": "par.capability.activity-bound.0.1-draft",
+      "status": "not_tested",
+      "dependencies": [
+        "par.reconstructable.v1"
+      ],
+      "checks": [
+        "agentic_contract_validation_pending_runtime"
+      ],
+      "limitations": [
+        "Experimental capability result; not a protocol conformance claim."
+      ]
+    },
+    {
+      "capability_id": "par.capability.authenticated-records.0.1-draft",
+      "status": "not_tested",
+      "dependencies": [
+        "par.capability.activity-bound.0.1-draft"
+      ],
+      "checks": [],
+      "limitations": [
+        "Development DSSE fixtures do not authenticate a producer."
+      ]
+    }
+  ],
+  "storage_assurance": {
+    "level": "S0",
+    "status": "incomplete",
+    "self_issued": true,
+    "tested_at": "2026-01-01T01:00:00Z",
+    "limitations": [
+      "S0 is logical synthetic journaling and is not production storage assurance."
+    ]
+  },
+  "environment": {
+    "os": "synthetic",
+    "runtime": "not-implemented",
+    "architecture": "contract-only"
+  },
+  "limitations": [
+    "Self-issued contract fixture only; no runtime or production assurance."
+  ],
+  "report_hash": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+}
