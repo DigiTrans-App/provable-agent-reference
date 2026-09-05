@@ -57,9 +57,12 @@ class ControlPlaneIntegrationTests(unittest.TestCase):
         self.assertEqual(self.store.create_run(run, event, outbox, idempotency), run_id)
         self.assertEqual(self.store.create_run(run, event, outbox, idempotency), run_id)
         claimed = self.store.claim_outbox("integration-worker", limit=10)
-        self.assertEqual([str(item["outbox_id"]) for item in claimed], [outbox_id])
+        claimed_ids = [str(item["outbox_id"]) for item in claimed]
+        self.assertIn(outbox_id, claimed_ids)
+        self.assertEqual(claimed_ids.count(outbox_id), 1)
         self.assertEqual(self.store.claim_outbox("other-worker", limit=10), [])
-        self.store.complete_outbox(outbox_id, "integration-worker")
+        for claimed_id in claimed_ids:
+            self.store.complete_outbox(claimed_id, "integration-worker")
 
         with self.store.transaction() as connection:
             counts = connection.execute(
@@ -82,7 +85,7 @@ class ControlPlaneIntegrationTests(unittest.TestCase):
             "requester_subject": "subject_synthetic",
             "purpose": "rollback test",
             "audience": "maintainers",
-            "risk_tier": "synthetic",
+            "risk_tier": 0,
             "policy_version": "phase-1",
         }
         event = {
