@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS outbox (
     created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
     available_at timestamptz NOT NULL DEFAULT clock_timestamp(),
     claimed_at timestamptz,
+    claimed_by text,
     published_at timestamptz,
     attempts integer NOT NULL DEFAULT 0 CHECK (attempts >= 0),
     last_error text

@@ -6,7 +6,9 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from provable_agent_reference.control_plane.artifacts import LocalArtifactStore
+from provable_agent_reference.control_plane.assurance import s0_report
 from provable_agent_reference.control_plane.models import CapabilityGrant
+from provable_agent_reference.control_plane.outbox import OutboxWorker
 from provable_agent_reference.control_plane.security import validate_local_reset_target
 
 
@@ -68,6 +70,43 @@ class ControlPlaneTests(unittest.TestCase):
                 "local-synthetic",
                 "postgresql://user:password@localhost/reference_production",
             )
+
+    def test_s0_report_does_not_overclaim_storage_assurance(self):
+        report = s0_report("revision-test")
+        self.assertEqual(report["level"], "S0")
+        self.assertEqual(report["status"], "incomplete")
+        self.assertEqual(report["controls"]["external_immutability"], "not_claimed")
+
+    def test_outbox_worker_completes_and_retries_with_bounded_error(self):
+        class FakeStore:
+            def __init__(self):
+                self.completed = []
+                self.retried = []
+
+            def claim_outbox(self, worker_id, limit):
+                return [
+                    {"outbox_id": "ok", "event_type": "run.requested", "payload": {}, "attempts": 1},
+                    {"outbox_id": "bad", "event_type": "run.requested", "payload": {}, "attempts": 2},
+                ]
+
+            def complete_outbox(self, outbox_id, worker_id):
+                self.completed.append((outbox_id, worker_id))
+
+            def retry_outbox(self, outbox_id, worker_id, error, delay_seconds):
+                self.retried.append((outbox_id, worker_id, error, delay_seconds))
+
+        store = FakeStore()
+
+        def publish(_event_type, payload):
+            if payload == {} and len(store.completed) == 1:
+                raise ConnectionError("sensitive provider detail")
+
+        worker = OutboxWorker(store, "worker-test", publish)
+        self.assertEqual(worker.run_once(), (1, 1))
+        self.assertEqual(store.completed, [("ok", "worker-test")])
+        self.assertEqual(store.retried[0][:2], ("bad", "worker-test"))
+        self.assertNotIn("sensitive provider detail", store.retried[0][2])
+        self.assertEqual(store.retried[0][3], 4)
 
 
 if __name__ == "__main__":
