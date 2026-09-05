@@ -1,4 +1,4 @@
-# Proposed decision 0004: DSSE-style packet signatures with verifier-pinned issuer trust
+# Proposed decision 0004: DSSE-compatible packet signatures with verifier-pinned issuer trust
 
 Status: **proposed**, not an accepted ADR.
 
@@ -10,28 +10,28 @@ false authentication.
 
 ## Proposed decision
 
-Wrap the exact canonical Assurance Packet bytes in a DSSE-style detached signing envelope. The
-envelope applies domain separation using a registered payload type and supports one or more
-signatures without changing the packet's existing content hash.
+Wrap the exact canonical Assurance Packet bytes in a standard DSSE envelope. The envelope uses
+DSSE pre-authentication encoding and the standard fields:
 
-Conceptual fields are:
+- `payloadType`, registered and versioned for the Assurance Packet media type;
+- `payload`, containing the base64-encoded exact canonical packet bytes;
+- `signatures`, containing standard `keyid` and `sig` values.
 
-- `envelope_version`;
-- `payload_type`, versioned for the Assurance Packet media type;
-- `payload_digest` over the exact canonical bytes;
-- optional embedded payload or an external immutable payload reference;
-- signature entries containing `issuer`, `key_id`, `algorithm`, `signature`, and a claimed
-  signing time with its time-assurance level;
-- envelope limitations.
+Phase 1 does not define a detached-payload extension or add issuer, algorithm, time, or
+verification material fields to the DSSE envelope. Those properties come from the verifier's
+trusted key metadata or separately standardized attestations. This keeps the transport
+compatible instead of calling a project-specific shape DSSE.
 
 The first interoperable algorithm profile should require one widely implemented asymmetric
-algorithm suitable for managed key services. Additional algorithms require explicit registry,
-test vectors, and downgrade handling; verifiers never infer an algorithm from key material.
+algorithm suitable for managed key services. Additional algorithms require an explicit
+registry, test vectors, and downgrade handling. The verifier resolves the algorithm from pinned
+key metadata; it never guesses from a signature or accepts an untrusted algorithm declaration.
 
 ## Trust and key discovery
 
 The verifier starts with an explicit trust configuration that maps accepted issuer identifiers
-to trusted keys or trust roots. A packet-supplied key is never sufficient.
+and globally unique key IDs to trusted keys, algorithms, roles, and validity metadata. A
+packet-supplied key is never sufficient.
 
 Two discovery modes are allowed:
 
@@ -49,7 +49,8 @@ transport but cannot create trust.
 - Key IDs are immutable and never reused for different key material.
 - Rotation publishes the successor before use and retains historical verification material for
   the applicable record-retention period.
-- Revocation identifies key, issuer, effective time, reason class, and signed status version.
+- Revocation metadata identifies key, issuer, effective time, reason class, and signed status
+  version.
 - A verifier distinguishes invalid-at-signing, revoked-after-signing, unknown-time, and
   currently-disabled results.
 - Without an independently trusted time source, the verifier reports signature validity under
@@ -57,14 +58,14 @@ transport but cannot create trust.
 
 ## Signer roles
 
-Packet issuer, approver, evidence source, and effect executor are distinct roles. One envelope
-signature authenticates only the signing issuer's statement; it does not retroactively
-authenticate every embedded actor. Role-specific signed records or attestations require their
-own profiles.
+Packet issuer, approver, evidence source, and effect executor are distinct roles. The trusted
+key metadata authorizes each key for specific roles. One envelope signature authenticates only
+the packet issuer's statement; it does not retroactively authenticate every embedded actor.
+Role-specific signed records or attestations require their own profiles.
 
 ## Consequences
 
-- Existing packet hashes remain stable and signatures can be transported separately.
+- Existing packet hashes remain stable and the DSSE envelope transports the exact packet.
 - Offline verification remains possible with a pinned trust bundle.
 - Multi-signature and cross-organization use remain possible without requiring them in Phase 1.
 - The implementation must define exact canonical bytes before signature interoperability can be
@@ -72,9 +73,10 @@ own profiles.
 
 ## Phase 1 implementation
 
-Use a clearly labeled development signer and test trust bundle. Test wrong issuer, key,
-algorithm, payload type, payload digest, signature, rotation, revocation, and missing trusted
-time. Phase 1 exports no `par.authenticated-records.v1` claim.
+Use a clearly labeled development signer and test trust bundle. Interoperability is not claimed
+until canonical packet bytes and DSSE pre-authentication encoding have cross-language vectors.
+Test wrong issuer, key, algorithm, payload type, payload bytes, signature, role, rotation,
+revocation, and missing trusted time. Phase 1 exports no `par.authenticated-records.v1` claim.
 
 ## Affected protocol versions
 
