@@ -24,9 +24,9 @@ The public repository uses a layered, least-privilege automation baseline:
 - **CodeQL** analyzes Python changes on pull requests and pushes to `main`, and runs on a weekly schedule using the extended security query suite.
 - **Dependency Review** evaluates dependency changes on pull requests and fails when a newly introduced vulnerability has moderate or greater severity.
 - **OpenSSF Scorecard** evaluates repository and supply-chain practices on pushes to `main`, branch-protection changes, and a weekly schedule. SARIF findings are uploaded to GitHub code scanning.
-- **Release** verifies that a pushed tag matches the package version, repeats the public validation gate, validates wheel and source-distribution metadata and contents, and publishes SHA-256 checksums with the GitHub release assets.
+- **Release** verifies that a pushed tag matches the package version and points to a commit contained in protected `main`, repeats the public validation gate, validates wheel and source-distribution metadata and contents, publishes SHA-256 checksums, and generates GitHub build-provenance attestations for every release asset.
 
-Third-party GitHub Actions are pinned to full commit SHAs and are kept current through Dependabot. Workflow tokens use read-only permissions unless a narrowly scoped write permission is required to publish code-scanning results, OpenSSF attestations, or an authorized tagged GitHub release.
+Repository validation rejects `pull_request_target`, mutable external Action references, and checkout steps that retain credentials. Third-party GitHub Actions are pinned to full commit SHAs and are kept current through weekly Dependabot updates. Workflow tokens use read-only permissions unless a narrowly scoped write permission is required to publish code-scanning results, OpenSSF attestations, release attestations, or an authorized tagged GitHub release.
 
 Automated findings are triage inputs, not certification. A passing workflow does not prove source authenticity, runtime completeness, production isolation, artifact provenance beyond the documented GitHub Actions boundary, or absence of vulnerabilities.
 
