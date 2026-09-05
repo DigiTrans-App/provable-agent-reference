@@ -31,6 +31,7 @@ The minimum deployable reference should demonstrate Levels 0 and 1:
 - development signature envelope and explicit limitations;
 - execution receipt, reconciliation, revocation, and supersession demonstrations;
 - deterministic reset and repeatable test dataset.
+- a separately implemented TypeScript verifier using published contracts and vectors.
 
 ## Phase 2 acceptance
 
