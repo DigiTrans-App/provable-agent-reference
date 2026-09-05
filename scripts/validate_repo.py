@@ -9,7 +9,6 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
-
 from validate_agentic_contracts import validate_agentic_contracts
 
 ROOT = Path(__file__).resolve().parents[1]
