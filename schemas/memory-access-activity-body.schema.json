@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/memory-access-activity-body.schema.json",
+  "title": "Experimental Privacy-Bounded Memory Access Body",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "body_type",
+    "memory_provider",
+    "store_id",
+    "namespace",
+    "adapter",
+    "access_purpose",
+    "allowed_classifications",
+    "filters_commitment",
+    "result_limit",
+    "query_commitment",
+    "commitment_key_ref",
+    "result_set_commitment",
+    "result_count",
+    "truncated",
+    "results",
+    "disclosure_mode",
+    "minimization_decision",
+    "retention_class",
+    "access_decision",
+    "evidence_object_refs",
+    "errors"
+  ],
+  "properties": {
+    "body_type": {"const": "memory_access"},
+    "memory_provider": {"type": "string", "minLength": 1, "maxLength": 200},
+    "store_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "namespace": {"type": "string", "minLength": 1, "maxLength": 500},
+    "adapter": {"$ref": "agentic-common.schema.json#/$defs/adapter"},
+    "access_purpose": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "allowed_classifications": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "agentic-common.schema.json#/$defs/classification"}
+    },
+    "filters_commitment": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "result_limit": {"type": "integer", "minimum": 1, "maximum": 1000},
+    "query_commitment": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "commitment_key_ref": {"type": "string", "minLength": 1, "maxLength": 500},
+    "result_set_commitment": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "result_count": {"type": "integer", "minimum": 0, "maximum": 10000},
+    "truncated": {"type": "boolean"},
+    "results": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {"$ref": "agentic-common.schema.json#/$defs/evidenceReference"}
+    },
+    "disclosure_mode": {"enum": ["metadata_only", "reference", "embedded_minimized"]},
+    "minimization_decision": {"enum": ["metadata_only", "minimized", "denied", "not_applicable"]},
+    "retention_class": {"type": "string", "minLength": 1, "maxLength": 200},
+    "access_decision": {"enum": ["allow", "deny", "partial", "unknown"]},
+    "evidence_object_refs": {
+      "type": "array",
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 500}
+    },
+    "errors": {
+      "type": "array",
+      "maxItems": 50,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 500}
+    }
+  }
+}

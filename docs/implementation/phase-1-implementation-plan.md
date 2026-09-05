@@ -53,7 +53,7 @@ used.
 
 ### PR D: development signing and TypeScript verifier
 
-- DSSE-compatible wrapper and pinned test trust bundle;
+- standard DSSE wrapper and pinned test trust bundle;
 - cross-language canonicalization and signature vectors;
 - independent TypeScript verifier and CLI;
 - end-to-end conformance report.

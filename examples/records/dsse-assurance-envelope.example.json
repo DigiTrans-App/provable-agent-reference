@@ -1,0 +1,10 @@
+{
+  "payloadType": "application/vnd.digitrans.provable-agent.assurance-packet+json;version=0.3.0-candidate.1",
+  "payload": "e30=",
+  "signatures": [
+    {
+      "keyid": "https://issuer.synthetic.invalid/keys/development-1",
+      "sig": "AA=="
+    }
+  ]
+}
