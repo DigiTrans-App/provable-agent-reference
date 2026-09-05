@@ -3,7 +3,6 @@ from __future__ import annotations
 import ipaddress
 from urllib.parse import urlparse
 
-
 LOCAL_HOSTS = {"localhost", "postgres", "127.0.0.1", "::1"}
 
 
