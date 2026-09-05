@@ -4,9 +4,11 @@ import os
 import unittest
 from datetime import UTC, datetime, timedelta
 
+from provable_agent_reference.contracts import TrustedRunContext
 from provable_agent_reference.control_plane.models import CapabilityGrant
 from provable_agent_reference.control_plane.service import ControlPlaneService
 from provable_agent_reference.control_plane.store import PostgresStore, canonical_json, sha256_uri
+from provable_agent_reference.synthetic_workflow import ActivityRecordBuilder
 
 
 @unittest.skipUnless(os.environ.get("PAR_DATABASE_URL"), "requires local synthetic PostgreSQL")
@@ -199,6 +201,85 @@ class ControlPlaneIntegrationTests(unittest.TestCase):
                 (grant_id, grant_id, grant_id),
             ).fetchone()
         self.assertEqual(counts, (1, 1, 1))
+
+    def test_activity_batch_persists_and_reconstructs_hash_chain(self) -> None:
+        import psycopg
+
+        with self.store.transaction() as connection:
+            run_id, tenant_id, case_id = connection.execute(
+                "SELECT run_id, tenant_id, case_id FROM runs ORDER BY created_at LIMIT 1"
+            ).fetchone()
+        context = TrustedRunContext(
+            tenant_id=tenant_id,
+            case_id=case_id,
+            run_id=run_id,
+            agent_id="agent_synthetic_specialist",
+            purpose="Exercise durable synthetic activity reconstruction.",
+            audience="synthetic_reviewer",
+            classification="internal",
+            created_at="2026-09-05T00:00:00Z",
+        )
+        builder = ActivityRecordBuilder(context)
+        records = [
+            builder.append(
+                "delegation.granted",
+                {
+                    "body_type": "delegation",
+                    "delegation_id": "delegation_integration",
+                    "parent_subject": "agent:orchestrator",
+                    "child_subject": "agent:synthetic-specialist",
+                    "task": "Collect synthetic evidence.",
+                    "capability_grant": ["memory.read"],
+                    "budget": {"max_tool_calls": 1, "max_model_calls": 0},
+                    "valid_until": "2026-09-06T00:00:00Z",
+                    "status": "granted",
+                },
+                actor_subject="agent:orchestrator",
+                actor_type="agent",
+            )
+        ]
+        self.store.append_agent_activities(records)
+        self.assertEqual(self.store.reconstruct_agent_activities(run_id), records)
+        with self.store.transaction() as connection:
+            with self.assertRaises(psycopg.errors.RaiseException):
+                connection.execute(
+                    "UPDATE agent_activity_records SET event_type = 'policy.decided' WHERE run_id = %s",
+                    (run_id,),
+                )
+
+    def test_effect_records_are_bound_immutable_and_replay_safe(self) -> None:
+        with self.store.transaction() as connection:
+            run_id, tenant_id, case_id = connection.execute(
+                "SELECT run_id, tenant_id, case_id FROM runs ORDER BY created_at LIMIT 1"
+            ).fetchone()
+        receipt_payload = {
+            "receipt_id": "receipt_integration",
+            "tenant_id": tenant_id,
+            "case_id": case_id,
+            "run_id": run_id,
+            "effect_status": "unknown",
+        }
+        receipt = {**receipt_payload, "record_hash": sha256_uri(receipt_payload)}
+        reconciliation_payload = {
+            "reconciliation_id": "reconciliation_integration",
+            "tenant_id": tenant_id,
+            "case_id": case_id,
+            "run_id": run_id,
+            "receipt_id": receipt["receipt_id"],
+            "receipt_hash": receipt["record_hash"],
+            "effect_status": "succeeded",
+        }
+        reconciliation = {
+            **reconciliation_payload,
+            "record_hash": sha256_uri(reconciliation_payload),
+        }
+        self.store.persist_effect_records(receipt, reconciliation)
+        self.store.persist_effect_records(receipt, reconciliation)
+        records = self.store.load_effect_records(run_id)
+        self.assertEqual(
+            {item["record_hash"] for item in records},
+            {receipt["record_hash"], reconciliation["record_hash"]},
+        )
 
 
 if __name__ == "__main__":

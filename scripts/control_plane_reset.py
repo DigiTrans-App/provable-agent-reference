@@ -5,7 +5,16 @@ import os
 
 from provable_agent_reference.control_plane.security import validate_local_reset_target
 
-TABLES = ("artifacts", "outbox", "journal_records", "idempotency_keys", "capability_grants", "runs")
+TABLES = (
+    "effect_records",
+    "agent_activity_records",
+    "artifacts",
+    "outbox",
+    "journal_records",
+    "idempotency_keys",
+    "capability_grants",
+    "runs",
+)
 
 
 def main() -> int:
