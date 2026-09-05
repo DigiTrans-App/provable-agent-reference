@@ -42,3 +42,5 @@ Nothing in this directory is a conformance requirement unless it is later accept
 normative change process, assigned a versioned profile, and backed by machine-readable positive
 and negative vectors. A reference deployment can demonstrate a pattern; it cannot certify that
 another deployment is secure.
+
+- [Local durable control plane](local-control-plane.md)
