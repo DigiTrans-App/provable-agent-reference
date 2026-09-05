@@ -9,29 +9,30 @@ informative until accepted and do not add claims to protocol `0.3.0-candidate.1`
 | Question | Proposed decision | Phase 1 consequence |
 |---|---|---|
 | Record granularity | One immutable record per security-relevant boundary transition; attempts remain distinct under one operation | Implement a typed activity journal and causal run graph |
-| Signature and key discovery | DSSE-style detached envelope over canonical packet bytes; verifier-pinned issuer trust; optional well-known metadata | Implement a development signer and explicit offline trust bundle |
+| Signature and key discovery | DSSE-compatible envelope carrying canonical packet bytes; verifier-pinned issuer trust; optional well-known metadata | Implement a development signer and explicit offline trust bundle |
 | Portable execution receipt | Separate authorization, submission, provider acknowledgement, observed effect, and reconciliation | Implement a core receipt plus adapter evidence, with `unknown` fail-closed |
 | Memory privacy | Metadata and keyed commitments by default; raw content stored separately and disclosed only by policy | Implement privacy modes, purpose binding, minimization, and deletion status |
 | Storage immutability | Deployment assurance levels from logical append-only through WORM and external anchoring | Phase 1 targets sandbox Level S0; non-production pilot requires S1 |
 
-## Proposed future extension sequence
+## Proposed profile composition
 
-If standardized, agentic profiles should extend the existing cumulative sequence rather than
-silently redefine it:
+Internal review found that putting every future feature into one cumulative profile sequence
+would force workflows to claim capabilities they do not use. The proposal therefore separates:
 
-1. `par.activity-bound.v1` — trusted causal activity records;
-2. `par.authenticated-records.v1` — issuer signatures and explicit trust configuration;
-3. `par.receipted-effects.v1` — exact effect authorization, receipt, and reconciliation;
-4. `par.durable-lifecycle.v1` — expiry, consumption, revocation, and supersession with durable
-   history.
+1. a cumulative core assurance ladder, potentially extended by `par.activity-bound.v1` and
+   `par.authenticated-records.v1`; and
+2. independently versioned capability results such as `par.capability.receipted-effect.v1`,
+   `par.capability.private-memory.v1`, and `par.capability.durable-lifecycle.v1`, each with
+   declared dependencies.
 
-These identifiers are reserved design labels only. They must not appear in Assurance Packet
-claims until separate normative RFCs, schemas, vectors, compatibility behavior, and independent
-review are complete.
+The current packet has no capability-results field. Phase 1 reports experimental capability
+results only in its conformance report; it does not add them to Assurance Packet claims. A
+future protocol RFC must decide the machine-readable composition model.
 
-Memory privacy is a mandatory behavior whenever memory activity is recorded; it is not a claim
-that every workflow uses memory. Storage assurance is reported separately from protocol
-conformance because an offline verifier cannot prove the producer's operational storage controls.
+These identifiers are reserved design labels only. They must not appear in candidate Assurance
+Packet claims. Memory privacy is mandatory whenever memory activity is recorded; it is not a
+claim that every workflow uses memory. Storage assurance is reported separately because an
+offline verifier cannot prove the producer's operational storage controls.
 
 ## Phase 1 boundary
 
@@ -58,3 +59,4 @@ evidence. Later decisions supersede; they do not rewrite accepted history.
 - [Portable execution receipts](decision-proposals/0005-portable-execution-receipts.md)
 - [Privacy-preserving memory evidence](decision-proposals/0006-memory-privacy.md)
 - [Storage assurance levels](decision-proposals/0007-storage-assurance-levels.md)
+- [Internal architecture and security review](internal-architecture-security-review.md)
