@@ -109,7 +109,7 @@ The five architecture questions are resolved as proposed directions in the
 [Phase 0 design decisions](phase-0-decisions.md):
 
 - one record per security-relevant boundary transition;
-- a DSSE-style packet envelope with verifier-pinned issuer trust;
+- a DSSE-compatible packet envelope with verifier-pinned issuer trust;
 - a portable execution receipt that separates submission from observed effect;
 - metadata-and-commitment-first memory evidence;
 - storage assurance reported separately at levels S0 through S3.
@@ -118,6 +118,11 @@ These directions authorize experimental Phase 1 design, not protocol claims. Eac
 extension still requires an accepted RFC, schema, canonicalization rules, positive and negative
 vectors, migration behavior, and independent review.
 
-The remaining Phase 1 scoping choice is implementation sequencing. The recommended order is a
-Python reference control plane and synthetic adapter first, followed immediately by a
-separately maintained TypeScript verifier before any stable interoperability claim.
+Internal pre-review resolved the profile-composition ambiguity by separating a cumulative core
+assurance ladder from independently versioned capability results. It also narrowed the signing
+proposal to the standard DSSE envelope shape; issuer, algorithm, role, rotation, revocation, and
+time assurance remain in verifier-pinned trust metadata or future attestations.
+
+The implementation sequence is defined in the
+[Phase 1 plan](phase-1-implementation-plan.md): Python contracts and control plane first, followed
+within Phase 1 by a separately maintained TypeScript verifier before any interoperability claim.
