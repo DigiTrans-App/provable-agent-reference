@@ -22,6 +22,11 @@ Artifact bytes use staged, content-addressed publication. Database metadata may 
 `available` only after digest verification and finalization. Missing or orphaned bytes remain
 unavailable and require reconciliation.
 
+The `Control Plane Integration` workflow starts an isolated PostgreSQL service, runs migrations
+and deterministic seeding twice, verifies atomic commit/rollback and outbox lease exclusion, then
+performs a logical `pg_dump`/reset/`pg_restore` recovery exercise. The workflow is synthetic-only;
+its result is not a durability or disaster-recovery assurance claim.
+
 ## Reset
 
 Reset is intentionally difficult to invoke accidentally:
@@ -41,5 +46,6 @@ environment markers, and any confirmation value other than the exact literal abo
 - local development credentials only;
 - no production destination or external effect;
 - no authenticated-record or append-only-storage claim beyond logical S0 behavior;
-- backup, restore, outbox worker leases, artifact reconciliation, and failure injection remain
-  acceptance work within PR B.
+- artifact reconciliation and broader failure injection remain acceptance work within PR B;
+- container tags remain version-locked but require verified upstream digest capture before the
+  final PR B acceptance decision.

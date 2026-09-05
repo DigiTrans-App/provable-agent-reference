@@ -32,9 +32,37 @@ class PostgresStore:
             with connection.transaction():
                 yield connection
 
-    def create_run(self, run: dict[str, Any], event: dict[str, Any], outbox: dict[str, Any]) -> None:
+    def create_run(
+        self,
+        run: dict[str, Any],
+        event: dict[str, Any],
+        outbox: dict[str, Any],
+        idempotency: dict[str, Any],
+    ) -> str:
         """Atomically persist state, append the journal, and enqueue the outbox."""
         with self.transaction() as connection:
+            claimed = connection.execute(
+                """INSERT INTO idempotency_keys
+                   (tenant_id, subject, operation, key_commitment, request_hash, result_ref)
+                   VALUES (%(tenant_id)s, %(subject)s, %(operation)s, %(key_commitment)s,
+                           %(request_hash)s, NULL)
+                   ON CONFLICT DO NOTHING
+                   RETURNING tenant_id""",
+                idempotency,
+            ).fetchone()
+            if claimed is None:
+                existing = connection.execute(
+                    """SELECT request_hash, result_ref FROM idempotency_keys
+                       WHERE tenant_id = %(tenant_id)s AND subject = %(subject)s
+                         AND operation = %(operation)s AND key_commitment = %(key_commitment)s
+                       FOR UPDATE""",
+                    idempotency,
+                ).fetchone()
+                if existing is None or existing[0] != idempotency["request_hash"]:
+                    raise RuntimeError("idempotency key was reused for a different request")
+                if existing[1] is None:
+                    raise RuntimeError("idempotency operation has no committed result")
+                return str(existing[1])
             connection.execute(
                 """INSERT INTO runs
                    (run_id, tenant_id, case_id, requester_subject, purpose, audience,
@@ -60,6 +88,13 @@ class PostgresStore:
                            %(aggregate_id)s, %(event_type)s, %(payload)s::jsonb)""",
                 {**outbox, "payload": canonical_json(outbox["payload"])},
             )
+            connection.execute(
+                """UPDATE idempotency_keys SET result_ref = %(result_ref)s
+                   WHERE tenant_id = %(tenant_id)s AND subject = %(subject)s
+                     AND operation = %(operation)s AND key_commitment = %(key_commitment)s""",
+                idempotency,
+            )
+        return str(idempotency["result_ref"])
 
     def claim_outbox(self, worker_id: str, limit: int = 50) -> list[dict[str, Any]]:
         if not worker_id or not 1 <= limit <= 500:

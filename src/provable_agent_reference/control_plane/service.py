@@ -43,8 +43,15 @@ class ControlPlaneService:
             "event_type": "run.requested",
             "payload": {"event_id": event_id, "record_hash": event["record_hash"]},
         }
-        self.store.create_run(run, event, outbox)
-        return run_id
+        idempotency = {
+            "tenant_id": request.tenant_id,
+            "subject": request.requester_subject,
+            "operation": "run.create",
+            "key_commitment": sha256_uri({"idempotency_key": idempotency_key}),
+            "request_hash": sha256_uri(request.__dict__),
+            "result_ref": run_id,
+        }
+        return self.store.create_run(run, event, outbox, idempotency)
 
     @staticmethod
     def require_attenuation(parent: CapabilityGrant, child: CapabilityGrant) -> None:
