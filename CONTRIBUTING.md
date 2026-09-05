@@ -36,6 +36,9 @@ Use only public or synthetic inputs. Do not place credentials, customer data, pr
 
 - Open an issue for substantial architecture changes.
 - Keep pull requests focused and explain the trust-boundary impact.
+- Classify the change with the pull request template. Security-critical changes include trust-boundary, dependency, workflow, release, governance, and ownership changes.
+- Request the approvals defined in the [governance review policy](GOVERNANCE.md#pull-request-review-policy): one independent approval for a standard change and two, including relevant expertise, for a security-critical change.
+- Treat an approval as applying only to the reviewed head. Ask for re-review after material changes.
 - Add tests for each behavior change and each failure mode.
 - Update schemas and documentation when contracts change.
 - Do not commit API keys, `.env` files, private evidence, raw prompts from customer workloads, generated evaluation results, or generated independent-validation reports.
