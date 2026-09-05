@@ -47,3 +47,10 @@ missing evidence, output substitution, and any broken cross-record binding fail 
 - provider-side model or API guarantees;
 - regulated-data compliance certification.
 - durable emission, consumption, expiry, revocation, and supersession records.
+
+
+## Phase 1 implementation update
+
+The synthetic Phase 1 implementation adds bounded delegation, privacy-minimized memory and tool adapters, transactional PostgreSQL state/journal/outbox writes, immutable receipt and reconciliation records, a fixed non-network effect target, and verifier-pinned development DSSE signatures. The detailed implemented-control and data inventory is maintained in the [Phase 1 threat model and privacy inventory](implementation/phase-1-threat-model-and-privacy.md).
+
+These controls remain S0 and synthetic. They do not establish production identity, key protection, trusted time, external effect evidence, customer isolation, independent attestation, or certification.

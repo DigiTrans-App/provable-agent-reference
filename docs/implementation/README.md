@@ -1,7 +1,8 @@
 # Implementable reference architecture
 
-Status: **Phase 0 design proposal**. These documents are informative, depend on the v0.3
-Reference Architecture Candidate, and do not change protocol `0.3.0-candidate.1`.
+Status: **experimental Phase 1 synthetic implementation**. These documents are informative,
+depend on the v0.3 Reference Architecture Candidate, and do not change protocol
+`0.3.0-candidate.1` or authorize production use.
 
 This package translates the provider-neutral protocol into a system that an implementation
 team can build, deploy, operate, and independently evaluate. It deliberately separates logical
@@ -44,3 +45,8 @@ and negative vectors. A reference deployment can demonstrate a pattern; it canno
 another deployment is secure.
 
 - [Local durable control plane](local-control-plane.md)
+- [Synthetic full-agentic workflow](synthetic-workflow.md)
+- [Development DSSE signing](development-signing.md)
+- [Phase 1 operator and adopter guide](phase-1-operator-guide.md)
+- [Phase 1 implementation threat model and privacy inventory](phase-1-threat-model-and-privacy.md)
+- [Phase 1 operational exercises](phase-1-operations-exercises.md)
