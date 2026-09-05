@@ -27,5 +27,11 @@ as `not_observed`, never as effect success. A separate state-comparison reconcil
 receipt hash and records the later synthetic observation. Alternate fixtures cover unknown outcome,
 revocation, supersession, duplicate consumption, mutated output, and non-synthetic destinations.
 
-This slice does not yet claim the complete PR C outcome. Durable receipt/lifecycle persistence and
-customer-safe packet/audit export remain acceptance work.
+The workflow reuses the existing v0.3 packet builder to produce a customer-safe packet containing
+evidence commitments and summaries rather than raw memory text. A compact audit export binds the
+ordered activity hashes, receipt, reconciliation, and packet. Both exports state their synthetic,
+development-only limitations and make no authenticated-record claim.
+
+PostgreSQL stores receipts and reconciliations as immutable, scope-checked, hash-verified records
+with transactional outbox notifications. Exact replays are idempotent; identity collisions,
+cross-scope substitution, changed receipt binding, and record mutation fail closed.

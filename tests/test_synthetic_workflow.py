@@ -80,6 +80,12 @@ class SyntheticWorkflowTests(unittest.TestCase):
         self.assertEqual(result.activities[3]["event_type"], "authorization.consumed")
         self.assertEqual(result.receipt["effect_status"], "not_observed")
         self.assertEqual(result.reconciliation["effect_status"], "succeeded")
+        self.assertEqual(
+            result.audit_export["packet_hash"], result.customer_safe_packet["packet_hash"]
+        )
+        packet_text = str(result.customer_safe_packet)
+        self.assertNotIn("Synthetic quarterly access review completed.", packet_text)
+        self.assertIn("Synthetic evidence", packet_text)
 
     def test_trusted_activity_envelope_ignores_adapter_identity_fields(self):
         class FakeStore:

@@ -6,6 +6,7 @@ import os
 from provable_agent_reference.control_plane.security import validate_local_reset_target
 
 TABLES = (
+    "effect_records",
     "agent_activity_records",
     "artifacts",
     "outbox",

@@ -247,6 +247,40 @@ class ControlPlaneIntegrationTests(unittest.TestCase):
                     (run_id,),
                 )
 
+    def test_effect_records_are_bound_immutable_and_replay_safe(self) -> None:
+        with self.store.transaction() as connection:
+            run_id, tenant_id, case_id = connection.execute(
+                "SELECT run_id, tenant_id, case_id FROM runs ORDER BY created_at LIMIT 1"
+            ).fetchone()
+        receipt_payload = {
+            "receipt_id": "receipt_integration",
+            "tenant_id": tenant_id,
+            "case_id": case_id,
+            "run_id": run_id,
+            "effect_status": "unknown",
+        }
+        receipt = {**receipt_payload, "record_hash": sha256_uri(receipt_payload)}
+        reconciliation_payload = {
+            "reconciliation_id": "reconciliation_integration",
+            "tenant_id": tenant_id,
+            "case_id": case_id,
+            "run_id": run_id,
+            "receipt_id": receipt["receipt_id"],
+            "receipt_hash": receipt["record_hash"],
+            "effect_status": "succeeded",
+        }
+        reconciliation = {
+            **reconciliation_payload,
+            "record_hash": sha256_uri(reconciliation_payload),
+        }
+        self.store.persist_effect_records(receipt, reconciliation)
+        self.store.persist_effect_records(receipt, reconciliation)
+        records = self.store.load_effect_records(run_id)
+        self.assertEqual(
+            {item["record_hash"] for item in records},
+            {receipt["record_hash"], reconciliation["record_hash"]},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

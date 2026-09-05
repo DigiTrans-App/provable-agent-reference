@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from .assurance_packet import build_assurance_packet
 from .canonical import sha256_uri
 from .contracts import EvidenceBundle, EvidenceRecord, SemanticDraft, TrustedRunContext
 from .control_plane.models import CapabilityGrant
@@ -158,6 +159,8 @@ class SyntheticWorkflowResult:
     activities: tuple[dict[str, Any], ...]
     receipt: dict[str, Any]
     reconciliation: dict[str, Any]
+    customer_safe_packet: dict[str, Any]
+    audit_export: dict[str, Any]
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -165,6 +168,8 @@ class SyntheticWorkflowResult:
             "activities": list(self.activities),
             "receipt": self.receipt,
             "reconciliation": self.reconciliation,
+            "customer_safe_packet": self.customer_safe_packet,
+            "audit_export": self.audit_export,
             "limitations": [
                 "Synthetic evidence and identities only.",
                 "No network destination or external effect is reachable.",
@@ -281,9 +286,31 @@ class SyntheticVendorAssuranceWorkflow:
             receipt, observed_effect=True, reconciled_at=context.created_at
         )
         activities = (delegation, memory_activity, tool_activity, lifecycle_activity)
+        packet = build_assurance_packet(
+            evidence_bundle=bundle,
+            result=pipeline,
+            limitations=(
+                "Synthetic evidence, identities, approval, destination, and effect only.",
+                "Execution receipt and reconciliation are draft Phase 1 capability records.",
+            ),
+        ).to_dict()
+        audit_payload = {
+            "run_id": context.run_id,
+            "activity_record_hashes": [item["record_hash"] for item in activities],
+            "receipt_hash": receipt["record_hash"],
+            "reconciliation_hash": reconciliation["record_hash"],
+            "packet_hash": packet["packet_hash"],
+            "limitations": ["Synthetic customer-safe export; not an authenticated record."],
+        }
+        audit_export = {**audit_payload, "export_hash": sha256_uri(audit_payload)}
         if self.activity_store is not None:
             self.activity_store.append_agent_activities(list(activities))
-        return SyntheticWorkflowResult(pipeline, activities, receipt, reconciliation)
+            persist_effects = getattr(self.activity_store, "persist_effect_records", None)
+            if persist_effects is not None:
+                persist_effects(receipt, reconciliation)
+        return SyntheticWorkflowResult(
+            pipeline, activities, receipt, reconciliation, packet, audit_export
+        )
 
 
 class ActivityRecordBuilder:
