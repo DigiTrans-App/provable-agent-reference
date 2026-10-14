@@ -1,0 +1,48 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/agent-activity-record.schema.json",
+  "event_version": "0.1-draft",
+  "record_type": "agent_activity",
+  "event_id": "evt_policy_001",
+  "event_type": "policy.decided",
+  "tenant_id": "tenant_synthetic",
+  "case_id": "case_vendor_review",
+  "run_id": "run_orchestrator_001",
+  "parent_run_id": null,
+  "sequence": 3,
+  "actor": {
+    "subject": "workload:policy-service",
+    "issuer": "https://issuer.synthetic.invalid",
+    "actor_type": "control_plane"
+  },
+  "policy_version": "policy:synthetic:1",
+  "occurred_at": "2026-01-01T00:00:04Z",
+  "occurred_at_assurance": "source_declared",
+  "observed_at": "2026-01-01T00:00:04Z",
+  "observed_at_assurance": "control_plane_observed",
+  "previous_event_hash": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+  "correlation_id": "corr_policy_001",
+  "operation_id": "op_policy_001",
+  "attempt_id": null,
+  "body": {
+    "body_type": "policy_decision",
+    "policy_bundle_id": "policy.synthetic",
+    "policy_bundle_version": "1",
+    "decision": "conditional",
+    "subject_hash": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+    "action_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+    "resource_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "context_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "obligations": [
+      "require_human_approval",
+      "synthetic_destination_only"
+    ],
+    "reason_codes": [
+      "TIER3_REVIEW_REQUIRED"
+    ]
+  },
+  "body_hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "limitations": [
+    "Synthetic policy decision only."
+  ],
+  "record_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}

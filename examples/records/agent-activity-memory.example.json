@@ -1,0 +1,69 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/agent-activity-record.schema.json",
+  "event_version": "0.1-draft",
+  "record_type": "agent_activity",
+  "event_id": "evt_memory_001",
+  "event_type": "memory.accessed",
+  "tenant_id": "tenant_synthetic",
+  "case_id": "case_vendor_review",
+  "run_id": "run_specialist_001",
+  "parent_run_id": "run_orchestrator_001",
+  "sequence": 1,
+  "actor": {
+    "subject": "workload:evidence-specialist",
+    "issuer": "https://issuer.synthetic.invalid",
+    "actor_type": "agent"
+  },
+  "policy_version": "policy:synthetic:1",
+  "occurred_at": "2026-01-01T00:00:02Z",
+  "occurred_at_assurance": "source_declared",
+  "observed_at": "2026-01-01T00:00:02Z",
+  "observed_at_assurance": "control_plane_observed",
+  "previous_event_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "correlation_id": "corr_vendor_review_001",
+  "operation_id": "op_memory_001",
+  "attempt_id": "attempt_memory_001",
+  "body": {
+    "body_type": "memory_access",
+    "memory_provider": "synthetic-memory",
+    "store_id": "store_synthetic_controls",
+    "namespace": "vendor-assurance",
+    "adapter": {
+      "adapter_id": "adapter.synthetic-memory",
+      "adapter_version": "0.1-draft"
+    },
+    "access_purpose": "Resolve synthetic control evidence for the approved vendor review.",
+    "allowed_classifications": [
+      "internal"
+    ],
+    "filters_commitment": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "result_limit": 10,
+    "query_commitment": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "commitment_key_ref": "keyref:development-memory-commitment",
+    "result_set_commitment": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "result_count": 1,
+    "truncated": false,
+    "results": [
+      {
+        "reference_id": "evidence:synthetic-control-001",
+        "content_commitment": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "source_ref": "source:synthetic-control-catalog",
+        "provenance_ref": "provenance:synthetic-control-001",
+        "classification": "internal",
+        "freshness_status": "current",
+        "integrity_status": "verified"
+      }
+    ],
+    "disclosure_mode": "metadata_only",
+    "minimization_decision": "metadata_only",
+    "retention_class": "synthetic-short",
+    "access_decision": "allow",
+    "evidence_object_refs": [],
+    "errors": []
+  },
+  "body_hash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "limitations": [
+    "Commitments use synthetic development inputs and do not establish anonymity."
+  ],
+  "record_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+}

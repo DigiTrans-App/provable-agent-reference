@@ -1,0 +1,43 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/agent-activity-record.schema.json",
+  "event_version": "0.1-draft",
+  "record_type": "agent_activity",
+  "event_id": "evt_tool_request_001",
+  "event_type": "tool.requested",
+  "tenant_id": "tenant_synthetic",
+  "case_id": "case_vendor_review",
+  "run_id": "run_specialist_001",
+  "parent_run_id": "run_orchestrator_001",
+  "sequence": 2,
+  "actor": {
+    "subject": "workload:evidence-specialist",
+    "issuer": "https://issuer.synthetic.invalid",
+    "actor_type": "agent"
+  },
+  "policy_version": "policy:synthetic:1",
+  "occurred_at": "2026-01-01T00:00:03Z",
+  "occurred_at_assurance": "source_declared",
+  "observed_at": "2026-01-01T00:00:03Z",
+  "observed_at_assurance": "control_plane_observed",
+  "previous_event_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "correlation_id": "corr_tool_001",
+  "operation_id": "op_tool_001",
+  "attempt_id": "attempt_tool_001",
+  "body": {
+    "body_type": "tool_activity",
+    "phase": "requested",
+    "tool_id": "tool.synthetic-evidence",
+    "tool_version": "0.1-draft",
+    "capability_id": "capability.synthetic-evidence.read",
+    "request_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "idempotency_key_commitment": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "result_hash": null,
+    "result_status": "not_available",
+    "completeness": "unavailable"
+  },
+  "body_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "limitations": [
+    "The request record does not show that the tool executed."
+  ],
+  "record_hash": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+}

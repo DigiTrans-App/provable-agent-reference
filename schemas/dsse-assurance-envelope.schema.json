@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/dsse-assurance-envelope.schema.json",
+  "title": "Experimental DSSE Assurance Packet Envelope",
+  "description": "Standard DSSE envelope shape. Trust metadata is external and verifier-pinned.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payloadType", "payload", "signatures"],
+  "properties": {
+    "payloadType": {
+      "const": "application/vnd.digitrans.provable-agent.assurance-packet+json;version=0.3.0-candidate.1"
+    },
+    "payload": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 8388608,
+      "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+    },
+    "signatures": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["keyid", "sig"],
+        "properties": {
+          "keyid": {"type": "string", "minLength": 1, "maxLength": 1000},
+          "sig": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 16384,
+            "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+          }
+        }
+      }
+    }
+  }
+}

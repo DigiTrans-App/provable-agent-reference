@@ -1,0 +1,323 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/agentic-semantic-vector-set.schema.json",
+  "vector_version": "0.1-draft",
+  "cases": [
+    {
+      "case_id": "semantic_cross_tenant_activity",
+      "semantic_rule": "same_case_scope",
+      "records": [
+        {
+          "example": "agent-activity-delegation.example.json",
+          "mutations": []
+        },
+        {
+          "example": "agent-activity-memory.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/tenant_id",
+              "value": "tenant_other"
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "scope"
+    },
+    {
+      "case_id": "semantic_cross_case_activity",
+      "semantic_rule": "same_case_scope",
+      "records": [
+        {
+          "example": "agent-activity-delegation.example.json",
+          "mutations": []
+        },
+        {
+          "example": "agent-activity-memory.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/case_id",
+              "value": "case_other"
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "scope"
+    },
+    {
+      "case_id": "semantic_duplicate_event_replay",
+      "semantic_rule": "unique_event_identity",
+      "records": [
+        {
+          "example": "agent-activity-delegation.example.json",
+          "mutations": []
+        },
+        {
+          "example": "agent-activity-delegation.example.json",
+          "mutations": []
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "replay"
+    },
+    {
+      "case_id": "semantic_duplicate_run_sequence",
+      "semantic_rule": "monotonic_run_sequence",
+      "records": [
+        {
+          "example": "agent-activity-delegation.example.json",
+          "mutations": []
+        },
+        {
+          "example": "agent-activity-memory.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/sequence",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "ordering"
+    },
+    {
+      "case_id": "semantic_broken_previous_hash",
+      "semantic_rule": "previous_hash_chain",
+      "records": [
+        {
+          "example": "agent-activity-delegation.example.json",
+          "mutations": []
+        },
+        {
+          "example": "agent-activity-memory.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/previous_event_hash",
+              "value": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "binding"
+    },
+    {
+      "case_id": "semantic_receipt_reconciliation_substitution",
+      "semantic_rule": "receipt_reconciliation_binding",
+      "records": [
+        {
+          "example": "execution-receipt.example.json",
+          "mutations": []
+        },
+        {
+          "example": "reconciliation-record.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/receipt_hash",
+              "value": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "binding"
+    },
+    {
+      "case_id": "semantic_first_event_has_previous_hash",
+      "semantic_rule": "previous_hash_chain",
+      "records": [
+        {
+          "example": "agent-activity-delegation.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/previous_event_hash",
+              "value": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+          ]
+        },
+        {
+          "example": "agent-activity-memory.example.json",
+          "mutations": []
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "binding"
+    },
+    {
+      "case_id": "semantic_delegation_privilege_expansion",
+      "semantic_rule": "delegation_attenuation",
+      "records": [
+        {
+          "example": "agent-activity-delegation.example.json",
+          "mutations": []
+        },
+        {
+          "example": "agent-activity-delegation.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/event_id",
+              "value": "evt_delegation_child_002"
+            },
+            {
+              "operation": "replace",
+              "path": "/body/delegation_id",
+              "value": "delegation_002"
+            },
+            {
+              "operation": "add",
+              "path": "/body/capability_grant/1",
+              "value": "capability.synthetic-effect.write"
+            },
+            {
+              "operation": "replace",
+              "path": "/body/budget/max_tool_calls",
+              "value": 6
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "scope"
+    },
+    {
+      "case_id": "semantic_idempotency_action_rebinding",
+      "semantic_rule": "idempotency_input_binding",
+      "records": [
+        {
+          "example": "execution-receipt.example.json",
+          "mutations": []
+        },
+        {
+          "example": "execution-receipt.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/receipt_id",
+              "value": "receipt_synthetic_002"
+            },
+            {
+              "operation": "replace",
+              "path": "/attempt_id",
+              "value": "attempt_delivery_002"
+            },
+            {
+              "operation": "replace",
+              "path": "/attempt_number",
+              "value": 2
+            },
+            {
+              "operation": "replace",
+              "path": "/action_hash",
+              "value": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "binding"
+    },
+    {
+      "case_id": "semantic_receipt_timestamp_reversal",
+      "semantic_rule": "receipt_time_order",
+      "records": [
+        {
+          "example": "execution-receipt.example.json",
+          "mutations": []
+        },
+        {
+          "example": "execution-receipt.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/acknowledged_at",
+              "value": "2025-12-31T23:59:59Z"
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "ordering"
+    },
+    {
+      "case_id": "semantic_unknown_effect_unsafe_retry",
+      "semantic_rule": "unknown_effect_retry_blocked",
+      "records": [
+        {
+          "example": "execution-receipt.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/effect_status",
+              "value": "unknown"
+            },
+            {
+              "operation": "replace",
+              "path": "/reconciliation_required",
+              "value": true
+            },
+            {
+              "operation": "replace",
+              "path": "/provider_evidence",
+              "value": null
+            },
+            {
+              "operation": "replace",
+              "path": "/observed_at",
+              "value": null
+            },
+            {
+              "operation": "replace",
+              "path": "/reconciled_at",
+              "value": null
+            },
+            {
+              "operation": "replace",
+              "path": "/reconciliation_method",
+              "value": null
+            },
+            {
+              "operation": "replace",
+              "path": "/time_assurance/observed",
+              "value": "unavailable"
+            },
+            {
+              "operation": "replace",
+              "path": "/time_assurance/reconciled",
+              "value": "unavailable"
+            }
+          ]
+        },
+        {
+          "example": "execution-receipt.example.json",
+          "mutations": [
+            {
+              "operation": "replace",
+              "path": "/receipt_id",
+              "value": "receipt_synthetic_002"
+            },
+            {
+              "operation": "replace",
+              "path": "/attempt_id",
+              "value": "attempt_delivery_002"
+            },
+            {
+              "operation": "replace",
+              "path": "/attempt_number",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "expected_semantic_valid": false,
+      "failure_class": "replay"
+    }
+  ]
+}

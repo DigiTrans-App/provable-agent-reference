@@ -13,6 +13,17 @@ The central rule is simple:
 
 > A model may propose meaning. Trusted software must construct identity, evidence bindings, verification, approval, authorization, and audit history.
 
+The project is evolving toward a technology-neutral **Reference Architecture Candidate**:
+the protocol and conformance requirements are separate from the Python reference
+implementation and provider-specific adapters. Review the
+[candidate architecture](docs/reference-architecture-candidate.md),
+[protocol candidate](docs/spec/README.md), and
+[normative change process](docs/change-process.md). The informative
+[implementable reference architecture package](docs/implementation/README.md) proposes the
+production-facing system boundaries and team playbook being discussed in
+[RFC #35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35). Candidate status
+does not imply a stable standard, certification, or production-security claim.
+
 Instead of treating model output as authoritative, the framework accepts a bounded semantic draft and then performs a deterministic control sequence:
 
 1. resolve evidence from a trusted, scoped bundle;
@@ -46,6 +57,7 @@ This repository contains generic, reusable building blocks:
 - human-approval records;
 - exact-use authorization;
 - audit reconstruction and tamper detection;
+- a candidate portable Assurance Packet with offline reference verification;
 - synthetic examples, adversarial tests, and local evaluations;
 - an optional OpenAI Agents SDK example;
 - an experimental privacy-minimized Codex evidence adapter;
@@ -53,7 +65,7 @@ This repository contains generic, reusable building blocks:
 
 ## What is not in this repository
 
-This repository does **not** contain the DigiTrust hosted platform, enterprise orchestration, customer-specific workflows, managed evidence operations, commercial integrations, SaaS administration, customer data, production infrastructure, or a private product roadmap. See [Open-source boundary](docs/open-source-boundary.md).
+This repository does **not** contain the DigiTrust hosted platform, production or customer-specific enterprise orchestration, customer-specific workflows, managed evidence operations, commercial integrations, SaaS administration, customer data, production infrastructure, or a private product roadmap. See [Open-source boundary](docs/open-source-boundary.md).
 
 ## Release
 
@@ -148,6 +160,35 @@ assert result.authorization.authorized
 assert result.audit_valid
 ```
 
+Create a deterministic candidate Assurance Packet from the verified control-chain result:
+
+```python
+from provable_agent_reference import (
+    build_assurance_packet,
+    load_assurance_packet,
+    verify_assurance_packet,
+)
+
+packet = build_assurance_packet(
+    evidence_bundle=bundle,
+    result=result,
+    limitations=(
+        "Digest bindings do not authenticate the producer or prove source completeness.",
+    ),
+)
+
+valid, errors = verify_assurance_packet(packet)
+assert valid, errors
+
+# A separate process can parse and verify the JSON-compatible packet.
+received = load_assurance_packet(packet.to_dict())
+assert received.packet_hash == packet.packet_hash
+```
+
+The packet carries the exact authorized output so an offline verifier can recompute its
+authorization binding. Its current protocol version, `0.3.0-candidate.1`, is experimental and
+independent of the Python package release version.
+
 ## OpenAI Agents SDK example
 
 The core framework is provider-neutral and has no runtime dependency on any model provider. An optional Agents SDK example is available in [`examples/openai_agents_sdk`](examples/openai_agents_sdk/README.md). It shows how a model can be limited to a semantic draft while authoritative controls remain in local trusted code.
@@ -183,7 +224,11 @@ tests/                                   Deterministic unit and integration test
 
 ## Security status
 
-This is a reference implementation, not a production security product. The cryptographic operations use standard SHA-256 hashing for deterministic record binding, not a production identity, signature, key-management, or attestation system. Automated CodeQL, dependency-review, and OpenSSF Scorecard workflows provide additional triage signals but do not constitute certification. Review [SECURITY.md](SECURITY.md) and the [threat model](docs/threat-model.md) before reuse.
+This is a reference implementation, not a production security product. It uses SHA-256 for deterministic record binding and a public, reproducible development-only Ed25519 DSSE signer for interoperability tests. Neither is a production identity, key-management, trusted-time, or attestation system. Automated CodeQL, dependency-review, and OpenSSF Scorecard workflows provide additional triage signals but do not constitute certification. Review [SECURITY.md](SECURITY.md) and the [threat model](docs/threat-model.md) before reuse.
+
+## Phase 1 synthetic operator path
+
+The [Phase 1 operator guide](docs/implementation/phase-1-operator-guide.md) provides the fresh-clone readiness command, operational walkthrough, machine-readable self-report, and explicit non-production limitations.
 
 ## Contributing
 

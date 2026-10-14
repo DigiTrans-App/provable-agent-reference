@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitrans.app/schemas/provable-agent-reference/agent-activity-record.schema.json",
+  "title": "Experimental Agent Activity Record",
+  "description": "Draft Phase 1 contract. Not a protocol 0.3.0-candidate.1 record or profile claim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "event_version",
+    "record_type",
+    "event_id",
+    "event_type",
+    "tenant_id",
+    "case_id",
+    "run_id",
+    "parent_run_id",
+    "sequence",
+    "actor",
+    "policy_version",
+    "occurred_at",
+    "occurred_at_assurance",
+    "observed_at",
+    "observed_at_assurance",
+    "previous_event_hash",
+    "correlation_id",
+    "operation_id",
+    "attempt_id",
+    "body",
+    "body_hash",
+    "limitations",
+    "record_hash"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://digitrans.app/schemas/provable-agent-reference/agent-activity-record.schema.json"
+    },
+    "event_version": {"const": "0.1-draft"},
+    "record_type": {"const": "agent_activity"},
+    "event_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "event_type": {
+      "enum": [
+        "delegation.granted",
+        "delegation.narrowed",
+        "delegation.expired",
+        "delegation.revoked",
+        "memory.accessed",
+        "tool.requested",
+        "tool.completed",
+        "policy.decided",
+        "authorization.consumed",
+        "authorization.expired",
+        "authorization.revoked",
+        "record.superseded"
+      ]
+    },
+    "tenant_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "case_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "run_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "parent_run_id": {
+      "anyOf": [
+        {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+        {"type": "null"}
+      ]
+    },
+    "sequence": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+    "actor": {"$ref": "agentic-common.schema.json#/$defs/actor"},
+    "policy_version": {"type": "string", "minLength": 1, "maxLength": 500},
+    "occurred_at": {"$ref": "agentic-common.schema.json#/$defs/timestamp"},
+    "occurred_at_assurance": {"$ref": "agentic-common.schema.json#/$defs/timeAssurance"},
+    "observed_at": {"$ref": "agentic-common.schema.json#/$defs/timestamp"},
+    "observed_at_assurance": {"const": "control_plane_observed"},
+    "previous_event_hash": {"$ref": "agentic-common.schema.json#/$defs/nullableDigest"},
+    "correlation_id": {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+    "operation_id": {
+      "anyOf": [
+        {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+        {"type": "null"}
+      ]
+    },
+    "attempt_id": {
+      "anyOf": [
+        {"$ref": "agentic-common.schema.json#/$defs/identifier"},
+        {"type": "null"}
+      ]
+    },
+    "body": {
+      "oneOf": [
+        {"$ref": "delegation-activity-body.schema.json"},
+        {"$ref": "memory-access-activity-body.schema.json"},
+        {"$ref": "tool-activity-body.schema.json"},
+        {"$ref": "policy-decision-activity-body.schema.json"},
+        {"$ref": "lifecycle-status-activity-body.schema.json"}
+      ]
+    },
+    "body_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"},
+    "limitations": {"$ref": "agentic-common.schema.json#/$defs/limitations"},
+    "record_hash": {"$ref": "agentic-common.schema.json#/$defs/digest"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"event_type": {"pattern": "^delegation\\."}}},
+      "then": {"properties": {"body": {"$ref": "delegation-activity-body.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "memory.accessed"}}},
+      "then": {"properties": {"body": {"$ref": "memory-access-activity-body.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"pattern": "^tool\\."}}},
+      "then": {"properties": {"body": {"$ref": "tool-activity-body.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "policy.decided"}}},
+      "then": {"properties": {"body": {"$ref": "policy-decision-activity-body.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"pattern": "^(authorization\\.|record\\.)"}}},
+      "then": {"properties": {"body": {"$ref": "lifecycle-status-activity-body.schema.json"}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "delegation.granted"}}},
+      "then": {"properties": {"body": {"properties": {"status": {"const": "granted"}}}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "delegation.narrowed"}}},
+      "then": {"properties": {"body": {"properties": {"status": {"const": "narrowed"}}}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "delegation.expired"}}},
+      "then": {"properties": {"body": {"properties": {"status": {"const": "expired"}}}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "delegation.revoked"}}},
+      "then": {"properties": {"body": {"properties": {"status": {"const": "revoked"}}}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "tool.requested"}}},
+      "then": {"properties": {"body": {"properties": {"phase": {"const": "requested"}}}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "tool.completed"}}},
+      "then": {"properties": {"body": {"properties": {"phase": {"const": "completed"}}}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "authorization.consumed"}}},
+      "then": {"properties": {"body": {"properties": {"status": {"const": "consumed"}}}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "authorization.expired"}}},
+      "then": {"properties": {"body": {"properties": {"status": {"const": "expired"}}}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "authorization.revoked"}}},
+      "then": {"properties": {"body": {"properties": {"status": {"const": "revoked"}}}}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "record.superseded"}}},
+      "then": {"properties": {"body": {"properties": {"status": {"const": "superseded"}}}}}
+    }
+  ]
+}

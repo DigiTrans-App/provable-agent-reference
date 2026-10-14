@@ -1,0 +1,87 @@
+name: Control Plane Integration
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/control-plane-integration.yml"
+      - "migrations/**"
+      - "scripts/control_plane_*.py"
+      - "src/provable_agent_reference/control_plane/**"
+      - "tests/test_control_plane_integration.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+        env:
+          POSTGRES_DB: provable_agent_synthetic
+          POSTGRES_USER: par_local
+          POSTGRES_PASSWORD: local-synthetic-only
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U par_local -d provable_agent_synthetic"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      PAR_ENVIRONMENT: local-synthetic
+      PAR_DATABASE_URL: postgresql://par_local:local-synthetic-only@localhost:55432/provable_agent_synthetic
+      PGPASSWORD: local-synthetic-only
+      PYTHONPATH: src
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install control-plane dependencies
+        run: python -m pip install -e '.[control-plane]'
+      - name: Verify pinned container manifests
+        run: |
+          docker image inspect \
+            postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94 \
+            --format '{{index .RepoDigests 0}}'
+          docker pull \
+            python:3.12.11-slim@sha256:47ae396f09c1303b8653019811a8498470603d7ffefc29cb07c88f1f8cb3d19f
+      - name: Migrate and seed twice
+        run: |
+          python scripts/control_plane_migrate.py
+          python scripts/control_plane_migrate.py
+          python scripts/control_plane_seed.py
+          python scripts/control_plane_seed.py
+      - name: Exercise PostgreSQL transaction and outbox leases
+        run: python -m unittest tests/test_control_plane_integration.py -v
+      - name: Demonstrate logical backup and restore
+        run: |
+          docker exec -e PGPASSWORD=local-synthetic-only \
+            "${{ job.services.postgres.id }}" pg_dump --username par_local \
+            --dbname provable_agent_synthetic --format=custom --file=/tmp/control-plane.dump
+          docker cp "${{ job.services.postgres.id }}:/tmp/control-plane.dump" \
+            /tmp/control-plane.dump
+          python scripts/control_plane_reset.py --confirm RESET-LOCAL-SYNTHETIC
+          docker cp /tmp/control-plane.dump \
+            "${{ job.services.postgres.id }}:/tmp/control-plane-restore.dump"
+          docker exec -e PGPASSWORD=local-synthetic-only \
+            "${{ job.services.postgres.id }}" pg_restore --username par_local \
+            --dbname provable_agent_synthetic --clean --if-exists --no-owner \
+            /tmp/control-plane-restore.dump
+          docker exec -e PGPASSWORD=local-synthetic-only \
+            "${{ job.services.postgres.id }}" psql --username par_local \
+            --dbname provable_agent_synthetic --tuples-only --command \
+            "SELECT count(*) FROM journal_records"

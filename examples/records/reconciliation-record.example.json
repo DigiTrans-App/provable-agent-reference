@@ -1,0 +1,22 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/reconciliation-record.schema.json",
+  "schema_version": "0.1-draft",
+  "reconciliation_id": "reconciliation_synthetic_001",
+  "tenant_id": "tenant_synthetic",
+  "case_id": "case_vendor_review",
+  "run_id": "run_orchestrator_001",
+  "receipt_id": "receipt_synthetic_001",
+  "receipt_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+  "method": "immutable_event",
+  "effect_status": "succeeded",
+  "reconciled_at": "2026-01-01T00:05:03Z",
+  "evidence_refs": [
+    "synthetic-receipt:001"
+  ],
+  "discrepancies": [],
+  "compensating_authorization_id": null,
+  "limitations": [
+    "Synthetic reconciliation does not establish a real external effect."
+  ],
+  "record_hash": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+}

@@ -35,7 +35,17 @@ Released on 2026-08-03.
 - [ ] JSON-LD or equivalent provenance profile exploration
 - [ ] Pluggable policy rules
 
-## v0.3 - Community and cryptographic hardening
+## v0.3 - Reference Architecture Candidate
+
+- [x] Separate the architecture, protocol candidate, Python implementation, adapters, and conformance model
+- [x] Normative lifecycle state machine and fail-closed invalidation rules
+- [x] Candidate portable Assurance Packet schema, builder, verifier, and synthetic vector
+- [x] Cumulative versioned conformance profiles
+- [x] Public RFC and immutable ADR process
+- [ ] Independent architecture and security review of the candidate ([#27](https://github.com/DigiTrans-App/provable-agent-reference/issues/27))
+- [ ] Second non-OpenAI runtime adapter
+- [ ] Second-language verifier or equivalent independent implementation
+- [ ] Provider-neutral golden canonicalization and negative conformance vectors
 
 - [ ] 100+ synthetic evaluation cases
 - [ ] Property-based tests for canonicalization and replay resistance ([#11](https://github.com/DigiTrans-App/provable-agent-reference/issues/11))
@@ -44,6 +54,32 @@ Released on 2026-08-03.
 - [ ] Formal threat-model review
 - [ ] Reproducible benchmark reports
 - [ ] Maintainer onboarding and expanded release automation
+
+## Phase 0 - Implementable full agentic reference architecture
+
+Tracked in [#35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35). These
+items are informative design work until accepted through the normative change process.
+
+- [x] Define the Phase 0 implementation RFC and scope
+- [x] Define full agentic actors, activities, authority flow, and privacy boundary
+- [x] Define logical service, API, event, storage, identity, and signing contracts
+- [x] Define a local and AWS minimum reference deployment profile
+- [x] Publish the team implementation playbook and maturity gates
+- [x] Resolve record granularity, signature envelope, receipt portability, memory privacy, and storage assurance
+- [x] Complete maintainer-side architecture/security pre-review and correct design ambiguities
+- [x] Publish the dependency-gated Phase 1 plan ([#37](https://github.com/DigiTrans-App/provable-agent-reference/issues/37))
+- [ ] Complete independent architecture/security review
+- [ ] Accept or revise the proposed architecture decisions
+- [ ] Approve Phase 1 implementation scope after v0.3 candidate disposition
+
+## v1.0 - Stable reference architecture
+
+- [ ] Two independent technical reviews completed and findings resolved or documented
+- [ ] Stable protocol version and compatibility policy
+- [ ] Independent implementation passes the public conformance kit
+- [ ] Positive, negative, downgrade, and replay vectors published
+- [ ] Release-candidate feedback period completed
+- [ ] Assurance claims and non-properties reviewed for stable publication
 
 ## Non-goals
 
