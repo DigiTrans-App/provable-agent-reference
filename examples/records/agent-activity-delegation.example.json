@@ -1,0 +1,47 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/agent-activity-record.schema.json",
+  "event_version": "0.1-draft",
+  "record_type": "agent_activity",
+  "event_id": "evt_delegation_001",
+  "event_type": "delegation.granted",
+  "tenant_id": "tenant_synthetic",
+  "case_id": "case_vendor_review",
+  "run_id": "run_specialist_001",
+  "parent_run_id": "run_orchestrator_001",
+  "sequence": 0,
+  "actor": {
+    "subject": "workload:orchestrator",
+    "issuer": "https://issuer.synthetic.invalid",
+    "actor_type": "agent_runtime"
+  },
+  "policy_version": "policy:synthetic:1",
+  "occurred_at": "2026-01-01T00:00:01Z",
+  "occurred_at_assurance": "source_declared",
+  "observed_at": "2026-01-01T00:00:01Z",
+  "observed_at_assurance": "control_plane_observed",
+  "previous_event_hash": null,
+  "correlation_id": "corr_vendor_review_001",
+  "operation_id": "op_delegation_001",
+  "attempt_id": null,
+  "body": {
+    "body_type": "delegation",
+    "delegation_id": "delegation_001",
+    "parent_subject": "workload:orchestrator",
+    "child_subject": "workload:evidence-specialist",
+    "task": "Collect synthetic control evidence for the vendor review.",
+    "capability_grant": [
+      "capability.synthetic-evidence.read"
+    ],
+    "budget": {
+      "max_tool_calls": 5,
+      "max_model_calls": 2
+    },
+    "valid_until": "2026-01-01T00:30:00Z",
+    "status": "granted"
+  },
+  "body_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "limitations": [
+    "Synthetic identities and capabilities only."
+  ],
+  "record_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+}

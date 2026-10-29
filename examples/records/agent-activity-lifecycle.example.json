@@ -1,0 +1,45 @@
+{
+  "$schema": "https://digitrans.app/schemas/provable-agent-reference/agent-activity-record.schema.json",
+  "event_version": "0.1-draft",
+  "record_type": "agent_activity",
+  "event_id": "evt_revocation_001",
+  "event_type": "authorization.revoked",
+  "tenant_id": "tenant_synthetic",
+  "case_id": "case_vendor_review",
+  "run_id": "run_orchestrator_001",
+  "parent_run_id": null,
+  "sequence": 4,
+  "actor": {
+    "subject": "human:synthetic-maintainer",
+    "issuer": "https://issuer.synthetic.invalid",
+    "actor_type": "human_approver"
+  },
+  "policy_version": "policy:synthetic:1",
+  "occurred_at": "2026-01-01T00:10:00Z",
+  "occurred_at_assurance": "source_declared",
+  "observed_at": "2026-01-01T00:10:00Z",
+  "observed_at_assurance": "control_plane_observed",
+  "previous_event_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "correlation_id": "corr_lifecycle_001",
+  "operation_id": "op_authorization_001",
+  "attempt_id": null,
+  "body": {
+    "body_type": "lifecycle_status",
+    "target_id": "authorization_synthetic_001",
+    "target_hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "status": "revoked",
+    "authority": {
+      "subject": "human:synthetic-maintainer",
+      "issuer": "https://issuer.synthetic.invalid",
+      "actor_type": "human_approver"
+    },
+    "effective_at": "2026-01-01T00:10:00Z",
+    "reason": "Synthetic revocation exercise.",
+    "successor_ref": null
+  },
+  "body_hash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "limitations": [
+    "Synthetic lifecycle record; identity and time are not production-authenticated."
+  ],
+  "record_hash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+}

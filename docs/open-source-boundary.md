@@ -8,13 +8,13 @@
 - approval and authorization record patterns;
 - audit reconstruction;
 - synthetic fixtures and adversarial tests;
-- optional provider adapters and examples;
+- synthetic, provider-neutral orchestration patterns and optional provider adapters;
 - contributor tooling and documentation.
 
 ## Excluded
 
 - DigiTrust hosted services;
-- enterprise multi-agent orchestration;
+- production or customer-specific enterprise multi-agent orchestration;
 - customer-specific workflows and policy packs;
 - commercial connectors and marketplace packaging;
 - managed evidence ingestion and retention;
