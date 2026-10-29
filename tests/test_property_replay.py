@@ -78,6 +78,7 @@ RELATIONAL_BINDINGS = {
         "approval_id",
         "purpose",
         "audience",
+        "output_hash",
         "reason",
     ),
 }

@@ -17,7 +17,7 @@ substitute for independent review.
 | Evidence insertion, removal, substitution, duplication, reordering | `test_property_replay.py` | Every variant, checked by the bundle and the verifier |
 | Tenant, case, and run reuse | `test_property_replay.py` | Bundle, compiler, approval, and authorization boundaries |
 | Exact-use purpose, audience, and output replay | `test_property_replay.py` | Every replay dimension in each example |
-| Rehashed linked-record and manifest substitution | `test_property_replay.py` | Candidate, verification, approval-link, scope, reason, and manifest bindings with recomputed record hashes |
+| Rehashed linked-record and manifest substitution | `test_property_replay.py` | Candidate, verification, approval-link, scope, authorized-output, reason, and manifest bindings with recomputed record hashes |
 | Assurance Packet authorized-output substitution | `test_property_replay.py` | Rehashed authorization and packet |
 | Runtime-adapter context binding | `test_property_replay.py` | Every trusted `AdapterContext` field |
 

@@ -30,6 +30,7 @@ All notable changes to this project will be documented here.
 - Approval and exact-use authorization now reject candidates whose deterministic hash is invalid.
 - Approval validates candidate identifiers and requires verification status to agree with error-level findings.
 - Audit reconstruction now validates every candidate, verification, approval, authorization, scope, decision, and reason relationship in the control chain.
+- Audit reconstruction now requires an authorized exact-use record to bind the candidate's approved output; denied records remain auditable.
 - Validation and release workflows now audit the resolved Python environment for known dependency vulnerabilities.
 - Release tags must point to commits contained in protected `main`, and repository validation rejects mutable Action references, `pull_request_target`, and persisted checkout credentials.
 
