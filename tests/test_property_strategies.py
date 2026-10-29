@@ -94,7 +94,7 @@ def run_contexts(draw: st.DrawFn) -> TrustedRunContext:
 
 
 @st.composite
-def pipeline_cases(draw: st.DrawFn) -> PipelineCase:
+def pipeline_cases(draw: st.DrawFn, min_limitations: int = 1) -> PipelineCase:
     context = draw(run_contexts())
     evidence_text = draw(SAFE_TEXT)
     record = EvidenceRecord.from_text(
@@ -115,7 +115,16 @@ def pipeline_cases(draw: st.DrawFn) -> PipelineCase:
     draft = SemanticDraft(
         claim_text=draw(SAFE_TEXT),
         selected_evidence_id=record.evidence_id,
-        limitations=(draw(SAFE_TEXT),),
+        limitations=tuple(
+            draw(
+                st.lists(
+                    SAFE_TEXT,
+                    min_size=min_limitations,
+                    max_size=max(min_limitations, 3),
+                    unique=True,
+                )
+            )
+        ),
         assurance_statement=draw(SAFE_TEXT),
         content_categories=(),
         redacted=False,

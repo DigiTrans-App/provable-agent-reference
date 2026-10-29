@@ -389,7 +389,7 @@ class ReplayResistancePropertyTests(unittest.TestCase):
                 output=exact_output(second),
             )
 
-    @given(pipeline_cases())
+    @given(pipeline_cases(min_limitations=2))
     def test_exact_use_authorization_rejects_every_scope_and_output_replay(
         self,
         case: PipelineCase,
@@ -421,7 +421,13 @@ class ReplayResistancePropertyTests(unittest.TestCase):
             elif label == "limitation_added":
                 output["limitations"] = [*limitations, "Synthetic extra limitation."]
             elif label == "limitations_reordered":
-                output["limitations"] = [*limitations, "Synthetic extra limitation."][::-1]
+                # Order-only change: the same approved limitations, reversed.
+                reordered = limitations[::-1]
+                self.assertGreaterEqual(len(limitations), 2)
+                self.assertEqual(len(reordered), len(limitations))
+                self.assertEqual(sorted(reordered), sorted(limitations))
+                self.assertNotEqual(reordered, limitations)
+                output["limitations"] = reordered
             elif label == "field_added":
                 output["extra"] = "Synthetic extra field."
             else:
