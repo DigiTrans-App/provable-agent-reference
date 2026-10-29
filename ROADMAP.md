@@ -48,7 +48,7 @@ Released on 2026-08-03.
 - [ ] Provider-neutral golden canonicalization and negative conformance vectors
 
 - [ ] 100+ synthetic evaluation cases
-- [x] Property-based tests for canonicalization and replay resistance ([#11](https://github.com/DigiTrans-App/provable-agent-reference/issues/11))
+- [ ] Property-based tests for canonicalization and replay resistance ([#11](https://github.com/DigiTrans-App/provable-agent-reference/issues/11))
 - [ ] Versioned signed-record adapter interface ([#10](https://github.com/DigiTrans-App/provable-agent-reference/issues/10))
 - [ ] Keyed commitment and selective-disclosure research ([#13](https://github.com/DigiTrans-App/provable-agent-reference/issues/13))
 - [ ] Formal threat-model review
