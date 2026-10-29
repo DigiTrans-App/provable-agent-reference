@@ -38,11 +38,14 @@ missing evidence, output substitution, and any broken cross-record binding fail 
 
 ## Generated security evidence
 
-The property-based suite generates bounded synthetic inputs for canonical JSON ordering and
-Unicode handling, candidate and lifecycle-record mutation, evidence insertion/removal/reordering,
-cross-tenant and cross-case reuse, purpose/audience/output replay, total-rehash record
-substitution, and adapter context changes. CI evaluates at least 100 examples for every property;
-an extended local profile evaluates 1,000.
+The property-based suite generates bounded synthetic inputs for canonical JSON round trips,
+ordering, scalar types, numeric boundaries, Unicode, and rejected values; candidate and
+lifecycle-record mutation; evidence insertion, removal, substitution, duplication, and
+reordering; cross-tenant, cross-case, and cross-run reuse; purpose, audience, and output
+replay; rehashed linked-record, manifest, and authorized-output substitution; and runtime
+adapter context changes. Every security-relevant field and replay dimension is enumerated
+within each generated example. The CI profile allows up to 100 generated examples per
+property and an extended local profile allows up to 1,000.
 
 Passing generated tests is evidence that the implemented invariants hold for the explored input
 space. It is not a proof of collision resistance, canonicalization equivalence across languages,

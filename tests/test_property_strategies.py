@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import re
 import string
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 
 from hypothesis import strategies as st
@@ -13,6 +16,7 @@ from provable_agent_reference import (
     SemanticDraft,
     TrustedRunContext,
 )
+from provable_agent_reference.canonical import sha256_uri
 
 IDENTIFIER_ALPHABET = string.ascii_lowercase + string.digits
 IDENTIFIER_SUFFIXES = st.text(
@@ -161,3 +165,56 @@ def alternate_identifier(value: str) -> str:
 
 def alternate_text(value: str) -> str:
     return value + " [other]"
+
+
+CLASSIFICATION_VALUES = ("public", "internal", "confidential", "restricted", "regulated")
+_IDENTIFIER_PATTERN = re.compile(r"^[a-z][a-z0-9_.-]{2,127}$")
+
+
+def alternate_classification(value: str) -> str:
+    """Return a different supported classification."""
+
+    index = CLASSIFICATION_VALUES.index(value)
+    return CLASSIFICATION_VALUES[(index + 1) % len(CLASSIFICATION_VALUES)]
+
+
+def alternate_hash(value: str) -> str:
+    """Return a well-formed sha256 URI that differs from ``value``."""
+
+    return sha256_uri({"mutated_from": value})
+
+
+def mutate_scalar_field(name: str, value: object) -> object:
+    """Return a distinct, well-formed replacement for a hash-bound scalar field.
+
+    Replacements stay within each field's syntactic contract so that a rejection is caused by
+    the binding check rather than by an unrelated validation error.
+    """
+
+    if isinstance(value, bool):
+        return not value
+    if name.endswith("_hash"):
+        return alternate_hash(str(value))
+    if name == "decision":
+        return "rejected" if value == "approved" else "approved"
+    if name == "classification":
+        return alternate_classification(str(value))
+    if isinstance(value, str):
+        if _IDENTIFIER_PATTERN.fullmatch(value):
+            return alternate_identifier(value)
+        return alternate_text(value)
+    raise TypeError(f"no scalar mutation defined for {name}")
+
+@contextmanager
+def case_label(**labels: object) -> Iterator[None]:
+    """Label an enumerated security dimension inside a ``@given`` test.
+
+    Hypothesis disables ``unittest.subTest`` reporting inside generated tests, so failures
+    are re-raised with the dimension that triggered them.
+    """
+
+    label = ", ".join(f"{key}={value}" for key, value in labels.items())
+    try:
+        yield
+    except AssertionError as error:
+        raise AssertionError(f"[{label}] {error}") from error
