@@ -35,6 +35,8 @@ jobs:
           python -m pip install --upgrade pip 'setuptools>=83' wheel
           python -m pip install -e '.[dev,openai]'
       - name: Unit tests
+        env:
+          HYPOTHESIS_PROFILE: ci
         run: python -m unittest discover -s tests -v
       - name: Dependency vulnerability audit
         run: python -m pip_audit --local --skip-editable

@@ -12,6 +12,7 @@ All notable changes to this project will be documented here.
 - Optional verification of release wheels, source distributions, `ARTIFACTS.json`, and `SHA256SUMS` without extracting archives.
 - Machine-readable independent-validation report schema, human reviewer guide and template, public issue form, and fail-closed test coverage.
 - Verifier identity and version bindings in verification results and their deterministic hashes.
+- Hypothesis property tests for canonicalization, lifecycle integrity bindings, replay resistance, rehashed audit-record and authorized-output substitution, and adapter context binding, with enumerated security dimensions, profile-floor checks, and standard and extended profiles.
 - GitHub build-provenance attestations for release distributions, artifact manifests, and checksums.
 
 ### Changed
@@ -29,6 +30,7 @@ All notable changes to this project will be documented here.
 - Approval and exact-use authorization now reject candidates whose deterministic hash is invalid.
 - Approval validates candidate identifiers and requires verification status to agree with error-level findings.
 - Audit reconstruction now validates every candidate, verification, approval, authorization, scope, decision, and reason relationship in the control chain.
+- Audit reconstruction now requires an authorized exact-use record to bind the candidate's approved output; denied records remain auditable.
 - Validation and release workflows now audit the resolved Python environment for known dependency vulnerabilities.
 - Release tags must point to commits contained in protected `main`, and repository validation rejects mutable Action references, `pull_request_target`, and persisted checkout credentials.
 

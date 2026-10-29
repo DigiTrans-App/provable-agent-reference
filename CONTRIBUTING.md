@@ -24,6 +24,11 @@ python scripts/validate_repo.py
 ruff check .
 ```
 
+Security-sensitive canonicalization and replay properties run in CI with a configured limit of
+100 generated examples per property; the number actually executed can be lower. See the
+[property-testing guide](docs/property-testing.md) for focused commands, the 1,000-example
+extended profile, how to measure executed example counts, and the failure-reproduction workflow.
+
 ## Independent validation
 
 Independent technical reviews are welcome, including critical, negative, and incomplete results. Start with the [independent validation guide](docs/independent-validation.md) and use the [validation report template](docs/validation-report-template.md) for the human assessment.

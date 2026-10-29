@@ -36,7 +36,24 @@ or runtime completeness, establish trusted time, demonstrate that an external ac
 or make predictable hashes confidential. Unknown protocol versions, invalid profile sequences,
 missing evidence, output substitution, and any broken cross-record binding fail closed.
 
-## Out of scope for v0.1
+## Generated security evidence
+
+The property-based suite generates bounded synthetic inputs for canonical JSON round trips,
+ordering, scalar types, numeric boundaries, Unicode, and rejected values; candidate and
+lifecycle-record mutation; evidence insertion, removal, substitution, duplication, and
+reordering; cross-tenant, cross-case, and cross-run reuse; purpose, audience, and output
+replay; rehashed linked-record, manifest, and authorized-output substitution; and runtime
+adapter context changes. Every security-relevant field and replay dimension is enumerated
+within each generated example. The CI profile allows up to 100 generated examples per
+property and an extended local profile allows up to 1,000.
+
+Passing generated tests is evidence that the implemented invariants hold for the explored input
+space. It is not a proof of collision resistance, canonicalization equivalence across languages,
+source authenticity, signature security, implementation correctness for all possible inputs, or
+deployment security. See the [property-testing guide](property-testing.md) for scope and
+reproduction instructions.
+
+## Out of scope for the current reference
 
 - secure identity proofing;
 - authenticated digital signatures;
