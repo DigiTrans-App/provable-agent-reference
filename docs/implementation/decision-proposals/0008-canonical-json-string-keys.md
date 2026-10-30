@@ -5,7 +5,7 @@ Status: **accepted** by maintainer John Agbekponou on 2026-10-30 UTC in
 The [accepted ADR](../../decisions/0008-canonical-json-string-keys.md) records the decision,
 compatibility evidence, and one-time independent-review exception for the F-2 implementation
 PR. All required GitHub checks remain mandatory. No protocol document changes with it.
-Tracking issue: #11 (reference only; remains open).
+Tracking issue: #11 (reference only; closed as completed on 2026-10-30 after PR #53).
 
 ## 1. Problem and motivation
 

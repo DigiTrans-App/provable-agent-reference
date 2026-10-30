@@ -42,14 +42,14 @@ Released on 2026-08-03.
 - [x] Candidate portable Assurance Packet schema, builder, verifier, and synthetic vector
 - [x] Cumulative versioned conformance profiles
 - [x] Public RFC and immutable ADR process
-- [ ] Independent architecture and security review of the candidate ([#27](https://github.com/DigiTrans-App/provable-agent-reference/issues/27))
+- [ ] Independent architecture and security review of the candidate ([#27](https://github.com/DigiTrans-App/provable-agent-reference/issues/27)); not performed. [#27](https://github.com/DigiTrans-App/provable-agent-reference/issues/27) was closed with the candidate merge ([#28](https://github.com/DigiTrans-App/provable-agent-reference/pull/28)), where independent human approval was waived by a maintainer exception. The exception is not an independent review.
 - [ ] Second non-OpenAI runtime adapter
-- [ ] Second-language verifier or equivalent independent implementation
+- [ ] Second-language verifier or equivalent independent implementation. Partial: a development TypeScript verifier for DSSE envelopes and `packet_hash` binding exists ([#44](https://github.com/DigiTrans-App/provable-agent-reference/pull/44)). It is not yet an accepted independent second-language conformance verifier.
 - [ ] Provider-neutral golden canonicalization and negative conformance vectors
 
 - [ ] 100+ synthetic evaluation cases
 - [x] Property-based tests for canonicalization and replay resistance ([#11](https://github.com/DigiTrans-App/provable-agent-reference/issues/11)); includes nested input rejection, trusted-field mutations, scope and output replay checks, and documented seed/minimized-example reproduction.
-- [ ] Versioned signed-record adapter interface ([#10](https://github.com/DigiTrans-App/provable-agent-reference/issues/10))
+- [ ] Versioned signed-record adapter interface ([#10](https://github.com/DigiTrans-App/provable-agent-reference/issues/10)). Open. Partial: development-only DSSE signing of the whole Assurance Packet exists ([#44](https://github.com/DigiTrans-App/provable-agent-reference/pull/44)); there is no signer/verifier adapter interface, per-record signing, or cross-context replay vectors.
 - [ ] Keyed commitment and selective-disclosure research ([#13](https://github.com/DigiTrans-App/provable-agent-reference/issues/13))
 - [ ] Formal threat-model review
 - [ ] Reproducible benchmark reports
@@ -57,8 +57,9 @@ Released on 2026-08-03.
 
 ## Phase 0 - Implementable full agentic reference architecture
 
-Tracked in [#35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35). These
-items are informative design work until accepted through the normative change process.
+Tracked in [#35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35), closed on
+2026-09-05 with Phase 0 PR #40. These items are informative design work until accepted through the
+normative change process.
 
 - [x] Define the Phase 0 implementation RFC and scope
 - [x] Define full agentic actors, activities, authority flow, and privacy boundary
@@ -68,9 +69,31 @@ items are informative design work until accepted through the normative change pr
 - [x] Resolve record granularity, signature envelope, receipt portability, memory privacy, and storage assurance
 - [x] Complete maintainer-side architecture/security pre-review and correct design ambiguities
 - [x] Publish the dependency-gated Phase 1 plan ([#37](https://github.com/DigiTrans-App/provable-agent-reference/issues/37))
-- [ ] Complete independent architecture/security review
-- [ ] Accept or revise the proposed architecture decisions
-- [ ] Approve Phase 1 implementation scope after v0.3 candidate disposition
+- [ ] Complete independent architecture/security review (waived for synthetic Phase 1 by a documented maintainer exception; not performed)
+- [ ] Accept or revise the proposed architecture decisions (decision 0008 is accepted; proposals 0001 through 0007 remain proposals, implemented experimentally in Phase 1)
+- [x] Approve Phase 1 implementation scope after v0.3 candidate disposition (synthetic scope only; recorded in [#37](https://github.com/DigiTrans-App/provable-agent-reference/issues/37))
+
+## Phase 1 - Synthetic full agentic reference deployment
+
+Tracked in [#37](https://github.com/DigiTrans-App/provable-agent-reference/issues/37), closed on
+2026-09-05. Development status and formal-acceptance status are listed separately. Everything here
+is synthetic, development-only, S0 storage, and not approved for production use, customer data,
+or live effects.
+
+Development status (merged to `main`):
+
+- [x] PR A: draft contracts and adversarial vectors ([#41](https://github.com/DigiTrans-App/provable-agent-reference/pull/41))
+- [x] PR B: local durable control plane ([#42](https://github.com/DigiTrans-App/provable-agent-reference/pull/42))
+- [x] PR C: synthetic full-agentic workflow ([#43](https://github.com/DigiTrans-App/provable-agent-reference/pull/43))
+- [x] PR D: development DSSE signing and a TypeScript DSSE verifier ([#44](https://github.com/DigiTrans-App/provable-agent-reference/pull/44))
+- [x] PR E: operator guide, threat model, exercises, and a self-issued readiness gate ([#45](https://github.com/DigiTrans-App/provable-agent-reference/pull/45))
+
+Formal-acceptance status (outstanding):
+
+- [ ] Independent architecture/security review (waived for synthetic Phase 1; required before any non-synthetic pilot)
+- [ ] Dedicated container vulnerability scan (required before any non-synthetic pilot)
+- [ ] Accepted authenticated-records profile and canonical hash-input contract (`par.authenticated-records.v1` is not claimed)
+- [ ] Independent second-language conformance verifier (see v0.3)
 
 ## v1.0 - Stable reference architecture
 

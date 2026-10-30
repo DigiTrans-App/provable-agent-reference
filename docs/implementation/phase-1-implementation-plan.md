@@ -1,8 +1,35 @@
 # Phase 1 implementation plan
 
-Status: **implementation in progress; PR A through PR D complete**. The maintainer recorded the
-disposition of PR #28, explicitly approved synthetic Phase 1, and documented the independent-review
-exception. PR E completes operator and adopter readiness. Production use remains prohibited.
+Status: **synthetic Phase 1 implementation complete (PR A through PR E merged)**. Production use
+remains prohibited.
+
+Development status: PR A through PR E merged on 2026-09-05 as PRs #41 through #45, and the
+maintainer closed [tracker #37](https://github.com/DigiTrans-App/provable-agent-reference/issues/37)
+after accepting synthetic Phase 1 at merge commit `8d8e6bf`. The maintainer recorded the
+disposition of PR #28 and explicitly approved synthetic Phase 1 scope.
+
+Formal-acceptance status: independent architecture/security review was waived by a documented
+maintainer exception. That exception is risk acceptance, not independent review or approval.
+No independent validation report is recorded (issue #22 remains open). Protocol
+`0.3.0-candidate.1` is unchanged, the Phase 0 decision proposals remain proposals except accepted
+decision 0008, and the authenticated-records and durable-lifecycle capabilities are not claimed.
+Independent review remains recommended before stable promotion and is required before any
+non-synthetic pilot.
+
+### Delivery status
+
+| Package | PR | Merge commit | Delivered (per the PR and tracker) |
+|---|---|---|---|
+| PR A | [#41](https://github.com/DigiTrans-App/provable-agent-reference/pull/41) | `cc89d03` | Draft contracts and adversarial vectors |
+| PR B | [#42](https://github.com/DigiTrans-App/provable-agent-reference/pull/42) | `413ef36` | Local durable control plane |
+| PR C | [#43](https://github.com/DigiTrans-App/provable-agent-reference/pull/43) | `0e31f44` | Synthetic full-agentic workflow |
+| PR D | [#44](https://github.com/DigiTrans-App/provable-agent-reference/pull/44) | `f6f5188` | Development DSSE signing and TypeScript DSSE verifier |
+| PR E | [#45](https://github.com/DigiTrans-App/provable-agent-reference/pull/45) | `8d8e6bf` | Operator guide, threat model, exercises, readiness gate |
+
+Scope note: the TypeScript verifier that shipped in PR D verifies the DSSE envelope, the pinned
+development trust bundle, the canonical payload bytes, and the `packet_hash` binding. The wider
+P1.8 scope below (schema, receipt, and activity-graph verification) is not implemented in it, and
+it is not an accepted independent second-language conformance verifier.
 
 ## Phase 1 outcome
 
@@ -111,6 +138,9 @@ Each PR remains independently testable. No PR may silently add a claimed future 
 - limitations state development identities/keys, synthetic evidence, S0 storage, and no
   production-effect authorization;
 - an independent reviewer can follow the playbook and produce a machine-readable report.
+
+Closure note: tracker #37 closed this item on the basis of a maintainer-run, self-issued
+machine-readable readiness report. No independent reviewer report is recorded.
 
 ## Explicitly deferred
 

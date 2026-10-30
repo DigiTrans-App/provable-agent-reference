@@ -27,8 +27,17 @@ requirements from one opinionated deployment example.
 - [Proposed execution-receipt decision](decision-proposals/0005-portable-execution-receipts.md)
 - [Proposed memory-privacy decision](decision-proposals/0006-memory-privacy.md)
 - [Proposed storage-assurance decision](decision-proposals/0007-storage-assurance-levels.md)
+- [Canonical string-key decision proposal (accepted as ADR 0008)](decision-proposals/0008-canonical-json-string-keys.md)
+- [Protected maintenance-release decision (accepted as ADR 0009)](../decisions/0009-protected-maintenance-releases.md)
 
-The discussion and acceptance record is [RFC issue #35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35).
+The discussion and acceptance record is [RFC issue #35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35),
+closed on 2026-09-05 with Phase 0 PR #40. Synthetic Phase 1 implementation is tracked in
+[#37](https://github.com/DigiTrans-App/provable-agent-reference/issues/37), also closed.
+
+Decision status: decision 0008 is an accepted ADR in [`docs/decisions/`](../decisions/0008-canonical-json-string-keys.md).
+Proposals 0001 through 0007 remain proposals, although Phase 1 implements experimental,
+development-only versions of several. Independent architecture/security review of this package
+was waived by a documented maintainer exception and has not been performed.
 
 ## Reading order
 

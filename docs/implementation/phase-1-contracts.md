@@ -5,9 +5,18 @@ artifact for Phase 1 PR A. They do not change protocol `0.3.0-candidate.1`, esta
 profile, authenticate a producer, or demonstrate a deployable runtime.
 
 The contract work follows the [Phase 1 implementation plan](phase-1-implementation-plan.md)
-and the proposed [logical service and event contracts](service-contracts.md). Implementation
-remains dependency-gated by the disposition of PR #28, the Phase 0 RFC, and explicit maintainer
-approval recorded in [Phase 1 tracker #37](https://github.com/DigiTrans-App/provable-agent-reference/issues/37).
+and the proposed [logical service and event contracts](service-contracts.md).
+
+Status update: PR A merged as
+[#41](https://github.com/DigiTrans-App/provable-agent-reference/pull/41), and the
+dependency gates (the disposition of PR #28, the Phase 0 RFC, and explicit maintainer approval)
+are recorded as satisfied for synthetic scope in
+[Phase 1 tracker #37](https://github.com/DigiTrans-App/provable-agent-reference/issues/37). The
+contracts remain draft and non-normative. The later PRs #42 through #45 added development-only
+DSSE signing with a pinned trust bundle and revocation fixtures, plus a synthetic S0 durable
+journal, outbox, and backup/restore demonstration. They did not add an authenticated-records,
+receipted-effect, private-memory, or durable-lifecycle claim, and canonical hash-input
+recomputation remains unspecified. The "future work" list below is the original PR A text.
 
 ## What this change adds
 
