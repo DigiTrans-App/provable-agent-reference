@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import os
+import secrets
+import sys
 import unittest
 
-from hypothesis import settings
+from hypothesis import __version__, is_hypothesis_test, seed, settings
 
 # Configured example limits. The guard tests below compare them with fixed agreed minimums,
 # so lowering a configured limit fails those tests instead of lowering the expectation.
@@ -36,6 +38,34 @@ def load_hypothesis_profile() -> str:
 
 
 ACTIVE_PROFILE = load_hypothesis_profile()
+
+
+def replay_seed() -> int:
+    """Choose a fresh run seed unless the caller supplies a recorded decimal seed."""
+
+    value = os.getenv("PAR_HYPOTHESIS_SEED")
+    if value is None:
+        return secrets.randbits(128)
+    if not value.isascii() or not value.isdecimal():
+        raise ValueError("PAR_HYPOTHESIS_SEED must be a non-negative decimal integer")
+    return int(value)
+
+
+RUN_SEED = replay_seed()
+print(
+    f"Property replay: PAR_HYPOTHESIS_SEED={RUN_SEED}; "
+    f"HYPOTHESIS_PROFILE={ACTIVE_PROFILE}; Hypothesis {__version__}",
+    file=sys.stderr,
+)
+
+
+def seeded_properties(cls: type[unittest.TestCase]) -> type[unittest.TestCase]:
+    """Seed generated methods after all native Hypothesis decorators are applied."""
+
+    for name, method in vars(cls).items():
+        if is_hypothesis_test(method):
+            setattr(cls, name, seed(RUN_SEED)(method))
+    return cls
 
 
 class HypothesisProfileTests(unittest.TestCase):

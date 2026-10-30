@@ -54,7 +54,8 @@ python -m unittest discover -s tests -p "test_property*.py" -v
 ```
 
 The `ci` profile allows up to 100 generated examples per property, has no per-example
-deadline, and prints a reproduction blob when Hypothesis finds a failure. The full test suite
+deadline, and prints a reproduction blob when Hypothesis finds a failure. Every run also logs
+a numeric `PAR_HYPOTHESIS_SEED`, the active profile, and the Hypothesis version. The full test suite
 uses this profile in validation and release workflows. `tests/test_hypothesis_setup.py`
 fails if either profile drops below its documented floor; an unknown `HYPOTHESIS_PROFILE`
 value fails instead of falling back to a smaller profile.
@@ -69,8 +70,12 @@ HYPOTHESIS_PROFILE=extended python -m unittest discover \
   -s tests -p 'test_property*.py' -v
 ```
 
-Both profiles use deterministic assertions over generated inputs. Hypothesis may explore those
-inputs in a different order between runs unless a specific failure is pinned.
+Both profiles use deterministic assertions over generated inputs. A fresh random seed is used
+for each process unless `PAR_HYPOTHESIS_SEED` is set, so normal runs continue exploring different
+inputs. The three property-test classes apply that seed with Hypothesis's native `seed`
+decorator after their `given` and `example` decorators. Explicit regression examples stay active.
+Seeded tests do not use the local Hypothesis example database; their portable regression corpus
+is the committed examples and fixed tests.
 
 ## Report example counts honestly
 
@@ -90,12 +95,21 @@ executed counts.
 
 ## Reproduce and preserve a failure
 
-1. Record `python --version` and `python -m pip show hypothesis`. The printed
+1. Record the logged `PAR_HYPOTHESIS_SEED`, `HYPOTHESIS_PROFILE`, Python version, and Hypothesis
+   version. Re-run the failing test with the same versions and profile, setting the logged seed:
+
+   ```bash
+   PAR_HYPOTHESIS_SEED=123456 HYPOTHESIS_PROFILE=ci PYTHONPATH=src:tests \
+     python -m unittest test_property_replay.ReplayResistancePropertyTests.test_exact_use_authorization_rejects_every_scope_and_output_replay -v
+   ```
+
+   Replace `123456` with the actual logged seed and select the failing test method. On PowerShell, set
+   `$env:PAR_HYPOTHESIS_SEED = "123456"`, `$env:HYPOTHESIS_PROFILE = "ci"`, and
+   `$env:PYTHONPATH = "src;tests"` before the same `python -m unittest` command.
+   An invalid seed fails immediately instead of silently choosing a different seed.
+2. For the exact minimized example, the printed
    `@reproduce_failure(...)` decorator embeds the Hypothesis version; a blob only replays
-   under that version.
-2. Re-run the exact failing test with the printed decorator, for example
-   `python -m unittest tests.test_property_replay.ReplayResistancePropertyTests.<name> -v`
-   from the repository root with `tests` on `PYTHONPATH`.
+   under that version. Temporarily add it to the failing test and re-run the command above.
 3. Confirm the minimized example fails without relying on local `.hypothesis/` state, for
    example by deleting that directory first.
 4. After security review, convert the minimized input into an explicit `@example(...)` or a
@@ -106,6 +120,9 @@ executed counts.
 
 The local `.hypothesis/` database is ignored and must not be treated as the regression corpus.
 Checked-in `@example` cases and fixed tests are the portable corpus used by CI and reviewers.
+`test_property_reproduction.py` verifies that an intentional failure prints a minimized example
+and reproduction blob, and that its logged seed reproduces the same draws in a fresh process
+without a saved database.
 
 ## Data and resource bounds
 

@@ -6,7 +6,7 @@ from dataclasses import fields, replace
 from typing import Any
 
 from hypothesis import given
-from test_hypothesis_setup import ACTIVE_PROFILE  # noqa: F401
+from test_hypothesis_setup import seeded_properties
 from test_property_strategies import (
     PipelineCase,
     alternate_classification,
@@ -152,6 +152,7 @@ def records_of(result: PipelineResult) -> dict[str, Any]:
     }
 
 
+@seeded_properties
 class IntegrityBindingPropertyTests(unittest.TestCase):
     def test_candidate_field_enumeration_matches_the_record_contract(self) -> None:
         declared = {field.name for field in fields(CanonicalCandidate)} - {"candidate_hash"}
@@ -349,6 +350,7 @@ class IntegrityBindingPropertyTests(unittest.TestCase):
                     )
 
 
+@seeded_properties
 class ReplayResistancePropertyTests(unittest.TestCase):
     @given(pipeline_cases())
     def test_cross_run_reuse_produces_distinct_bindings(self, case: PipelineCase) -> None:
