@@ -39,6 +39,17 @@ def build_audit_manifest(
     )
 
 
+def _approved_output_hash(candidate: CanonicalCandidate) -> str:
+    """Hash of the exact output an approved candidate authorizes."""
+
+    return sha256_uri(
+        {
+            "assurance_statement": candidate.assurance_statement,
+            "limitations": list(candidate.limitations),
+        }
+    )
+
+
 def verify_audit_manifest(
     *,
     manifest: AuditManifest,
@@ -72,4 +83,8 @@ def verify_audit_manifest(
         errors.append("approval_candidate_mismatch")
     if authorization.candidate_hash != candidate.candidate_hash:
         errors.append("authorization_candidate_mismatch")
+    # An authorized record must bind the candidate's exact approved output. Denied records
+    # describe the output that was requested, so they are not compared with it.
+    if authorization.authorized and authorization.output_hash != _approved_output_hash(candidate):
+        errors.append("authorization_output_mismatch")
     return not errors, tuple(errors)

@@ -4,6 +4,26 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 
+## [0.2.1] - proposed, not yet published
+
+Security maintenance release for the 0.2 line, prepared from v0.2.0. It contains only the two fixes below and the release controls that publish them. Record formats and hashes for valid inputs are unchanged.
+
+### Security
+
+- `verify_audit_manifest` now reports `authorization_output_mismatch` when an authorization record marked as authorized carries an `output_hash` that differs from the hash of the candidate's approved output (its assurance statement and limitations). Before this change, standalone audit verification could report such a record as valid if the substituted hash was recomputed into the record's own hash, including when the consumer rebuilt the records from strictly JSON-serialized data. Denied records still describe the output that was requested and are not compared with the approved output. The fix is a backport of the audit change in PR #29.
+- `canonical_json` and `sha256_uri` now reject object keys that are not strings, at every nesting depth, with `TypeError`. Previously the serializer converted integer, boolean, `None`, and float keys to strings, so `{1: "x"}` and `{"1": "x"}` produced the same canonical text and digest. This is input-representation ambiguity, not a SHA-256 collision. Non-finite numbers (`NaN`, `Infinity`, `-Infinity`) are rejected with `ValueError`. The fix is a backport of the canonical-key change in PR #52 and the non-finite rejection from PR #24.
+
+### Changed
+
+- Release controls from `main` are carried to the 0.2 maintenance line: the release-line allow-list, the hardened release verifier, explicit latest and prerelease labelling, and CI that runs on pull requests into `release/*.*.x`.
+- The `dev` extra now includes `pip-audit`, which the validation and release workflows use.
+
+### Compatibility
+
+- Records built from string-keyed, finite-number inputs keep identical canonical text, digests, record formats, and hashes as v0.2.0.
+- Callers that pass non-string keys or `NaN`/`Infinity` to `canonical_json`, `sha256_uri`, or `authorize_exact_use` now receive an exception instead of a digest.
+- `verify_audit_manifest` can now return `authorization_output_mismatch` for tampered authorized records. Valid records are still accepted.
+
 ## [0.2.0] - 2026-08-03
 
 ### Added
