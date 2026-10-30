@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "main_line": "0.3",
+  "maintenance_lines": [
+    {
+      "line": "0.2",
+      "branch": "release/0.2.x",
+      "base_commit": "106b91ea790bf96b059d5d60c07f79f16c02eeea"
+    }
+  ]
+}

@@ -9,7 +9,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  # All release lines share this lock so an older release cannot overwrite Latest.
+  group: release-publication
   cancel-in-progress: false
 
 jobs:
@@ -19,6 +20,9 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -26,34 +30,34 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
           cache: pip
       - name: Install release dependencies
-        run: python -m pip install '.[dev,openai]'
-      - name: Verify tag and release metadata
+        run: |
+          python -m pip install --upgrade pip 'setuptools>=83' wheel
+          python -m pip install '.[dev,openai]'
+      - name: Verify release source and metadata
+        id: verify
         env:
           RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_COMMIT: ${{ github.sha }}
         run: |
-          python - <<'PY'
-          import os
-          import tomllib
-          from pathlib import Path
-
-          project = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]
-          expected_tag = f"v{project['version']}"
-          actual_tag = os.environ["RELEASE_TAG"]
-          if actual_tag != expected_tag:
-              raise SystemExit(f"tag/version mismatch: {actual_tag} != {expected_tag}")
-
-          notes = Path("docs") / "releases" / f"{actual_tag}.md"
-          if not notes.is_file():
-              raise SystemExit(f"release notes not found: {notes}")
-          PY
+          # Fetch only main here. The verifier fetches the single allow-listed
+          # maintenance branch for the tag's release line, never a wildcard.
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          python scripts/verify_release.py \
+            --tag "${RELEASE_TAG}" \
+            --commit "${RELEASE_COMMIT}" \
+            --main-ref refs/remotes/origin/main \
+            --release-lines .github/release-lines.json
       - name: Run release validation
+        env:
+          HYPOTHESIS_PROFILE: ci
         run: |
           python -m unittest discover -s tests -v
+          python -m pip_audit --local --skip-editable
           python scripts/validate_repo.py
           python evals/run_local.py
           ruff check .
@@ -64,15 +68,33 @@ jobs:
           python scripts/validate_dist.py > dist/ARTIFACTS.json
           cd dist
           sha256sum *.whl *.tar.gz ARTIFACTS.json > SHA256SUMS
+      - name: Attest release artifacts
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: |
+            dist/*.whl
+            dist/*.tar.gz
+            dist/ARTIFACTS.json
+            dist/SHA256SUMS
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_LATEST: ${{ steps.verify.outputs.latest }}
+          RELEASE_PRERELEASE: ${{ steps.verify.outputs.prerelease }}
         run: |
+          # Labels come from the verifier and are set once at creation.
+          case "${RELEASE_LATEST}" in true|false) ;; *) echo "invalid latest flag" >&2; exit 1 ;; esac
+          case "${RELEASE_PRERELEASE}" in true|false) ;; *) echo "invalid prerelease flag" >&2; exit 1 ;; esac
+          flags=("--latest=${RELEASE_LATEST}")
+          if [ "${RELEASE_PRERELEASE}" = "true" ]; then
+            flags+=(--prerelease)
+          fi
           gh release create "${GITHUB_REF_NAME}" \
             dist/*.whl \
             dist/*.tar.gz \
             dist/ARTIFACTS.json \
             dist/SHA256SUMS \
             --verify-tag \
+            "${flags[@]}" \
             --title "Provable Agent Reference Framework ${GITHUB_REF_NAME}" \
             --notes-file "docs/releases/${GITHUB_REF_NAME}.md"

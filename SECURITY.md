@@ -21,10 +21,10 @@ Include:
 The public repository uses a layered, least-privilege automation baseline:
 
 - **Validation** runs unit tests, repository checks, local adversarial evaluations, linting, distribution builds, artifact validation, the framework demo, and the optional OpenAI Agents SDK compatibility test on Python 3.11 and 3.12.
-- **CodeQL** analyzes Python changes on pull requests and pushes to `main`, and runs on a weekly schedule using the extended security query suite.
+- **CodeQL** analyzes Python changes on pull requests and pushes to `main` and `release/*.*.x` maintenance branches, and runs on a weekly schedule using the extended security query suite.
 - **Dependency Review** evaluates dependency changes on pull requests and fails when a newly introduced vulnerability has moderate or greater severity.
 - **OpenSSF Scorecard** evaluates repository and supply-chain practices on pushes to `main`, branch-protection changes, and a weekly schedule. SARIF findings are uploaded to GitHub code scanning.
-- **Release** verifies that a pushed tag matches the package version, repeats the public validation gate, validates wheel and source-distribution metadata and contents, and publishes SHA-256 checksums with the GitHub release assets.
+- **Release** validates tag/version/notes and the designated protected release branch under [accepted decision 0009](docs/decisions/0009-protected-maintenance-releases.md), repeats the public validation and dependency-audit gates, validates wheel and source-distribution metadata and contents, publishes SHA-256 checksums and GitHub build-provenance attestations, and sets prerelease/Latest flags at creation.
 
 Third-party GitHub Actions are pinned to full commit SHAs and are kept current through Dependabot. Workflow tokens use read-only permissions unless a narrowly scoped write permission is required to publish code-scanning results, OpenSSF attestations, or an authorized tagged GitHub release.
 

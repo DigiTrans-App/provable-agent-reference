@@ -57,7 +57,9 @@ This repository does **not** contain the DigiTrust hosted platform, enterprise o
 
 ## Release
 
-The current release is **v0.2.0**, which adds a versioned runtime-adapter boundary, the experimental Codex Evidence Adapter, offline OpenAI Agents SDK compatibility validation, repository security automation, and validated GitHub release artifacts.
+The 0.2 maintenance line is prepared at **v0.2.1** (proposed; not yet published), a security maintenance release for v0.2.0. See the [v0.2.1 release notes](docs/releases/v0.2.1.md).
+
+**v0.2.0** added a versioned runtime-adapter boundary, the experimental Codex Evidence Adapter, offline OpenAI Agents SDK compatibility validation, repository security automation, and validated GitHub release artifacts.
 
 Review the complete [v0.2.0 release notes](docs/releases/v0.2.0.md). GitHub Releases publish a wheel, source distribution, machine-readable artifact manifest, and SHA-256 checksum file. The package is not currently published to PyPI.
 
