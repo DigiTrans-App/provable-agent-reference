@@ -9,7 +9,7 @@ from decimal import Decimal
 
 from hypothesis import assume, example, given
 from hypothesis import strategies as st
-from test_hypothesis_setup import ACTIVE_PROFILE  # noqa: F401
+from test_hypothesis_setup import seeded_properties
 from test_property_strategies import JSON_SCALARS, JSON_VALUES, case_label
 
 from provable_agent_reference.canonical import canonical_json, sha256_uri
@@ -85,6 +85,7 @@ def reorder_mappings(value: object, rng: random.Random) -> object:
     return value
 
 
+@seeded_properties
 class CanonicalizationPropertyTests(unittest.TestCase):
     @example({})
     @example([])
