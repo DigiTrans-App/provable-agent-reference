@@ -1,20 +1,18 @@
 from __future__ import annotations
 
 import hashlib
-import json
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from ..canonical import canonical_json
 from .models import CapabilityGrant
 
 
-def canonical_json(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-
-
 def sha256_uri(value: Any) -> str:
+    """Hash validated canonical JSON, preserving this API's rejection of raw bytes."""
+
     return "sha256:" + hashlib.sha256(canonical_json(value).encode()).hexdigest()
 
 
