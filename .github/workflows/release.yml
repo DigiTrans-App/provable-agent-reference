@@ -9,7 +9,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  # All release lines share this lock so an older release cannot overwrite Latest.
+  group: release-publication
   cancel-in-progress: false
 
 jobs:
@@ -38,15 +39,19 @@ jobs:
           python -m pip install --upgrade pip 'setuptools>=83' wheel
           python -m pip install '.[dev,openai]'
       - name: Verify release source and metadata
+        id: verify
         env:
           RELEASE_TAG: ${{ github.ref_name }}
           RELEASE_COMMIT: ${{ github.sha }}
         run: |
+          # Fetch only main here. The verifier fetches the single allow-listed
+          # maintenance branch for the tag's release line, never a wildcard.
           git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
           python scripts/verify_release.py \
             --tag "${RELEASE_TAG}" \
             --commit "${RELEASE_COMMIT}" \
-            --main-ref refs/remotes/origin/main
+            --main-ref refs/remotes/origin/main \
+            --release-lines .github/release-lines.json
       - name: Run release validation
         env:
           HYPOTHESIS_PROFILE: ci
@@ -74,12 +79,22 @@ jobs:
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_LATEST: ${{ steps.verify.outputs.latest }}
+          RELEASE_PRERELEASE: ${{ steps.verify.outputs.prerelease }}
         run: |
+          # Labels come from the verifier and are set once at creation.
+          case "${RELEASE_LATEST}" in true|false) ;; *) echo "invalid latest flag" >&2; exit 1 ;; esac
+          case "${RELEASE_PRERELEASE}" in true|false) ;; *) echo "invalid prerelease flag" >&2; exit 1 ;; esac
+          flags=("--latest=${RELEASE_LATEST}")
+          if [ "${RELEASE_PRERELEASE}" = "true" ]; then
+            flags+=(--prerelease)
+          fi
           gh release create "${GITHUB_REF_NAME}" \
             dist/*.whl \
             dist/*.tar.gz \
             dist/ARTIFACTS.json \
             dist/SHA256SUMS \
             --verify-tag \
+            "${flags[@]}" \
             --title "Provable Agent Reference Framework ${GITHUB_REF_NAME}" \
             --notes-file "docs/releases/${GITHUB_REF_NAME}.md"

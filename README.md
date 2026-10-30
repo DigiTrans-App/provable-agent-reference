@@ -19,10 +19,14 @@ implementation and provider-specific adapters. Review the
 [candidate architecture](docs/reference-architecture-candidate.md),
 [protocol candidate](docs/spec/README.md), and
 [normative change process](docs/change-process.md). The informative
-[implementable reference architecture package](docs/implementation/README.md) proposes the
-production-facing system boundaries and team playbook being discussed in
-[RFC #35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35). Candidate status
-does not imply a stable standard, certification, or production-security claim.
+[implementable reference architecture package](docs/implementation/README.md) describes the
+production-facing system boundaries and team playbook recorded in
+[RFC #35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35) (closed with Phase 0
+PR #40 as informative planning) and a synthetic, development-only Phase 1 implementation
+([#37](https://github.com/DigiTrans-App/provable-agent-reference/issues/37), merged and closed).
+Independent architecture/security review was waived by a documented maintainer exception and has
+not been performed. Candidate status does not imply a stable standard, certification, or
+production-security claim.
 
 Instead of treating model output as authoritative, the framework accepts a bounded semantic draft and then performs a deterministic control sequence:
 

@@ -9,7 +9,7 @@ Security-critical areas changed (check all that apply):
 
 - [ ] Authentication, authorization, approvals, or verification
 - [ ] Canonicalization, audit evidence, or binding schemas
-- [ ] Dependencies, GitHub Actions, or release automation
+- [ ] Dependencies, GitHub Actions, or release automation (including `.github/release-lines.json`)
 - [ ] Security policy, governance, or ownership
 - [ ] None of the above
 

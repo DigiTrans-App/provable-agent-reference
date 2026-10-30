@@ -2,6 +2,12 @@
 
 Status: **proposal**. Tracking issue: [#35](https://github.com/DigiTrans-App/provable-agent-reference/issues/35).
 
+Disposition: tracker #35 was closed on 2026-09-05 when Phase 0 PR #40 merged. The maintainer
+accepted this package as informative planning and approved synthetic Phase 1 implementation,
+waiving independent architecture/security review under a documented exception. That waiver is
+not independent review, endorsement, or production authorization. The detailed decision
+proposals 0001 through 0007 were not promoted to accepted ADRs.
+
 ## Decision sought
 
 Approve an informative implementation architecture and delivery playbook that extends the

@@ -1,9 +1,9 @@
 # Synthetic full-agentic workflow
 
-Status: **experimental Phase 1 PR C implementation**. All identities, evidence, memory, tools,
+Status: **experimental Phase 1 synthetic implementation (PR C, merged as #43)**. All identities, evidence, memory, tools,
 reviewers, and results are synthetic. No network destination or production effect is reachable.
 
-The first PR C slice connects a deterministic evidence specialist to a privacy-bounded memory
+The workflow connects a deterministic evidence specialist to a privacy-bounded memory
 adapter and capability-enforcing tool gateway, then feeds the proposed semantic draft into the
 existing trusted compiler, deterministic verifier, approval, exact-use authorization, and audit
 chain.
