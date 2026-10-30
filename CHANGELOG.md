@@ -28,6 +28,7 @@ All notable changes to this project will be documented here.
 - Assurance Packet verification recomputes packet, evidence, output, record, manifest, and deterministic rule bindings; malformed profile claims, self-approval under the governed profile, and semantically false rehashed findings fail closed.
 - Packet lifecycle state is limited to `reconstructed`; the reference does not infer emission, delivery, consumption, revocation, or supersession.
 - Approval and exact-use authorization now reject candidates whose deterministic hash is invalid.
+- Canonical JSON now rejects non-string object keys at every depth with `TypeError` instead of converting them to strings. The control-plane store uses the same serializer and also rejects non-finite numbers; valid finite, string-keyed inputs retain their canonical bytes and hashes. The core raw-bytes hash path and the store's JSON-only hash contract are preserved under accepted decision 0008.
 - Approval validates candidate identifiers and requires verification status to agree with error-level findings.
 - Audit reconstruction now validates every candidate, verification, approval, authorization, scope, decision, and reason relationship in the control chain.
 - Audit reconstruction now requires an authorized exact-use record to bind the candidate's approved output; denied records remain auditable.

@@ -13,6 +13,8 @@ substitute for independent review.
 | Mapping order invariance at every depth; list order sensitivity | `test_property_canonicalization.py` | Generated values and permutations |
 | Scalar type distinctness, numeric boundaries, Unicode, escaping | `test_property_canonicalization.py` | Generated scalars plus explicit boundary examples |
 | Non-finite, unsupported, and unencodable values | `test_property_canonicalization.py` | Every rejected value at several nesting positions |
+| Non-string object keys | `test_property_canonicalization.py` | Every formerly coerced key type at generated depths, containers, and insertion positions |
+| Store canonicalization and write boundary | `test_store_canonicalization.py` | Fixed invalid-key/non-finite cases, unchanged valid legacy hashes, and a synthetic connection that records attempted writes |
 | Candidate and lifecycle-record field mutation | `test_property_replay.py` | Every hash-bound field, enumerated in each example |
 | Evidence insertion, removal, substitution, duplication, reordering | `test_property_replay.py` | Every variant, checked by the bundle and the verifier |
 | Tenant, case, and run reuse | `test_property_replay.py` | Bundle, compiler, approval, and authorization boundaries |
@@ -27,7 +29,8 @@ so a rejection is attributable to the intended mutation. Field-enumeration guard
 record gains a field that the suite does not yet mutate.
 
 The canonicalization properties test the current Python contract in
-`provable_agent_reference.canonical`: string-keyed mappings, sorted keys, compact separators,
+`provable_agent_reference.canonical`: string-keyed mappings (other key types raise `TypeError`
+instead of being converted), sorted keys, compact separators,
 UTF-8 output without ASCII escaping, and rejection of non-finite numbers. Integers outside
 JavaScript's safe range are accepted by this contract but are not cross-language
 interoperable; the DSSE profile rejects them separately.

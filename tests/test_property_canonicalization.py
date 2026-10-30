@@ -45,6 +45,9 @@ UNSUPPORTED_VALUES = (
     complex(1, 2),
     object(),
 )
+# Non-string keys that the serializer used to convert, with their string counterparts.
+COERCED_KEYS = ((1, "1"), (True, "true"), (None, "null"), (1.5, "1.5"))
+KEY_MESSAGE = "canonical JSON object keys must be strings"
 LONE_SURROGATES = ("\ud800", "\udbff", "\udc00", "\udfff")
 
 
@@ -248,6 +251,52 @@ class CanonicalizationPropertyTests(unittest.TestCase):
                 with self.subTest(value=ascii(value)):
                     with self.assertRaises(UnicodeEncodeError):
                         sha256_uri(container)
+
+    @given(
+        JSON_VALUES,
+        st.lists(st.sampled_from(("dict", "list", "tuple")), max_size=6),
+        st.dictionaries(st.text(max_size=10), JSON_SCALARS, max_size=4),
+        st.integers(min_value=0, max_value=4),
+    )
+    def test_non_string_keys_are_rejected_at_any_depth_and_position(
+        self,
+        payload: object,
+        wrappers: list[str],
+        siblings: dict[str, object],
+        position: int,
+    ) -> None:
+        def build(key: object) -> object:
+            entries = list(siblings.items())
+            entries.insert(min(position, len(entries)), (key, payload))
+            value: object = dict(entries)
+            for kind in wrappers:
+                if kind == "dict":
+                    value = {"w": value}
+                elif kind == "list":
+                    value = [value]
+                else:
+                    value = (value,)
+            return value
+
+        # Every coerced key category is checked in each example, after a valid baseline.
+        for key, counterpart in COERCED_KEYS:
+            with case_label(key=repr(key), depth=len(wrappers), position=position):
+                baseline = build(counterpart)
+                self.assertEqual(
+                    canonical_json(baseline),
+                    json.dumps(
+                        baseline,
+                        allow_nan=False,
+                        ensure_ascii=False,
+                        separators=(",", ":"),
+                        sort_keys=True,
+                    ),
+                )
+                invalid = build(key)
+                with self.assertRaisesRegex(TypeError, KEY_MESSAGE):
+                    canonical_json(invalid)
+                with self.assertRaisesRegex(TypeError, KEY_MESSAGE):
+                    sha256_uri(invalid)
 
 
 if __name__ == "__main__":
