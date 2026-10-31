@@ -68,6 +68,10 @@ jobs:
           python scripts/validate_dist.py > dist/ARTIFACTS.json
           cd dist
           sha256sum *.whl *.tar.gz ARTIFACTS.json > SHA256SUMS
+      - name: Install and test built distributions
+        env:
+          HYPOTHESIS_PROFILE: ci
+        run: python scripts/check_built_distributions.py
       - name: Attest release artifacts
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:

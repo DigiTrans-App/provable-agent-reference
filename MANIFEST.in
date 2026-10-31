@@ -1,0 +1,27 @@
+# The source distribution is a self-contained source tree: it carries the bundled
+# tests together with every support file those tests read, so that
+# `python -m unittest discover -s tests` works from an extracted sdist.
+# Keep this file in step with SDIST_SUPPORT_PATHS in scripts/validate_dist.py.
+#
+# Patterns name file suffixes instead of grafting whole directories, so interpreter
+# caches (__pycache__, *.pyc) and other local files are never shipped.
+
+include CHANGELOG.md
+include LICENSE
+include NOTICE
+include README.md
+
+# Bundled tests. setuptools only adds tests/test*.py by default, which silently
+# drops tests/helpers.py.
+recursive-include tests *.py
+
+# Repository files that the bundled tests import or open.
+recursive-include examples *.json *.jsonl *.md *.py
+recursive-include schemas *.json
+recursive-include scripts *.py
+recursive-include trust *.json
+recursive-include typescript *.ts
+recursive-include vectors *.json
+recursive-include docs/releases *.md
+recursive-include .github/workflows *.yml
+include .github/release-lines.json
