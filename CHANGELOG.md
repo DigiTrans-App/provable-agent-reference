@@ -14,6 +14,8 @@ All notable changes to this project will be documented here.
 - Verifier identity and version bindings in verification results and their deterministic hashes.
 - Hypothesis property tests for canonicalization, lifecycle integrity bindings, replay resistance, rehashed audit-record and authorized-output substitution, and adapter context binding, with enumerated security dimensions, profile-floor checks, and standard and extended profiles.
 - GitHub build-provenance attestations for release distributions, artifact manifests, and checksums.
+- `MANIFEST.in`, so the source distribution carries the bundled tests together with the helper module and fixtures they read and can run `python -m unittest discover -s tests` after extraction.
+- `scripts/check_built_distributions.py`, which installs the built wheel and source distribution into fresh virtual environments, smoke tests the wheel, and runs the sdist's bundled tests against the installed build. It runs in the validation and release workflows before attestation and publication.
 
 ### Changed
 
@@ -22,6 +24,7 @@ All notable changes to this project will be documented here.
 - Raised the build baseline to a patched Setuptools release and upgraded packaging tools explicitly in CI before auditing dependencies.
 - Canonical JSON now rejects non-finite numbers, and the Codex JSONL adapter rejects duplicate object keys, excessive nesting, and oversized aggregate streams.
 - Dependabot now checks Python and GitHub Actions dependencies weekly and groups related updates.
+- `scripts/validate_dist.py` now requires the complete expected source-distribution member set, every module under `src/provable_agent_reference` in the wheel, and rejects bytecode in either artifact.
 
 ### Security
 

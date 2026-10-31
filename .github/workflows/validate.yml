@@ -93,5 +93,9 @@ jobs:
         run: |
           python -m build
           python scripts/validate_dist.py
+      - name: Install and test built distributions
+        env:
+          HYPOTHESIS_PROFILE: ci
+        run: python scripts/check_built_distributions.py
       - name: Demo
         run: python -m provable_agent_reference > /tmp/provable-agent-reference-demo.json
